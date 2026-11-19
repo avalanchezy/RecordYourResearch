@@ -83,6 +83,7 @@ createApp({
       editSuggests: [], editSuggestOpen: false,
       updateEvent: { open: false, stage: 'review', raw: '', observed_at: '', revise_due: '' },
       pasteForm: emptyPasteForm(),
+      sysImport: { text: '', parsed: null, loading: false, saving: false },
       rawStatusOptions: ['Submitted to Journal', 'Technical Check in Progress', 'With Editor',
         'Reviewer Invited', 'Under Review', 'Required Reviews Complete',
         'Decision in Process', 'Revise - Major', 'Revise - Minor', 'Revision Submitted to Journal',
@@ -403,7 +404,7 @@ createApp({
     stageColor(k) { return (this.stages[k] || {}).color || '#64748b'; },
     chipStyle(k) { return { background: this.stageColor(k) }; },
     trackerLabel(t) { return { openreview: 'OpenReview', elsevier: '爱思唯尔', manual: '手动' }[t] || t; },
-    srcLabel(s) { return { manual: '手动', openreview: '自动·OR', elsevier: '半自动·爱思唯尔' }[s] || s; },
+    srcLabel(s) { return { manual: '手动', openreview: '自动·OR', elsevier: '半自动·爱思唯尔', paste: '粘贴·投稿系统' }[s] || s; },
     relLabel(r) {
       const dir = { 转投: ['转投为 →', '← 转投自'], 扩写: ['扩写为 →', '← 扩写自'] }[r.relation];
       return dir ? (r.direction === 'in' ? dir[1] : dir[0]) : r.relation;
@@ -994,6 +995,63 @@ createApp({
         this.refreshAll();
         this.loadChanges({ quiet: true });
       } catch {} finally { this.pasteForm.saving = false; }
+    },
+
+    // ---------- 投稿系统页面导入（用户自己登录后整页复制粘贴）----------
+    async parseSysImport() {
+      const f = this.sysImport, text = f.text;
+      if (!text.trim()) { this.$toast('先粘贴投稿系统页面的内容', 'warn'); return; }
+      f.loading = true;
+      try {
+        const p = await this.api('/api/import/system-paste', this.jsonOpts('POST', { text }));
+        if (this.sysImport !== f || f.text !== text) return;       // 解析期间改了文本：结果作废
+        p._text = text;
+        for (const it of p.items) {
+          // 按标题对上的默认不勾：请先看一眼对的是不是同一篇
+          it._pick = (it.action === 'update' && it.match && it.match.by === 'number') || it.action === 'create';
+          it._venue = it.journal || p.journal || '';
+        }
+        f.parsed = p;
+        if (p.items.length) this.$toast(`认出 ${p.items.length} 篇稿件，核对后点「导入选中」`);
+        else this.$toast('没有认出稿件：请复制作者中心里列出稿件（含稿件编号）的页面', 'warn');
+      } catch {} finally { f.loading = false; }
+    },
+    onSysPaste() { setTimeout(() => this.parseSysImport(), 0); },
+    sysPicks() {
+      return (this.sysImport.parsed?.items || []).map((it, i) => ({ it, i })).filter(x => x.it._pick);
+    },
+    sysActionText(it) {
+      return { update: '记入时间线', same: '已是最新', create: '新建', unknown: '状态未识别',
+               skip: '草稿 / 已被取代，不导入', no_title: '缺标题，不能新建',
+               ambiguous: '对上了多篇，请手动处理', trashed: '在回收站里（先恢复再导入）' }[it.action] || '';
+    },
+    sysMatchText(it) {
+      const m = it.match;
+      if (!m) return '';
+      return `《${this.short(m.title, 40)}》` + (m.venue ? ` · ${m.venue}` : '') + (m.by === 'title' ? ' · 按标题对上，请核对' : '');
+    },
+    async confirmSysImport() {
+      const p = this.sysImport.parsed;
+      if (!p) return;
+      const picks = this.sysPicks().map(({ it, i }) => ({ index: i, action: it.action === 'create' ? 'create' : 'update',
+                                                        venue_name: it.action === 'create' ? (it._venue || '').trim() : '' }));
+      if (!picks.length) return;
+      if (picks.some(x => x.action === 'create' && !x.venue_name)) {
+        this.$toast('新建的稿件需要期刊名：请在表格里补上', 'warn'); return;
+      }
+      this.sysImport.saving = true;
+      try {
+        const r = await this.api('/api/import/system-paste/confirm', this.jsonOpts('POST', { text: p._text, picks }));
+        this.$toast(`已记入 ${r.updated} 篇、新建 ${r.created} 篇` + (r.unchanged ? `，${r.unchanged} 篇已是最新` : '')
+          + (r.backdated ? `；其中 ${r.backdated} 篇时间线上有更晚的记录，当前状态没变` : '') + ' ✓', r.backdated ? 'warn' : '');
+        this.sysImport = { text: '', parsed: null, loading: false, saving: false };
+        this.refreshAll();
+      } catch {} finally { this.sysImport.saving = false; }
+    },
+    async goSysImport() {
+      if (this.showDetail && !(await this.closeDetail())) return;     // 有未保存的编辑时先问
+      this.go('query');
+      setTimeout(() => document.getElementById('sys-import')?.scrollIntoView({ behavior: 'smooth' }), 200);
     },
 
     // ---------- 渠道查询 ----------

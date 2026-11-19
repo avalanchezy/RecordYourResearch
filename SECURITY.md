@@ -59,6 +59,7 @@
 | OpenReview 官方 API（`api2.openreview.net`、`api.openreview.net`） | 你绑定了账号之后：绑定、同步、查询，以及每日后台同步 | 登录邮箱和密码（仅登录时）、登录令牌、查询参数（你的 profile ID、稿件 forum ID，按标题匹配时还有稿件标题） |
 | 爱思唯尔中国的稿件查询服务（`dsp-api.elsevier.cn`） | 只有在你开启「爱思唯尔一键查稿（实验）」之后：点击查询时，或点「拉取期刊缩写字典」（只在功能开启时显示）时 | 查询：稿件编号、通讯作者姓名拼音、期刊缩写和随机设备标识。拉取字典：只发送随机设备标识。设备标识在第一次使用时随机生成，保存在数据目录的 `elsevier_device_id` 文件里 |
 
+- 「从投稿系统导入」**不发送任何数据**：你粘贴的页面文字只在本机解析。程序不会登录或访问这些投稿系统（IEEE、Springer、Elsevier、MDPI 等），也不保存它们的密码。
 - 所有请求都使用如实的 User-Agent（`RecordYourResearch/<版本>` 加项目地址）。
 - 没有遥测、统计、崩溃上报或自动更新检查；网页不从 CDN 加载任何资源。
 - 抽屉里的外部链接只有在你点击时才由浏览器打开。
@@ -75,7 +76,7 @@
 属于本项目的安全问题，例如：
 
 - 绕过 Host / Origin 检查，让恶意网页读取或修改数据；
-- 界面里的 XSS（例如通过稿件标题、粘贴的文本或 OpenReview 返回的数据注入脚本）；
+- 界面里的 XSS（例如通过稿件标题、粘贴的官方页面或投稿系统页面，或 OpenReview 返回的数据注入脚本）；
 - 路径穿越、任意文件读写；
 - 凭据泄露（例如密码被明文写进数据库、日志或备份）；
 - 未经用户开启的对外网络请求。
@@ -133,6 +134,8 @@ The password is sent only to the official OpenReview API to log in. The login to
 - **The official OpenReview API** (`api2.openreview.net`, `api.openreview.net`), only once you bind an account. The app sends your login email and password (at login only), the token and query parameters: your profile id, forum ids and, for title matching, the paper title.
 - **Elsevier China's manuscript-query service** (`dsp-api.elsevier.cn`), only after you enable the experimental one-click query. A query you click sends the manuscript number, the corresponding author's pinyin, the journal acronym and a random device id. The 「拉取期刊缩写字典」 (journal-acronym dictionary) button, shown only while the feature is on, sends only the random device id. The id is generated on first use and stored as `elsevier_device_id` in the data folder.
 
+**Import from a submission system sends nothing.** The page text you paste is parsed locally. The app never logs in to or contacts those submission systems (IEEE, Springer, Elsevier, MDPI and others) and does not store their passwords.
+
 All requests use an honest User-Agent. There is no telemetry, analytics, crash reporting or update check, and nothing is loaded from a CDN.
 
 ### Local data
@@ -144,7 +147,7 @@ All requests use an honest User-Agent. There is no telemetry, analytics, crash r
 **In scope**:
 
 - bypassing the Host/Origin checks;
-- XSS in the UI;
+- XSS in the UI, including through pasted submission-system pages;
 - path traversal or arbitrary file access;
 - credential leaks;
 - outbound requests the user did not enable.

@@ -473,6 +473,46 @@
         </div>
       </div>
     </div>
+    <div class="panel" id="sys-import">
+      <h3>从投稿系统导入 <span class="badge-src">ScholarOne · Editorial Manager · IEEE Author Portal · Snapp · MDPI · 中文期刊…</span></h3>
+      <p class="hint small">IEEE、Taylor &amp; Francis、Springer、Wiley、Elsevier、MDPI 等都没有给作者用的接口，也不允许程序替你登录。
+        所以请你自己在浏览器里登录投稿系统，打开作者中心里列出稿件的那一页，<b>Ctrl+A 全选、Ctrl+C 复制</b>，粘贴到下面：
+        程序会认出每篇稿件的编号、标题、状态和日期，库里已有的记进时间线，没有的可以新建。本程序不会登录或访问这些网站。</p>
+      <textarea v-model="sysImport.text" rows="6" class="sys-text" @input="sysImport.parsed = null" @paste="onSysPaste()"
+        placeholder="把列出稿件的那一页整页粘贴到这里：ScholarOne 的 Author Dashboard、Editorial Manager 里的某个文件夹（如 Submissions Being Processed）、IEEE / Wiley 的 My Submissions、中文期刊的作者中心稿件列表…"></textarea>
+      <div class="pf-actions">
+        <button class="btn primary sm" :disabled="sysImport.loading" @click="parseSysImport()">{{ sysImport.loading ? '解析中…' : '🔍 解析预览' }}</button>
+        <button class="btn ghost sm" v-if="sysImport.parsed && sysPicks().length" :disabled="sysImport.saving"
+                @click="confirmSysImport()">{{ sysImport.saving ? '导入中…' : '✓ 导入选中（' + sysPicks().length + '）' }}</button>
+      </div>
+      <div v-if="sysImport.parsed" class="sys-result">
+        <p class="small">识别为：<b>{{ sysImport.parsed.system_label || '未知系统' }}</b><span v-if="sysImport.parsed.journal"> · {{ sysImport.parsed.journal }}</span>
+          · 共 {{ sysImport.parsed.items.length }} 篇</p>
+        <div class="table-wrap" v-if="sysImport.parsed.items.length">
+          <table class="sys-table">
+            <thead><tr><th></th><th>稿件编号</th><th>标题</th><th>官方状态</th><th>日期</th><th>处理</th></tr></thead>
+            <tbody>
+              <tr v-for="(it, i) in sysImport.parsed.items" :key="i" :class="'sys-' + it.action">
+                <td><input type="checkbox" v-model="it._pick" :disabled="it.action !== 'update' && it.action !== 'create'"></td>
+                <td class="mono">{{ it.manuscript_id || '—' }}</td>
+                <td :title="it.title">{{ short(it.title, 70) || '（无标题）' }}</td>
+                <td><span v-if="it.stage" class="stage-chip" :style="chipStyle(it.stage)">{{ stageLabel(it.stage) }}</span>
+                    <small class="sys-raw">{{ it.raw_status }}</small></td>
+                <td class="nowrap">{{ it.status_date || '' }}</td>
+                <td>
+                  <template v-if="it.match"><a href="#" @click.prevent="openDetail(it.match.id)">#{{ it.match.id }}</a> {{ sysActionText(it) }}
+                    <small class="sys-raw">{{ sysMatchText(it) }}</small></template>
+                  <template v-else-if="it.action === 'create'">新建 · <input v-model="it._venue" class="sys-venue" placeholder="期刊名"></template>
+                  <template v-else>{{ sysActionText(it) }}
+                    <small class="sys-raw" v-if="it.candidates && it.candidates.length">
+                      <template v-for="(m, k) in it.candidates" :key="m.id"><a href="#" @click.prevent="openDetail(m.id)">#{{ m.id }}</a>{{ k + 1 < it.candidates.length ? '、' : '' }}</template></small></template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
     <div class="panel">
       <h3>期刊 / 会议分级速查 <span class="badge-src">{{ rankSourcesText() }}</span></h3>
       <p class="hint small" v-if="rankMissingHint()">{{ rankMissingHint() }}</p>
@@ -606,6 +646,8 @@
                 :disabled="detail._querying" @click="queryElsevier(detail)">{{ detail._querying?'查询中…':'一键查稿（实验）' }}</button>
         <button v-if="detail.venue_tracker==='elsevier'" class="btn primary sm paste-btn"
                 @click="togglePaste()">📋 粘贴官方结果</button>
+        <button v-if="detail.venue_type==='journal' && detail.venue_tracker==='manual'" class="btn ghost sm"
+                @click="goSysImport()" title="粘贴 ScholarOne / Editorial Manager / IEEE Author Portal 等作者中心页面">📋 从投稿系统导入</button>
         <button class="btn ghost sm" @click="openEventForm()">＋ 登记状态变化</button>
         <button class="btn ghost sm" @click="editMode ? saveEdit() : startEdit()">{{ editMode?'保存':'编辑信息' }}</button>
         <button class="btn ghost sm" v-if="editMode" @click="cancelEdit()">取消编辑</button>

@@ -28,6 +28,7 @@ from app import db
 from app import elsevier
 from app import openreview
 from app import rankings as rk
+from app import syspaste
 from app import vault
 from app import venueutil as vu
 from app.parser import parse_pdf, strip_invisible
@@ -1964,6 +1965,201 @@ def elsevier_paste_confirm(sid: int, p: PasteIn):
                 "hint": "与上一次官方结果相同（状态与审稿人统计均未变化），未重复记录"}
     return {"ok": True, "stage": stage, "raw": raw, "written": True, "current_stage": cur,
             "backdated": cur != stage}
+
+
+# ---------- 投稿系统页面导入（ScholarOne / Editorial Manager / IEEE Author Portal / Snapp / MDPI / 中文期刊…）----------
+# 用户自己登录官方投稿系统，把作者中心整页复制粘贴进来。本程序不登录、不访问这些网站，也不保存它们的密码。
+class SysPasteIn(BaseModel):
+    text: str
+
+
+class SysPastePick(BaseModel):
+    index: int
+    action: str                 # update / create
+    venue_name: str = ""        # create：期刊名（页面上没有时由用户补）
+
+
+class SysPasteConfirmIn(BaseModel):
+    text: str
+    picks: list[SysPastePick] = []
+
+
+def _sys_parse(text: str) -> dict:
+    if not text or not text.strip():
+        raise HTTPException(400, "粘贴内容为空")
+    if len(text) > 2_000_000:
+        raise HTTPException(400, "粘贴内容太长（超过 200 万字符）")
+    return syspaste.parse(text)
+
+
+_TERMINAL = ("rejected", "withdrawn")
+
+
+def _cjk_len(s: str) -> int:
+    return sum(1 for ch in s if "\u4e00" <= ch <= "\u9fff")
+
+
+def _sys_brief(r) -> dict:
+    return {"id": r["id"], "title": r["title"], "venue": r["venue_name"] or "",
+            "current_stage": r["current_stage"], "trashed": bool(r["deleted_at"])}
+
+
+def _sys_match(c, items: list[dict], page_journal: str = "") -> list[dict]:
+    """把解析出的每篇稿件对到库里。
+
+    - 有编号：按编号对（完全相同的编号优先，其次忽略 R1 / .R1 等修改稿后缀）。
+    - 没有编号：才按标题对，而且只对期刊投稿；页面上知道期刊名时还要对得上；
+      已拒 / 已撤的旧稿不接新的在审状态（转投后同名的是另一篇）。
+    - 对上不止一篇 → 「待确认」（ambiguous），对上的在回收站里 → trashed：都不能导入，也不会新建。
+    """
+    rows = c.execute("SELECT s.id, s.title, s.manuscript_number, s.current_stage, s.current_raw,"
+                     " COALESCE(s.deleted_at,'') AS deleted_at, v.name AS venue_name, v.type AS venue_type"
+                     " FROM submissions s LEFT JOIN venues v ON v.id=s.venue_id").fetchall()
+    by_ms, by_exact, by_title = {}, {}, {}
+    for r in rows:
+        num = (r["manuscript_number"] or "").strip().upper()
+        if num:
+            by_exact.setdefault(num, []).append(r)
+            by_ms.setdefault(syspaste.ms_base(num), []).append(r)
+        tk = syspaste.title_key(r["title"])
+        if len(tk) >= 6:
+            by_title.setdefault(tk, []).append(r)
+    out = []
+    for it in items:
+        row = dict(it, match=None, candidates=[])
+        mid = (it.get("manuscript_id") or "").strip().upper()
+        ms = syspaste.ms_base(mid)
+        cands, how = [], ""
+        if ms:
+            exact = by_exact.get(mid, [])
+            cands, how = (exact if len(exact) == 1 else by_ms.get(ms, [])), "number"
+        elif it.get("title"):
+            tk = syspaste.title_key(it["title"])
+            if len(tk) >= 6:
+                cands = list(by_title.get(tk, []))
+                if not cands and it.get("title_truncated") and (_cjk_len(tk) >= 6 or len(tk) >= 20):
+                    cands = [r for k, rs in by_title.items() if k.startswith(tk) for r in rs]
+            jn = vu.norm_title(it.get("journal") or page_journal or "")
+            cands = [r for r in cands if (r["venue_type"] or "journal") == "journal"
+                     and (not jn or not r["venue_name"] or vu.norm_title(r["venue_name"]) == jn)]
+            if it.get("stage") and it["stage"] not in _TERMINAL:
+                cands = [r for r in cands if r["current_stage"] not in _TERMINAL]
+            how = "title"
+        live = [r for r in cands if not r["deleted_at"]]
+        if len(live) == 1:
+            hit = live[0]
+            same = hit["current_stage"] == it.get("stage") and \
+                syspaste.same_status(hit["current_raw"], it.get("raw_status"))
+            row["match"] = dict(_sys_brief(hit), by=how)
+            row["action"] = "same" if same else ("update" if it.get("stage") else "skip")
+        elif len(live) > 1:
+            row["action"], row["candidates"] = "ambiguous", [_sys_brief(r) for r in live[:5]]
+        elif cands:
+            row["action"], row["candidates"] = "trashed", [_sys_brief(r) for r in cands[:5]]
+        elif not it.get("stage"):
+            row["action"] = "skip" if it.get("raw_status") else "unknown"      # 草稿 / 被取代 / 认不出的状态
+        else:
+            row["action"] = "create" if it.get("title") else "no_title"
+        out.append(row)
+    # 同一次粘贴里两篇不同的稿件对到库里同一篇：都改成「待确认」，不把两条时间线揉到一起
+    claims = {}
+    for row in out:
+        if row["match"]:
+            claims.setdefault(row["match"]["id"], []).append(row)
+    for rs in claims.values():
+        keys = {syspaste.ms_base(r.get("manuscript_id")) or "t:" + syspaste.title_key(r.get("title")) for r in rs}
+        if len(keys) > 1:
+            for r in rs:
+                r["action"], r["candidates"], r["match"] = "ambiguous", [r["match"]], None
+    return out
+
+
+@app.post("/api/import/system-paste")
+def system_paste_preview(p: SysPasteIn):
+    """粘贴投稿系统页面 → 认出每篇稿件 → 预览（不写入）。"""
+    parsed = _sys_parse(p.text)
+    with db.get_db() as c:
+        parsed["items"] = _sys_match(c, parsed["items"], parsed.get("journal") or "")
+    return parsed
+
+
+def _sys_event(c, sid: int, it: dict, parsed: dict) -> int | None:
+    stage = it.get("stage")
+    if not stage:
+        return None
+    raw = (it.get("raw_status") or parsed.get("system_label") or "")[:200]
+    observed = db.ts_from_date(it["status_date"]) if it.get("status_date") else db.now_str()
+    # 同一稿件、同阶段、同原文、同一天的粘贴记录只记一次：同一页粘贴几次都不会刷屏
+    if c.execute("SELECT 1 FROM status_events WHERE submission_id=? AND source='paste' AND stage=?"
+                 " AND COALESCE(raw_status,'')=? AND substr(observed_at,1,10)=?",
+                 (sid, stage, raw, observed[:10])).fetchone():
+        return None
+    payload = {"system_paste": True, "system": parsed.get("system") or "",
+               "system_label": parsed.get("system_label") or ""}
+    if it.get("status_date"):
+        payload["official_date"] = it["status_date"]
+    if it.get("manuscript_id"):
+        payload["manuscript_id"] = it["manuscript_id"]
+    eid = db.add_event(c, sid, stage, raw, "paste", payload, observed)
+    # 官方时间早于建档登记事件（建档时没填投稿日期等）→ 登记事件挪到它前面，官方状态才会成为当前状态
+    reg = _registration_event(c, sid)
+    if reg and reg["id"] != eid and (reg["observed_at"] or "") > observed:
+        before = (db.parse_ts(observed) - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
+        c.execute("UPDATE status_events SET observed_at=? WHERE id=?", (before, reg["id"]))
+        db.refresh_current(c, sid)
+    return eid
+
+
+@app.post("/api/import/system-paste/confirm")
+def system_paste_confirm(p: SysPasteConfirmIn):
+    """确认导入：选中的已有稿件记一条官方状态（同一天同状态不重复），对不上的新建投稿。"""
+    parsed = _sys_parse(p.text)
+    res = {"updated": 0, "created": 0, "unchanged": 0, "backdated": 0, "ids": []}
+    today = date.today().isoformat()
+    with db.get_db() as c:
+        items = _sys_match(c, parsed["items"], parsed.get("journal") or "")
+        seen, made = set(), set()
+        for pk in p.picks:
+            if not (0 <= pk.index < len(items)) or pk.index in seen:
+                raise HTTPException(400, "选择的条目不存在或重复，请重新解析")
+            seen.add(pk.index)
+            it = items[pk.index]
+            if pk.action == "update" and it["match"] and it["action"] in ("update", "same"):
+                sid = it["match"]["id"]
+                sub = _require_live_sub(c, sid)
+                eid = _sys_event(c, sid, it, parsed)
+                if it.get("manuscript_id") and not sub["manuscript_number"]:
+                    c.execute("UPDATE submissions SET manuscript_number=? WHERE id=?", (it["manuscript_id"], sid))
+                sd = it.get("submitted_date") or ""
+                if sd and sd <= today and not sub["submitted_at"]:
+                    c.execute("UPDATE submissions SET submitted_at=? WHERE id=?", (sd, sid))
+                    _move_initial_event(c, sid, sd)
+                c.execute("UPDATE submissions SET last_synced_at=? WHERE id=?", (db.now_str(), sid))
+                res["updated" if eid else "unchanged"] += 1
+                if eid and c.execute("SELECT current_stage FROM submissions WHERE id=?", (sid,)).fetchone()[0] != it["stage"]:
+                    res["backdated"] += 1          # 时间线上有更晚的记录：记进了历史，当前状态不变
+                res["ids"].append(sid)
+            elif pk.action == "create" and it["action"] == "create":
+                key = syspaste.ms_base(it.get("manuscript_id")) or "t:" + syspaste.title_key(it.get("title"))
+                if key in made:                    # 同一页里重复出现的同一篇只建一次
+                    res["unchanged"] += 1
+                    continue
+                made.add(key)
+                venue = strip_invisible(pk.venue_name or it.get("journal") or parsed.get("journal") or "")
+                if not venue:
+                    raise HTTPException(400, f"《{it['title'][:40]}》缺少期刊名，请补上后再导入")
+                sd = it.get("submitted_date") or ""
+                sid = _insert_submission(c, SubmissionIn(
+                    title=it["title"], manuscript_number=it.get("manuscript_id") or "",
+                    submitted_at=sd if sd and sd <= today else "",
+                    notes=f"从 {parsed.get('system_label') or '投稿系统'} 页面导入",
+                    venue=VenueIn(name=venue, type="journal", tracker="manual")))
+                _sys_event(c, sid, it, parsed)
+                res["created"] += 1
+                res["ids"].append(sid)
+            else:
+                raise HTTPException(400, f"第 {pk.index + 1} 条不能「{pk.action}」，请重新解析后再选")
+    return res
 
 
 # ---------- 导出台账 ----------

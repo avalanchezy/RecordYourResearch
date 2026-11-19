@@ -8,7 +8,7 @@
 """
 import os
 
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 REPO_URL = "https://github.com/avalanchezy/RecordYourResearch"
 USER_AGENT = f"RecordYourResearch/{VERSION} (+{REPO_URL})"
 

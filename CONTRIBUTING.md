@@ -6,7 +6,7 @@
 
 - **本机优先、单人使用**：程序只服务本机（`127.0.0.1`），没有账号体系；不做托管服务，也不做多人共享。
 - **隐私优先**：不加遥测、统计、崩溃上报或更新检查；网页不从 CDN 加载资源。任何新的对外网络请求都要先开 issue 讨论，而且必须由用户主动开启、可以关闭。
-- **尊重第三方服务**：只用官方提供的方式访问 OpenReview 等服务，请求保持低频；**不绕过验证码、人机验证、限流或任何访问控制**，遇到就停下来转人工。
+- **尊重第三方服务**：只用官方提供的方式访问 OpenReview 等服务，请求保持低频；**不绕过验证码、人机验证、限流或任何访问控制**，遇到就停下来转人工。没有作者 API 的投稿系统（IEEE、Springer、Elsevier、MDPI 等）只支持用户自己复制粘贴页面：不接受替用户登录、抓取这些系统或保存它们密码的实现。
 - **依赖尽量少**：新增 Python 依赖请先开 issue 讨论；前端不引入构建工具，Vue 以随项目附带的文件提供。
 - **界面用中文**，用语和现有的阶段名、按钮文字保持一致。
 - **只用合成数据**，见[下文](#只用合成数据)。
@@ -55,6 +55,7 @@ python -m pytest
 | `app/openreview.py` | OpenReview 官方 API：登录、同步我的投稿、状态推断 |
 | `app/elsevier.py` | 爱思唯尔一键查稿（实验功能，默认关闭） |
 | `app/parser.py` | PDF 元数据抽取（PyMuPDF） |
+| `app/syspaste.py` | 「从投稿系统导入」：识别粘贴的投稿系统页面，解析出稿件编号、标题、状态和日期（不联网） |
 | `app/rankings.py` | 分级匹配：徽章用严格匹配，速查和联想用模糊匹配 |
 | `app/rankings_build.py` | 生成本地分级库 `rankings.db` |
 | `app/vault.py` | 凭据存储（Windows DPAPI / keyring） |
@@ -73,7 +74,7 @@ python -m pytest
 
 ## 添加一个状态映射
 
-最常见的贡献，是让程序认识一种新的状态文字（通常来自「未识别的状态」issue）。
+最常见的贡献，是让程序认识一种新的状态文字（通常来自「未识别的状态」issue）。OpenReview 和爱思唯尔粘贴用的是 `app/stages.py` 里的映射，下面 1–5 步说的就是它；「从投稿系统导入」的状态另见第 6 步。
 
 1. **算出归一键**。`app/stages.py` 里的 `status_key()` 会把原始文字转成小写、把各种破折号统一成 ` - `、合并空白、去掉首尾标点，例如 `Revise – Minor.` → `revise - minor`。先确认它现在的结果：
 
@@ -101,11 +102,14 @@ python -m pytest
 
 5. （可选）很常见的状态可以加进手动登记的下拉选项：`web/app.js` 里的 `rawStatusOptions`。
 
+6. **「从投稿系统导入」的状态**。导入时先用 `app/syspaste.py` 里各投稿系统专用的词表 `EXTRA_STATUS`（优先级最高）和它自己的规则，认不出时才退回 `app/stages.py` 的映射。所以要修正导入的状态，请改 `EXTRA_STATUS`，并补一个合成的测试：写在 `tests/test_system_import.py` 里，或者加进 `tests/fixtures/syspaste_corpus.json` 语料（由 `tests/test_syspaste_corpus.py` 检查）。测试页面同样必须是合成的。
+
 ## 只用合成数据
 
 - 代码、测试、fixture、示例、截图、issue、PR 和提交信息里，**一律不要**出现真实的论文标题、稿件编号、人名、邮箱、OpenReview forum ID、PDF 或数据库。
 - 用一眼就能看出是虚构的例子：稿件编号 `ABC-D-25-00000`、标题「DemoNet: A Synthetic Network for Testing」、作者 Alice Example、邮箱 `alice@example.com`、拼音 `XIAOMING WANG`。
 - 截图请用 `tools/demo_seed.py` 生成的演示数据，或在一个全新的数据目录（`--data-dir`）里手动建几篇演示投稿后再截。
+- 「从投稿系统导入」的测试页面必须是合成的：照各系统的公开文档和界面结构自己构造，填虚构的稿件。**不要**提交从真实作者中心复制来的页面，哪怕已经打码。
 - 不要提交数据目录、`*.db`、PDF、你自己导入用的 CSV（例如 JCR）或 `rankings.db`。`.gitignore` 已经排除了这些文件，请不要用 `git add -f` 绕过。`data-sources/` 里的随附数据文件按下一节的规则维护。
 
 ## `data-sources/` 的贡献
@@ -140,7 +144,7 @@ Thanks for helping! RecordYourResearch is a small local-only tool for individual
 - **Principles**:
   - local-first and single-user, with no hosting or sharing;
   - no telemetry and no CDN; new outbound requests must be discussed first and be opt-in;
-  - respect third-party services: official APIs only, low request rates, and never bypass captchas, challenges, rate limits or access controls;
+  - respect third-party services: official APIs only, low request rates, and never bypass captchas, challenges, rate limits or access controls. Submission systems without an author API (IEEE, Springer, Elsevier, MDPI, …) are supported only through pages the user copies and pastes; no code that logs in to them, crawls them or stores their passwords;
   - keep dependencies minimal;
   - keep UI text in Chinese.
 - **Setup**: Python 3.10 or newer (CI tests 3.10, 3.12 and 3.14).
@@ -151,13 +155,14 @@ Thanks for helping! RecordYourResearch is a small local-only tool for individual
 - **Tests**: run `python -m pytest`.
   - Network access is blocked because httpx's transport raises. The app treats that as a network failure, so a real request does not fail a test by itself; tests must assert on results.
   - Use the `client`, `fake_openreview` and `secure_store` fixtures from `tests/conftest.py`, and generate PDFs on the fly with PyMuPDF.
-- **Code layout**: `server.py` is the FastAPI app, `app/*.py` holds the modules (database, stages, OpenReview, Elsevier, PDF parser, rankings, vault) and `web/` the in-DOM Vue template, `app.js` and `style.css`. Never edit `web/vendor/`.
-- **Adding a status mapping**:
+- **Code layout**: `server.py` is the FastAPI app, `app/*.py` holds the modules (database, stages, OpenReview, Elsevier, PDF parser, submission-system paste parser `syspaste.py`, rankings, vault) and `web/` the in-DOM Vue template, `app.js` and `style.css`. Never edit `web/vendor/`.
+- **Adding a status mapping** for OpenReview and the Elsevier paste (`app/stages.py`; for the submission-system import see step 5):
   1. Add the `status_key()` form of the raw status to `RAW_STATUS_MAP` in `app/stages.py`.
   2. Add an assertion to `test_status_normalisation` in `tests/test_parsing.py`.
   3. If you change the regex fallback rules (`_RULES`), add negative tests; order matters.
   4. For Chinese statuses, change two places in `server.py`: the `_ZH_STAGE` dict and the `_PASTE_PATTERNS["stage_zh"]` regex. Also add the status to `RAW_STATUS_MAP` in `app/stages.py`, and add a paste-parser test (see `test_official_paste_parser_records_status` in `tests/test_api.py`).
-- **Synthetic data only**: never put real titles, manuscript numbers, names, emails, OpenReview forum ids, PDFs or databases in code, tests, screenshots, issues, PRs or commit messages. Use `ABC-D-25-00000`, "DemoNet: …", Alice Example, `alice@example.com`.
+  5. Submission-system import: statuses first go through `app/syspaste.py`'s system-specific vocabulary `EXTRA_STATUS` (which takes precedence) and its own rules, and only then fall back to `app/stages.py`. To fix an import status, edit `EXTRA_STATUS` and add a synthetic test in `tests/test_system_import.py` or the corpus fixture `tests/fixtures/syspaste_corpus.json` (checked by `tests/test_syspaste_corpus.py`).
+- **Synthetic data only**: never put real titles, manuscript numbers, names, emails, OpenReview forum ids, PDFs or databases in code, tests, screenshots, issues, PRs or commit messages. Use `ABC-D-25-00000`, "DemoNet: …", Alice Example, `alice@example.com`. Test pages for the submission-system import must be synthetic, built from each system's public documentation; never commit a page copied from a real author dashboard, even redacted.
 - **`data-sources/`**:
   - The CSV files and `SHA256SUMS` are stored byte-exact (`data-sources/*.csv -text` and `data-sources/SHA256SUMS -text` in `.gitattributes`); don't let tools reformat them. The two JSON files get normal text handling.
   - `cas_2025.csv` and `xr_2026.csv` are unmodified copies of upstream mirror files. Update them by replacing them with newer upstream files, never by editing.

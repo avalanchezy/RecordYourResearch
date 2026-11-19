@@ -1,0 +1,1909 @@
+[
+ {
+  "family": "Publisher in-house author dashboards: MDPI SuSy, Taylor & Francis Submission Portal, Frontiers (My Frontiers / Peer Review Forum)",
+  "samples": [
+   {
+    "name": "mdpi_susy_submitted_manuscripts",
+    "system": "MDPI SuSy",
+    "page_type": "mdpi_submitted_list",
+    "text": "Skip to Content\nJournals\nTopics\nInformation\nAuthor Services\nInitiatives\nAbout\nAlice Example\nLogout\nSubmit\nUser Menu\nHome\nManage Accounts\nChange Password\nEdit Profile\nLogout\nSubmissions Menu\nSubmit Manuscript\nDisplay Submitted Manuscripts\nDisplay Co-authored Manuscripts\nEnglish Editing\nDiscount Vouchers\nInvoices\nLaTex Word Count\nReviewers Menu\nReviews\nVolunteer Preferences\ncollapse all\nDisplay Submitted Manuscripts\nIncomplete Submissions\nJournal\tTitle\tLast Saved\tAction\nBatteries\tSynthetic Draft on Placeholder Battery Ageing Models\t11 November 2026\tContinue Submission\nDelete\nSubmitted Manuscripts\nManuscript ID\tJournal\tTitle\tStatus\tSubmitted\tLast Update\tAction\nsensors-4703318\tSensors\tSynthetic Study of Low-Power Strain Gauge Arrays for Bridge Monitoring\nAlice Example, Bruno Placeholder\tPending review\t16 November 2026\t16 November 2026\tDisplay\nelectronics-4655102\tElectronics\tA Synthetic Benchmark for Edge Inference Latency on Microcontrollers\nAlice Example, Chen Sample, Dana Placeholder\tUnder review\t21 October 2026\t27 October 2026\tDisplay\napplsci-4590417\tApplied Sciences\tSynthetic Evaluation of Graph Denoising Filters for Sparse Point Clouds\nAlice Example *, Evan Testperson\tPending major revisions\t29 September 2026\t10 November 2026\tDisplay\nUpload Revised Version\nremotesensing-4561290\tRemote Sensing\tSynthetic Study of Cloud-Gap Filling in Multispectral Time Series\nChen Sample, Alice Example\tRevised version review\t2 September 2026\t12 November 2026\tDisplay\njimaging-4512876\tJournal of Imaging\tPlaceholder Analysis of Lens Distortion Models for Synthetic Endoscopy\nAlice Example\tPending editor decision\t18 August 2026\t14 November 2026\tDisplay\nbioengineering-4387765\tBioengineering\tSynthetic Study of Gait Phase Estimation with Wearable IMUs\nAlice Example, Frida Example\tPublished\t3 July 2026\t22 August 2026\tDisplay\nView Article\ndrones-4420931\tDrones\tSynthetic Assessment of Rotor Noise Under Hover\nAlice Example, Gus Placeholder\tRejected\t12 August 2026\t19 August 2026\tDisplay\ndiagnostics-4299018\tDiagnostics\tAn Invented Cohort Study of Retinal Image Quality Scores\nAlice Example, Hana Sample\tWithdrawn\t5 June 2026\t30 June 2026\tDisplay\nFeedback & Help\n© 1996-2026 MDPI (Basel, Switzerland) unless otherwise stated\nDisclaimer\nTerms and Conditions\nPrivacy Policy",
+    "expected": [
+     {
+      "manuscript_id": "sensors-4703318",
+      "title": "Synthetic Study of Low-Power Strain Gauge Arrays for Bridge Monitoring",
+      "raw_status": "Pending review",
+      "stage": "submitted",
+      "status_date": "2026-11-16",
+      "submitted_date": "2026-11-16"
+     },
+     {
+      "manuscript_id": "electronics-4655102",
+      "title": "A Synthetic Benchmark for Edge Inference Latency on Microcontrollers",
+      "raw_status": "Under review",
+      "stage": "review",
+      "status_date": "2026-10-27",
+      "submitted_date": "2026-10-21"
+     },
+     {
+      "manuscript_id": "applsci-4590417",
+      "title": "Synthetic Evaluation of Graph Denoising Filters for Sparse Point Clouds",
+      "raw_status": "Pending major revisions",
+      "stage": "revise",
+      "status_date": "2026-11-10",
+      "submitted_date": "2026-09-29"
+     },
+     {
+      "manuscript_id": "remotesensing-4561290",
+      "title": "Synthetic Study of Cloud-Gap Filling in Multispectral Time Series",
+      "raw_status": "Revised version review",
+      "stage": "review",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-09-02"
+     },
+     {
+      "manuscript_id": "jimaging-4512876",
+      "title": "Placeholder Analysis of Lens Distortion Models for Synthetic Endoscopy",
+      "raw_status": "Pending editor decision",
+      "stage": "decision",
+      "status_date": "2026-11-14",
+      "submitted_date": "2026-08-18"
+     },
+     {
+      "manuscript_id": "bioengineering-4387765",
+      "title": "Synthetic Study of Gait Phase Estimation with Wearable IMUs",
+      "raw_status": "Published",
+      "stage": "production",
+      "status_date": "2026-08-22",
+      "submitted_date": "2026-07-03"
+     },
+     {
+      "manuscript_id": "drones-4420931",
+      "title": "Synthetic Assessment of Rotor Noise Under Hover",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "2026-08-19",
+      "submitted_date": "2026-08-12"
+     },
+     {
+      "manuscript_id": "diagnostics-4299018",
+      "title": "An Invented Cohort Study of Retinal Image Quality Scores",
+      "raw_status": "Withdrawn",
+      "stage": "withdrawn",
+      "status_date": "2026-06-30",
+      "submitted_date": "2026-06-05"
+     }
+    ]
+   },
+   {
+    "name": "mdpi_susy_coauthored_manuscripts",
+    "system": "MDPI SuSy",
+    "page_type": "mdpi_coauthored_list",
+    "text": "Skip to Content\nJournals\nTopics\nInformation\nAuthor Services\nInitiatives\nAbout\nAlice Example\nLogout\nSubmit\nUser Menu\nHome\nManage Accounts\nChange Password\nEdit Profile\nLogout\nSubmissions Menu\nSubmit Manuscript\nDisplay Submitted Manuscripts\nDisplay Co-authored Manuscripts\nEnglish Editing\nDiscount Vouchers\nInvoices\nLaTex Word Count\nReviewers Menu\nReviews\nVolunteer Preferences\ncollapse all\nDisplay Co-authored Manuscripts\nManuscript ID\tJournal\tTitle\tSubmitting Author\tStatus\tSubmitted\tLast Update\nmaterials-4466021\tMaterials\tSynthetic Microstructure Maps of Additively Manufactured Alloys\tIvan Placeholder\tEnglish correction done\t14 August 2026\t9 November 2026\nmathematics-4478803\tMathematics\tA Placeholder Proof of Bounded Synthetic Sequences\tJun Example\tAccepted\t20 August 2026\t13 November 2026\nijms-4401187\tInternational Journal of Molecular Sciences\tSynthetic Docking Scores for Invented Kinase Inhibitors\tKara Sample\tAuthor proofreading\t27 July 2026\t17 November 2026\nenergies-4688390\tEnergies\tSynthetic Load Profiles for Placeholder Microgrids\tLiam Testperson\tPending Precheck Decision\t3 November 2026\t5 November 2026\nsymmetry-4372205\tSymmetry\tAn Invented Lattice Model with Placeholder Symmetry Breaking\tMia Example\tPending conversion\t28 June 2026\t18 November 2026\nFeedback & Help\n© 1996-2026 MDPI (Basel, Switzerland) unless otherwise stated\nDisclaimer\nTerms and Conditions\nPrivacy Policy",
+    "expected": [
+     {
+      "manuscript_id": "materials-4466021",
+      "title": "Synthetic Microstructure Maps of Additively Manufactured Alloys",
+      "raw_status": "English correction done",
+      "stage": "production",
+      "status_date": "2026-11-09",
+      "submitted_date": "2026-08-14"
+     },
+     {
+      "manuscript_id": "mathematics-4478803",
+      "title": "A Placeholder Proof of Bounded Synthetic Sequences",
+      "raw_status": "Accepted",
+      "stage": "accepted",
+      "status_date": "2026-11-13",
+      "submitted_date": "2026-08-20"
+     },
+     {
+      "manuscript_id": "ijms-4401187",
+      "title": "Synthetic Docking Scores for Invented Kinase Inhibitors",
+      "raw_status": "Author proofreading",
+      "stage": "production",
+      "status_date": "2026-11-17",
+      "submitted_date": "2026-07-27"
+     },
+     {
+      "manuscript_id": "energies-4688390",
+      "title": "Synthetic Load Profiles for Placeholder Microgrids",
+      "raw_status": "Pending Precheck Decision",
+      "stage": "editor",
+      "status_date": "2026-11-05",
+      "submitted_date": "2026-11-03"
+     },
+     {
+      "manuscript_id": "symmetry-4372205",
+      "title": "An Invented Lattice Model with Placeholder Symmetry Breaking",
+      "raw_status": "Pending conversion",
+      "stage": "production",
+      "status_date": "2026-11-18",
+      "submitted_date": "2026-06-28"
+     }
+    ]
+   },
+   {
+    "name": "mdpi_susy_manuscript_information",
+    "system": "MDPI SuSy",
+    "page_type": "mdpi_manuscript_details",
+    "text": "Skip to Content\nJournals\nTopics\nInformation\nAuthor Services\nInitiatives\nAbout\nAlice Example\nLogout\nSubmit\nUser Menu\nHome\nManage Accounts\nChange Password\nEdit Profile\nLogout\nSubmissions Menu\nSubmit Manuscript\nDisplay Submitted Manuscripts\nDisplay Co-authored Manuscripts\nEnglish Editing\nDiscount Vouchers\nInvoices\nLaTex Word Count\nReviewers Menu\nReviews\nVolunteer Preferences\ncollapse all\nManuscript Information\nJournal\tApplied Sciences\nSection\tComputing and Artificial Intelligence\nManuscript ID\tapplsci-4590417\nType\tArticle\nNumber of Pages\t18\nTitle\tSynthetic Evaluation of Graph Denoising Filters for Sparse Point Clouds\nAuthors\tAlice Example *, Evan Testperson\nAbstract\tWe describe an invented benchmark of graph filters applied to synthetic point clouds.\nAll numbers in this record are fictional and exist only for parser testing.\nKeywords\tpoint clouds; graph signal processing; denoising; synthetic data\nStatus\tPending major revisions\nSubmission received\t29 September 2026\nAssistant Editor\tMia Placeholder\nEditorial Office\nReview Reports\nNumber of reviewer reports collected: 3\nRound 1\nReviewer 1\tReport received\tView report\nReviewer 2\tReport received\tView report\nReviewer 3\tReport received\tView report\nEditorial Decision\nDecision\tReconsider after Major Revision\nDecision date\t10 November 2026\nRevision due\t20 November 2026\nUpload Revised Version\nManuscript Files\nManuscript\tmanuscript-v1.docx\nSupplementary Materials\tsupplementary-data.zip\nFeedback & Help\n© 1996-2026 MDPI (Basel, Switzerland) unless otherwise stated\nDisclaimer\nTerms and Conditions\nPrivacy Policy",
+    "expected": [
+     {
+      "manuscript_id": "applsci-4590417",
+      "title": "Synthetic Evaluation of Graph Denoising Filters for Sparse Point Clouds",
+      "raw_status": "Pending major revisions",
+      "stage": "revise",
+      "status_date": "2026-11-10",
+      "submitted_date": "2026-09-29"
+     }
+    ]
+   },
+   {
+    "name": "tandf_portal_dashboard",
+    "system": "Taylor & Francis Submission Portal",
+    "page_type": "tandf_dashboard",
+    "text": "Skip to main content\nTaylor & Francis Group\nan informa business\nSubmission Portal\nAlice Example\nMy account\nLog out\nNotifications\nRevision required on submission 261077352\nThe Journal of Economic Education\nMy submissions\nNEW SUBMISSION\nSUBMISSION\n260418823\nTITLE\nNo title supplied yet\nJOURNAL\nBiomarkers\nSTATUS\nSubmission Incomplete\nCHARGES\nRESUME\nDELETE\nSUBMISSION\n261077352\nTITLE\nSynthetic Study of Classroom Feedback Loops in Introductory Economics\nJOURNAL\nThe Journal of Economic Education\nSTATUS\nRevision Required\nCHARGES\nREVISE\nDECLINE TO REVISE\nSUBMISSION\n258803461\nTITLE\nA Synthetic Finite-Element Model of Placeholder Knee Cartilage\nJOURNAL\nComputer Methods in Biomechanics and Biomedical Engineering\nSTATUS\nUnder Review\nCHARGES\nSUBMISSION\n254903318\nTITLE\nSynthetic Soil Microbiome Profiles Under Simulated Drought\nJOURNAL\nCogent Biology\nSTATUS\nAccepted\nCHARGES\nAPC: USD 1,650.00\nPAY APC\nSUBMISSION\n249871135\nTITLE\nSynthetic Biomarker Panels for a Fictional Cohort\nJOURNAL\nBiomarkers\nSTATUS\nRejected\nCHARGES\nNeed Help?\nFeedback\nCookies\nPrivacy Policy\nTerms & Conditions\nAccessibility\n© 2026 Informa UK Limited, trading as Taylor & Francis Group",
+    "expected": [
+     {
+      "manuscript_id": "260418823",
+      "title": "",
+      "raw_status": "Submission Incomplete",
+      "stage": "",
+      "status_date": "",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "261077352",
+      "title": "Synthetic Study of Classroom Feedback Loops in Introductory Economics",
+      "raw_status": "Revision Required",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "258803461",
+      "title": "A Synthetic Finite-Element Model of Placeholder Knee Cartilage",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "254903318",
+      "title": "Synthetic Soil Microbiome Profiles Under Simulated Drought",
+      "raw_status": "Accepted",
+      "stage": "accepted",
+      "status_date": "",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "249871135",
+      "title": "Synthetic Biomarker Panels for a Fictional Cohort",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "tandf_portal_expanded_timeline",
+    "system": "Taylor & Francis Submission Portal",
+    "page_type": "tandf_submission_timeline",
+    "text": "Skip to main content\nTaylor & Francis Group\nan informa business\nSubmission Portal\nAlice Example\nMy account\nLog out\nMy submissions\nSUBMISSION\n261077352\nTITLE\nSynthetic Study of Classroom Feedback Loops in Introductory Economics\nJOURNAL\nThe Journal of Economic Education\nSTATUS\nRevision Required\nCHARGES\nREVISE\nDECLINE TO REVISE\n1\nSUBMISSION\n01 September 2026\nSubmission Created\n02 September 2026\nManuscript Submitted\n03 September 2026\nWith Journal Administrator\n2\nPEER REVIEW\n08 September 2026\nWith Editor\n15 September 2026\nUnder Review\n09 November 2026\nRevision Required\nREVISE\n3\nREVISION 1\nRevision Submitted\nWith Editor\nDecision\nNeed Help?\nFeedback\nCookies\nPrivacy Policy\nTerms & Conditions\nAccessibility\n© 2026 Informa UK Limited, trading as Taylor & Francis Group",
+    "expected": [
+     {
+      "manuscript_id": "261077352",
+      "title": "Synthetic Study of Classroom Feedback Loops in Introductory Economics",
+      "raw_status": "Revision Required",
+      "stage": "revise",
+      "status_date": "2026-11-09",
+      "submitted_date": "2026-09-02"
+     }
+    ]
+   },
+   {
+    "name": "frontiers_my_submissions",
+    "system": "Frontiers (My Frontiers)",
+    "page_type": "frontiers_my_submissions",
+    "text": "Frontiers\nJournals\nTopics\nArticles\nFor authors\nSubmit your research\nAlice Example\nMy Frontiers\nDashboard\nMy projects\nInbox\nMy invoices\nMy editor roles\nMy manuscript tracking\nTake part in Frontiers\nMy Submissions\nAll (8)\nIn Preparation (1)\nAccepted (1)\nPublished (1)\nRejected (1)\nSearch by title or manuscript ID\nOriginal Research\nSynthetic Study of Placeholder Sepsis Scores in a Simulated Ward\nFrontiers in Medicine · Precision Medicine\nManuscript ID: 1810274\nSubmitted on 16 November 2026\nStatus\nInitial validation\nLast update 16 November 2026\nMethods\nA Synthetic Grasp Dataset for Invented Soft Grippers\nFrontiers in Robotics and AI · Robot Learning and Evolution\nManuscript ID: 1808861\nSubmitted on 09 November 2026\nStatus\nEditorial assignment\nLast update 11 November 2026\nOriginal Research\nSynthetic Study of Terrain Classification for Placeholder Legged Robots\nFrontiers in Robotics and AI · Field Robotics\nManuscript ID: 1801127\nSubmitted on 27 October 2026\nStatus\nIndependent review\nLast update 06 November 2026\nEnter review forum\nOriginal Research\nSynthetic Study of Hippocampal Replay in a Simulated Maze Task\nFrontiers in Neuroscience · Brain Imaging Methods\nManuscript ID: 1794410\nSubmitted on 14 October 2026\nStatus\nInteractive review\nLast update 12 November 2026\nAction required\nRespond to the reviewers and upload your revised manuscript · Due 19 November 2026\nEnter review forum\nOriginal Research\nSynthetic Study of Tumour Margin Detection in Placeholder MRI Scans\nFrontiers in Oncology · Cancer Imaging and Image-directed Interventions\nManuscript ID: 1789934\nSubmitted on 26 September 2026\nStatus\nReview finalized\nLast update 12 November 2026\nEnter review forum\nBrief Research Report\nAn Invented Reader Study of Synthetic Chest Radiographs\nFrontiers in Radiology · Artificial Intelligence in Radiology\nManuscript ID: 1752208\nSubmitted on 22 July 2026\nStatus\nAccepted\nLast update 03 November 2026\nEnter production forum\nOriginal Research\nSynthetic Study of Spike Sorting Drift in Placeholder Probes\nFrontiers in Neuroscience · Neuroprosthetics\nManuscript ID: 1738876\nSubmitted on 01 July 2026\nStatus\nPublished\nLast update 28 August 2026\nDOI: 10.3389/fnins.2026.1738876\nView article\nMini Review\nA Placeholder Review of Synthetic Swarm Benchmarks\nFrontiers in Robotics and AI · Multi-Robot Systems\nManuscript ID: 1760043\nSubmitted on 04 August 2026\nStatus\nRejected\nLast update 02 September 2026\nView review forum\nHelp center\nPrivacy policy\nTerms and conditions\n© 2026 Frontiers Media S.A. All rights reserved",
+    "expected": [
+     {
+      "manuscript_id": "1810274",
+      "title": "Synthetic Study of Placeholder Sepsis Scores in a Simulated Ward",
+      "raw_status": "Initial validation",
+      "stage": "submitted",
+      "status_date": "2026-11-16",
+      "submitted_date": "2026-11-16"
+     },
+     {
+      "manuscript_id": "1808861",
+      "title": "A Synthetic Grasp Dataset for Invented Soft Grippers",
+      "raw_status": "Editorial assignment",
+      "stage": "editor",
+      "status_date": "2026-11-11",
+      "submitted_date": "2026-11-09"
+     },
+     {
+      "manuscript_id": "1801127",
+      "title": "Synthetic Study of Terrain Classification for Placeholder Legged Robots",
+      "raw_status": "Independent review",
+      "stage": "review",
+      "status_date": "2026-11-06",
+      "submitted_date": "2026-10-27"
+     },
+     {
+      "manuscript_id": "1794410",
+      "title": "Synthetic Study of Hippocampal Replay in a Simulated Maze Task",
+      "raw_status": "Interactive review",
+      "stage": "revise",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-10-14"
+     },
+     {
+      "manuscript_id": "1789934",
+      "title": "Synthetic Study of Tumour Margin Detection in Placeholder MRI Scans",
+      "raw_status": "Review finalized",
+      "stage": "reviews_done",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-09-26"
+     },
+     {
+      "manuscript_id": "1752208",
+      "title": "An Invented Reader Study of Synthetic Chest Radiographs",
+      "raw_status": "Accepted",
+      "stage": "accepted",
+      "status_date": "2026-11-03",
+      "submitted_date": "2026-07-22"
+     },
+     {
+      "manuscript_id": "1738876",
+      "title": "Synthetic Study of Spike Sorting Drift in Placeholder Probes",
+      "raw_status": "Published",
+      "stage": "production",
+      "status_date": "2026-08-28",
+      "submitted_date": "2026-07-01"
+     },
+     {
+      "manuscript_id": "1760043",
+      "title": "A Placeholder Review of Synthetic Swarm Benchmarks",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "2026-09-02",
+      "submitted_date": "2026-08-04"
+     }
+    ]
+   },
+   {
+    "name": "frontiers_review_forum_history",
+    "system": "Frontiers (My Frontiers)",
+    "page_type": "frontiers_review_forum",
+    "text": "Frontiers\nJournals\nTopics\nArticles\nFor authors\nSubmit your research\nAlice Example\nMy Frontiers\nDashboard\nMy projects\nInbox\nMy invoices\nMy editor roles\nMy manuscript tracking\nTake part in Frontiers\nFrontiers in Oncology\nCancer Imaging and Image-directed Interventions\nOriginal Research\nSynthetic Study of Tumour Margin Detection in Placeholder MRI Scans\nManuscript ID: 1789934\nAlice Example*, Bruno Placeholder, Chen Sample\nInitial validation\nEditorial assignment\nIndependent review\nInteractive review\nReview finalized\nFinal decision\nNo action required\nRequest extension\nHelp\nEditor\nReviewer 1\nReviewer 2\nHistory\nDate\tAction\n12 November 2026, 16:20\tManuscript moved to Review finalized\n12 November 2026, 16:20\tReviewer 2 endorsed the manuscript\n11 November 2026, 09:05\tReviewer 1 endorsed the manuscript\n06 November 2026, 18:42\tAuthors uploaded revised manuscript (version 2) and response to reviewers\n27 October 2026, 10:13\tManuscript moved to Interactive review\n24 October 2026, 14:51\tReviewer 2 submitted a review report\n19 October 2026, 08:30\tReviewer 1 submitted a review report\n02 October 2026, 15:47\tManuscript moved to Independent review\n30 September 2026, 11:02\tManuscript moved to Editorial assignment\n29 September 2026, 09:12\tManuscript passed Initial validation\n26 September 2026, 17:36\tManuscript submitted\nFiles\nManuscript (version 2).docx\nResponse to reviewers.pdf\nHelp center\nPrivacy policy\nTerms and conditions\n© 2026 Frontiers Media S.A. All rights reserved",
+    "expected": [
+     {
+      "manuscript_id": "1789934",
+      "title": "Synthetic Study of Tumour Margin Detection in Placeholder MRI Scans",
+      "raw_status": "Review finalized",
+      "stage": "reviews_done",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-09-26"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "family": "Editorial Manager (Aries Systems) - Author Main Menu and author folders",
+  "samples": [
+   {
+    "name": "em_main_menu_newui_springer_apin",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "main_menu",
+    "text": "Applied Intelligence\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nAuthor Main Menu\nAlternate Contact Information\nUnavailable Dates\nFor additional help with your submission, please click here for the Author Tutorial.\nPlease check the Submissions Needing Revision folder regularly; the revision due date is shown there.\nNew Submissions\nSubmit New Manuscript\nSubmissions Sent Back to Author\nIncomplete Submissions (1)\nSubmissions Waiting for Author's Approval\nSubmissions Being Processed (5)\nRevisions\nSubmissions Needing Revision (1)\nRevisions Sent Back to Author\nIncomplete Submissions Being Revised\nRevisions Waiting for Author's Approval\nRevisions Being Processed\nDeclined Revisions\nCompleted\nSubmissions with a Decision (3)\nSite time 08:41 Nov 19 | Your local time 21:41 Nov 19",
+    "expected": []
+   },
+   {
+    "name": "em_being_processed_newui_springer_apin",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "folder:Submissions Being Processed",
+    "text": "Applied Intelligence\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions Being Processed\nPage 1 of 1 (5 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nCorrespondence\nSend E-mail\t \tSynthetic Study of Contrastive Pretraining on Toy Sensor Streams\tNov 16, 2026\tNov 16, 2026\tSubmitted to Journal\nView Submission\nSimilarity Check/iThenticate Results (7%)\nCorrespondence\nSend E-mail\tAPIN-D-26-98377\tSynthetic Study of Curriculum Schedules for Placeholder Robot Grasping\tOct 27, 2026\tNov 2, 2026\tWith Editor\nView Submission\nSimilarity Check/iThenticate Results (12%)\nCorrespondence\nSend E-mail\tAPIN-D-26-98231\tSynthetic Study of Graph Attention for Imaginary Traffic Forecasting\tSep 2, 2026\tSep 21, 2026\tUnder Review\nView Submission\nCorrespondence\nSend E-mail\tAPIN-D-26-97105\tSynthetic Study of Reject Option Classifiers under Simulated Label Noise\tJul 14, 2026\tNov 11, 2026\tRequired Reviews Completed\nView Submission\nCorrespondence\nSend E-mail\tAPIN-D-26-96644\tSynthetic Evidence on Revision Cycles in Simulated Peer Review\tJun 3, 2026\tNov 17, 2026\tDecision in Process\nPage 1 of 1 (5 total submissions)\nPrevious 1 Next\nResults per page\nSite time 08:41 Nov 19 | Your local time 21:41 Nov 19",
+    "expected": [
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Contrastive Pretraining on Toy Sensor Streams",
+      "raw_status": "Submitted to Journal",
+      "stage": "submitted",
+      "status_date": "2026-11-16",
+      "submitted_date": "2026-11-16"
+     },
+     {
+      "manuscript_id": "APIN-D-26-98377",
+      "title": "Synthetic Study of Curriculum Schedules for Placeholder Robot Grasping",
+      "raw_status": "With Editor",
+      "stage": "editor",
+      "status_date": "2026-11-02",
+      "submitted_date": "2026-10-27"
+     },
+     {
+      "manuscript_id": "APIN-D-26-98231",
+      "title": "Synthetic Study of Graph Attention for Imaginary Traffic Forecasting",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "2026-09-21",
+      "submitted_date": "2026-09-02"
+     },
+     {
+      "manuscript_id": "APIN-D-26-97105",
+      "title": "Synthetic Study of Reject Option Classifiers under Simulated Label Noise",
+      "raw_status": "Required Reviews Completed",
+      "stage": "reviews_done",
+      "status_date": "2026-11-11",
+      "submitted_date": "2026-07-14"
+     },
+     {
+      "manuscript_id": "APIN-D-26-96644",
+      "title": "Synthetic Evidence on Revision Cycles in Simulated Peer Review",
+      "raw_status": "Decision in Process",
+      "stage": "decision",
+      "status_date": "2026-11-17",
+      "submitted_date": "2026-06-03"
+     }
+    ]
+   },
+   {
+    "name": "em_revisions_being_processed_elsevier_ins_timestamps",
+    "system": "Editorial Manager - Elsevier (editorialmanager.com/ins)",
+    "page_type": "folder:Revisions Being Processed",
+    "text": "Information Sciences\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nRevisions Being Processed\nPage 1 of 1 (3 total submissions)\nPrevious\n1\nNext\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\tAuthorship\nView Submission\nView Attachments\nCorrespondence\nSend E-mail\tINS-D-26-97012R1\tSynthetic Study of Sparse Mixture Routing for Mock Recommendation Logs\tApr 9 2026 10:14AM\tNov 14 2026 9:02PM\tRevised Manuscript Submitted\tCorresponding Author\nView Submission\nCorrespondence\nSend E-mail\tINS-D-25-95880R2\tSynthetic Study of Federated Averaging on Fabricated Hospital Partitions\tDec 18 2025 3:47PM\tOct 30 2026 11:20AM\tWith Editor\tCorresponding Author\nView Submission\tINS-D-26-96501R1\tSynthetic Study of Prompt Ensembles for Placeholder Legal Question Answering\tFeb 27 2026 8:05AM\tSep 15 2026 4:38PM\tUnder Review\tOther Author\nPage 1 of 1 (3 total submissions)\nPrevious\n1\nNext\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "INS-D-26-97012R1",
+      "title": "Synthetic Study of Sparse Mixture Routing for Mock Recommendation Logs",
+      "raw_status": "Revised Manuscript Submitted",
+      "stage": "editor",
+      "status_date": "2026-11-14",
+      "submitted_date": "2026-04-09"
+     },
+     {
+      "manuscript_id": "INS-D-25-95880R2",
+      "title": "Synthetic Study of Federated Averaging on Fabricated Hospital Partitions",
+      "raw_status": "With Editor",
+      "stage": "editor",
+      "status_date": "2026-10-30",
+      "submitted_date": "2025-12-18"
+     },
+     {
+      "manuscript_id": "INS-D-26-96501R1",
+      "title": "Synthetic Study of Prompt Ensembles for Placeholder Legal Question Answering",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "2026-09-15",
+      "submitted_date": "2026-02-27"
+     }
+    ]
+   },
+   {
+    "name": "em_needing_revision_single_springer_apin",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "folder:Submissions Needing Revision",
+    "text": "Applied Intelligence\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions Needing Revision\nUse 'File Inventory' to download your source files and 'Revise Submission' to start the revision. Choosing Decline to Revise moves the manuscript to Declined Revisions.\nIMPORTANT: do not click 'Revise Submission' until your revised files are ready to be submitted.\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tDate Revision Due\tStatus Date\tCurrent Status\tView Decision\nView Submission\nFile Inventory\nRevise Submission\nDecline to Revise\nCorrespondence\nSend E-mail\tAPIN-D-26-95518R1\tSynthetic Study of Diffusion Priors for Invented Satellite Imagery\tMar 5, 2026\tDec 4, 2026\tNov 4, 2026\tRevise\tMajor Revision\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nSite time 08:41 Nov 19 | Your local time 21:41 Nov 19",
+    "expected": [
+     {
+      "manuscript_id": "APIN-D-26-95518R1",
+      "title": "Synthetic Study of Diffusion Priors for Invented Satellite Imagery",
+      "raw_status": "Revise",
+      "stage": "revise",
+      "status_date": "2026-11-04",
+      "submitted_date": "2026-03-05"
+     }
+    ]
+   },
+   {
+    "name": "em_decision_folder_plos_pone_mmddyyyy",
+    "system": "Editorial Manager - PLOS (editorialmanager.com/pone)",
+    "page_type": "folder:Submissions with a Decision",
+    "text": "PLOS ONE\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions with a Decision\nPage 1 of 1 (4 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nView Decision Letter\nCorrespondence\tPONE-D-25-95120R2\tSynthetic Study of Accept–Reject Sampling for Toy Bayesian Models\t11/30/2025\t05/14/2026\tCompleted - Accept\nView Submission\nView Decision Letter\nCorrespondence\tPONE-D-26-91876\tSynthetic Study of Wearable Step Counts in an Invented Cohort\t01/09/2026\t02/23/2026\tCompleted - Reject\nView Submission\nCorrespondence\tPONE-D-25-94410R1\tSynthetic Study of Noise Injection for Placeholder Speech Enhancement\t10/21/2025\t04/03/2026\tComplete – Withdrawn\nView Submission\nView Decision Letter\nCorrespondence\tPONE-D-26-93307R1\tSynthetic Study of Soil Microbe Counts on Hypothetical Farms\t03/17/2026\t09/08/2026\tAccept\nPage 1 of 1 (4 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "PONE-D-25-95120R2",
+      "title": "Synthetic Study of Accept–Reject Sampling for Toy Bayesian Models",
+      "raw_status": "Completed - Accept",
+      "stage": "accepted",
+      "status_date": "2026-05-14",
+      "submitted_date": "2025-11-30"
+     },
+     {
+      "manuscript_id": "PONE-D-26-91876",
+      "title": "Synthetic Study of Wearable Step Counts in an Invented Cohort",
+      "raw_status": "Completed - Reject",
+      "stage": "rejected",
+      "status_date": "2026-02-23",
+      "submitted_date": "2026-01-09"
+     },
+     {
+      "manuscript_id": "PONE-D-25-94410R1",
+      "title": "Synthetic Study of Noise Injection for Placeholder Speech Enhancement",
+      "raw_status": "Complete – Withdrawn",
+      "stage": "withdrawn",
+      "status_date": "2026-04-03",
+      "submitted_date": "2025-10-21"
+     },
+     {
+      "manuscript_id": "PONE-D-26-93307R1",
+      "title": "Synthetic Study of Soil Microbe Counts on Hypothetical Farms",
+      "raw_status": "Accept",
+      "stage": "accepted",
+      "status_date": "2026-09-08",
+      "submitted_date": "2026-03-17"
+     }
+    ]
+   },
+   {
+    "name": "em_sent_back_plus_incomplete_elsevier_eswa",
+    "system": "Editorial Manager - Elsevier (editorialmanager.com/eswa)",
+    "page_type": "folder:Submissions Sent Back to Author + Incomplete Submissions",
+    "text": "Expert Systems with Applications\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions Sent Back to Author\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tDate Submission Began\tStatus Date\tCurrent Status\nView Submission\nView Letter\nEdit Submission\nApprove Submission\nRemove Submission\nSend E-mail\tESWA-D-26-99012\tSynthetic Study of Knowledge Graph Completion on Mock Product Catalogues\tNov 3 2026 9:15am\tNov 12 2026 4:40pm\tSent Back to Author\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\n\nExpert Systems with Applications\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nIncomplete Submissions\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tDate Submission Began\tStatus Date\tCurrent Status\nEdit Submission\nRemove Submission\nSend E-mail\t\tSynthetic Study of Rule Mining over Fictional Insurance Claims\tNov 18 2026 10:02pm\tNov 18 2026 10:02pm\tIncomplete\nEdit Submission\nRemove Submission\nSend E-mail\t\tSynthetic Study of Ontology Alignment for Placeholder Museum Records\tOct 1 2026 7:30am\tOct 2 2026 8:11am\tIncomplete\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "ESWA-D-26-99012",
+      "title": "Synthetic Study of Knowledge Graph Completion on Mock Product Catalogues",
+      "raw_status": "Sent Back to Author",
+      "stage": "submitted",
+      "status_date": "2026-11-12",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Rule Mining over Fictional Insurance Claims",
+      "raw_status": "Incomplete",
+      "stage": "",
+      "status_date": "2026-11-18",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Ontology Alignment for Placeholder Museum Records",
+      "raw_status": "Incomplete",
+      "stage": "",
+      "status_date": "2026-10-02",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "em_waiting_for_approval_cookie_banner_plos_pone",
+    "system": "Editorial Manager - PLOS (editorialmanager.com/pone)",
+    "page_type": "folder:Submissions Waiting for Author's Approval",
+    "text": "We use cookies to make this site work and to understand how it is used. You can accept all cookies, reject non-essential cookies or choose your settings.\nCookie Settings\nReject All\nAccept All Cookies\nPLOS ONE\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions Waiting for Author's Approval\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tDate Submission Began\tStatus Date\tCurrent Status\nView Submission\nEdit Submission\nApprove Submission\nRemove Submission\nSend E-mail\t\tSynthetic Study of Bird Song Motifs in an Invented Archipelago\t11/17/2026\t11/18/2026\tNeeds Approval\nEdit Submission\nRemove Submission\t \tSynthetic Study of Tidal Sediment Cores from a Hypothetical Estuary\t11/19/2026\t11/19/2026\tBuilding PDF\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Bird Song Motifs in an Invented Archipelago",
+      "raw_status": "Needs Approval",
+      "stage": "",
+      "status_date": "2026-11-18",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Tidal Sediment Cores from a Hypothetical Estuary",
+      "raw_status": "Building PDF",
+      "stage": "",
+      "status_date": "2026-11-19",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "em_revisions_sent_back_plus_declined_elsevier_ins",
+    "system": "Editorial Manager - Elsevier (editorialmanager.com/ins)",
+    "page_type": "folder:Revisions Sent Back to Author + Declined Revisions",
+    "text": "Information Sciences\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nRevisions Sent Back to Author\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Revision\nEdit Revision\nApprove Revision\nDecline to Revise\nSend E-mail\tINS-D-26-94721R1\tSynthetic Study of Spiking Networks on Fabricated Event Camera Data\tJan 20 2026 1:12PM\tNov 13 2026 10:47AM\tSent Back to Author\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\n\n\nInformation Sciences\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nDeclined Revisions\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nReinstate Submission\tINS-D-25-93356\tSynthetic Study of Cache Eviction Heuristics on Imaginary Web Traces\tAug 11 2025 6:30PM\tMar 2 2026 9:00AM\tRevise\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "INS-D-26-94721R1",
+      "title": "Synthetic Study of Spiking Networks on Fabricated Event Camera Data",
+      "raw_status": "Sent Back to Author",
+      "stage": "revise",
+      "status_date": "2026-11-13",
+      "submitted_date": "2026-01-20"
+     },
+     {
+      "manuscript_id": "INS-D-25-93356",
+      "title": "Synthetic Study of Cache Eviction Heuristics on Imaginary Web Traces",
+      "raw_status": "Revise",
+      "stage": "withdrawn",
+      "status_date": "2026-03-02",
+      "submitted_date": "2025-08-11"
+     }
+    ]
+   },
+   {
+    "name": "em_main_menu_production_tasks_springer_apin",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "main_menu+production_tasks",
+    "text": "Applied Intelligence\nBob Placeholder | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nAuthor Main Menu\nAlternate Contact Information\nUnavailable Dates\nProduction\nSubmissions in Production (1)\nCurrent Task Assignments\nCurrent Task Assignments\nAction\tTask\tDate Task Assigned\tDate Task Due\tDate Until Due\tManuscript Number\tDOI\tArticle Type\tAssigned By\nView Assignment Letter\nView Instructions\nAssignment Files\nSubmit Task\nCorrespondence\nSend E-mail\tAuthor Proof\tNov 16, 2026\tNov 17, 2026\t2 days overdue\tAPIN-D-25-94102R2\t10.5555/example.2026.0417\tOriginal Research\tEvan Sample\nNew Submissions\nSubmit New Manuscript\nSubmissions Sent Back to Author\nIncomplete Submissions\nSubmissions Waiting for Author's Approval\nSubmissions Being Processed (1)\nRevisions\nSubmissions Needing Revision\nRevisions Sent Back to Author\nIncomplete Submissions Being Revised\nRevisions Waiting for Author's Approval\nRevisions Being Processed\nDeclined Revisions\nCompleted\nSubmissions with a Decision (4)\nCompleted Production Task Assignments (2)\nSubmissions with Production Completed (2)\nSite time 08:41 Nov 19 | Your local time 21:41 Nov 19",
+    "expected": [
+     {
+      "manuscript_id": "APIN-D-25-94102R2",
+      "title": "",
+      "raw_status": "Author Proof",
+      "stage": "production",
+      "status_date": "2026-11-16",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "em_production_completed_springer_apin",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "folder:Submissions with Production Completed",
+    "text": "Applied Intelligence\nBob Placeholder | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions with Production Completed\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nCorrespondence\tAPIN-D-25-92218R1\tSynthetic Study of Attention Sinks in Toy Language Models\tFeb 11, 2025\tJul 29, 2025\tCompleted - Accept\nView Submission\nCorrespondence\tAPIN-D-24-90876R2\tSynthetic Study of Spectral Clustering on Made-up Social Graphs\tMar 18, 2024\tJan 6, 2025\tAccept\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "APIN-D-25-92218R1",
+      "title": "Synthetic Study of Attention Sinks in Toy Language Models",
+      "raw_status": "Completed - Accept",
+      "stage": "production",
+      "status_date": "2025-07-29",
+      "submitted_date": "2025-02-11"
+     },
+     {
+      "manuscript_id": "APIN-D-24-90876R2",
+      "title": "Synthetic Study of Spectral Clustering on Made-up Social Graphs",
+      "raw_status": "Accept",
+      "stage": "production",
+      "status_date": "2025-01-06",
+      "submitted_date": "2024-03-18"
+     }
+    ]
+   },
+   {
+    "name": "em_history_popup_single_manuscript_elsevier_ins",
+    "system": "Editorial Manager - Elsevier (editorialmanager.com/ins)",
+    "page_type": "history_popup",
+    "text": "History for Manuscript Number: INS-D-26-97012R1\nAlice Example (CHINA): \"Synthetic Study of Sparse Mixture Routing for Mock Recommendation Logs\"\nCorrespondence History\nCorrespondence Date\tLetter\tRecipient\tRevision\nNov 14 2026 9:02PM\tAuthor Submits Revised Manuscript Confirmation\tAlice Example\t1\nNov 14 2026 8:57PM\tPDF Built and Requires Approval\tAlice Example\t1\nSep 22 2026 3:16PM\tEditor Decision - Major Revision\tAlice Example\t0\nJun 30 2026 10:05AM\tReply to status query (External)\talice.example@example.org\t\nApr 9 2026 10:14AM\tAuthor Submits New Manuscript Confirmation\tAlice Example\t0\nApr 9 2026 10:02AM\tPDF Built and Requires Approval\tAlice Example\t0",
+    "expected": [
+     {
+      "manuscript_id": "INS-D-26-97012R1",
+      "title": "Synthetic Study of Sparse Mixture Routing for Mock Recommendation Logs",
+      "raw_status": "Author Submits Revised Manuscript Confirmation",
+      "stage": "editor",
+      "status_date": "2026-11-14",
+      "submitted_date": "2026-04-09"
+     }
+    ]
+   },
+   {
+    "name": "em_legacy_ui_being_processed_crlf_fictional_jexs",
+    "system": "Editorial Manager - legacy navigation (fictional journal JEXS)",
+    "page_type": "folder:Submissions Being Processed (legacy UI)",
+    "text": "HOME • LOGOUT • HELP • REGISTER • UPDATE MY INFORMATION • JOURNAL OVERVIEW\r\nMAIN MENU • CONTACT US • SUBMIT A MANUSCRIPT • INSTRUCTIONS FOR AUTHORS • PRIVACY\r\nRole:   Username: aexample\r\nSubmissions Being Processed for Author Alice Example, PhD\r\nPage: 1 of 1 (3 total submissions)\tDisplay  results per page.\r\nAction \tManuscript Number \tTitle \tInitial Date Submitted \tStatus Date \tCurrent Status \r\nView Submission\r\nView Reference Checking Results\r\nCorrespondence\r\nSend E-mail\tJEXS-D-26-90417\tSynthetic Study of Suture Tension in a Simulated Tissue Phantom\tSep 9 2026 12:54PM\tOct 6 2026 2:26PM\tEditor Invited\r\nView Submission\r\nCorrespondence\r\nSend E-mail\tJEXS-D-26-90388\tSynthetic Study of Recovery Times in an Invented Clinical Registry\tAug 30 2026 9:58AM\tNov 14 2026 12:29PM\tReviewers Invited\r\nView Submission\r\nFees and Payments\r\nCorrespondence\r\nSend E-mail\t \tSynthetic Study of Hand Hygiene Prompts in a Fictional Ward\tNov 17 2026 12:09PM\tNov 17 2026 12:09PM\tReceived by Journal\r\nPage: 1 of 1 (3 total submissions)\tDisplay  results per page.\r\nUse Adobe Reader 10 or later for best PDF viewing results.",
+    "expected": [
+     {
+      "manuscript_id": "JEXS-D-26-90417",
+      "title": "Synthetic Study of Suture Tension in a Simulated Tissue Phantom",
+      "raw_status": "Editor Invited",
+      "stage": "editor",
+      "status_date": "2026-10-06",
+      "submitted_date": "2026-09-09"
+     },
+     {
+      "manuscript_id": "JEXS-D-26-90388",
+      "title": "Synthetic Study of Recovery Times in an Invented Clinical Registry",
+      "raw_status": "Reviewers Invited",
+      "stage": "review",
+      "status_date": "2026-11-14",
+      "submitted_date": "2026-08-30"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Hand Hygiene Prompts in a Fictional Ward",
+      "raw_status": "Received by Journal",
+      "stage": "submitted",
+      "status_date": "2026-11-17",
+      "submitted_date": "2026-11-17"
+     }
+    ]
+   },
+   {
+    "name": "em_collapsed_action_links_no_status_date_fictional_texm",
+    "system": "Editorial Manager - fictional T&F-style journal TEXM",
+    "page_type": "folder:Submissions Being Processed",
+    "text": "Example Letters in Mechanics\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\n← Submissions Being Processed\nPage 1 of 1 (3 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tCurrent Status\nAction Links\tTEXM-D-26-90731\tSynthetic Study of Crack Growth in a Hypothetical Polymer Beam\t02 Nov 2026\tEditor Assigned\nAction Links\tTEXM-D-26-90602\tSynthetic Study of Vortex Shedding behind Invented Bluff Bodies\t14 Sep 2026\tReviewer Invited\nAction Links\tTEXM-D-26-90555\tSynthetic Study of Contact Friction in Placeholder Gear Trains\t28 Jul 2026\tDecision Pending\nPage 1 of 1 (3 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "TEXM-D-26-90731",
+      "title": "Synthetic Study of Crack Growth in a Hypothetical Polymer Beam",
+      "raw_status": "Editor Assigned",
+      "stage": "editor",
+      "status_date": "",
+      "submitted_date": "2026-11-02"
+     },
+     {
+      "manuscript_id": "TEXM-D-26-90602",
+      "title": "Synthetic Study of Vortex Shedding behind Invented Bluff Bodies",
+      "raw_status": "Reviewer Invited",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-09-14"
+     },
+     {
+      "manuscript_id": "TEXM-D-26-90555",
+      "title": "Synthetic Study of Contact Friction in Placeholder Gear Trains",
+      "raw_status": "Decision Pending",
+      "stage": "decision",
+      "status_date": "",
+      "submitted_date": "2026-07-28"
+     }
+    ]
+   },
+   {
+    "name": "em_dashboard_multi_folder_paste_elsevier_knosys",
+    "system": "Editorial Manager - Elsevier (editorialmanager.com/knosys)",
+    "page_type": "dashboard:multi-folder paste",
+    "text": "Knowledge-Based Systems\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions Being Processed\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nCorrespondence\nSend E-mail\tKNOSYS-D-26-97754\tSynthetic Study of Hypergraph Embeddings for Toy Citation Networks\tMay 06, 2026\tJun 01, 2026\tUnder Review\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\n\nKnowledge-Based Systems\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nRevisions Being Processed\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nCorrespondence\nSend E-mail\tKNOSYS-D-26-96120R1\tSynthetic Study of Few-Shot Fault Diagnosis on Simulated Bearings\tMar 02, 2026\tNov 09, 2026\tRequired Reviews Completed\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\n\nKnowledge-Based Systems\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmission Transfers Waiting for Author's Approval\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nAgree to Transfer\nDecline to Transfer\nCorrespondence\tKNOSYS-D-26-94468\tSynthetic Study of Fuzzy Rule Pruning on Invented Credit Data\tJan 15, 2026\tOct 20, 2026\tTransfer Pending\nPage 1 of 1 (1 total submissions)\nPrevious 1 Next\nResults per page\n\nKnowledge-Based Systems\nAlice Example | Logout\nHome\nMain Menu\nSubmit a Manuscript\nAbout\nHelp\nSubmissions with a Decision\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page\nAction\tManuscript Number\tTitle\tInitial Date Submitted\tStatus Date\tCurrent Status\nView Submission\nView Decision Letter\nCorrespondence\tKNOSYS-D-25-93999R2\tSynthetic Study of Temporal Knowledge Distillation on Mock Sensor Logs\tSep 08, 2025\tApr 27, 2026\tCompleted - Accept\nView Submission\nView Decision Letter\nCorrespondence\tKNOSYS-D-26-95036\tSynthetic Study of Active Learning Budgets for Placeholder Medical Notes\tFeb 03, 2026\tMar 30, 2026\tCompleted - Reject\nPage 1 of 1 (2 total submissions)\nPrevious 1 Next\nResults per page",
+    "expected": [
+     {
+      "manuscript_id": "KNOSYS-D-26-97754",
+      "title": "Synthetic Study of Hypergraph Embeddings for Toy Citation Networks",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "2026-06-01",
+      "submitted_date": "2026-05-06"
+     },
+     {
+      "manuscript_id": "KNOSYS-D-26-96120R1",
+      "title": "Synthetic Study of Few-Shot Fault Diagnosis on Simulated Bearings",
+      "raw_status": "Required Reviews Completed",
+      "stage": "reviews_done",
+      "status_date": "2026-11-09",
+      "submitted_date": "2026-03-02"
+     },
+     {
+      "manuscript_id": "KNOSYS-D-26-94468",
+      "title": "Synthetic Study of Fuzzy Rule Pruning on Invented Credit Data",
+      "raw_status": "Transfer Pending",
+      "stage": "rejected",
+      "status_date": "2026-10-20",
+      "submitted_date": "2026-01-15"
+     },
+     {
+      "manuscript_id": "KNOSYS-D-25-93999R2",
+      "title": "Synthetic Study of Temporal Knowledge Distillation on Mock Sensor Logs",
+      "raw_status": "Completed - Accept",
+      "stage": "accepted",
+      "status_date": "2026-04-27",
+      "submitted_date": "2025-09-08"
+     },
+     {
+      "manuscript_id": "KNOSYS-D-26-95036",
+      "title": "Synthetic Study of Active Learning Budgets for Placeholder Medical Notes",
+      "raw_status": "Completed - Reject",
+      "stage": "rejected",
+      "status_date": "2026-03-30",
+      "submitted_date": "2026-02-03"
+     }
+    ]
+   },
+   {
+    "name": "em_author_details_coauthor_status_negative",
+    "system": "Editorial Manager - Springer (editorialmanager.com/apin)",
+    "page_type": "author_details",
+    "text": "Author Details for Manuscript Number: APIN-D-26-98231\nSynthetic Study of Graph Attention for Imaginary Traffic Forecasting\nCorresponding Author Status\nOrder\tAuthor Name\tEmail Address\tORCID Identifier\tAcademic Degree(s)\tAffiliation\tOptions\n1\tAlice Example\talice.example@example.org\t\tPhD\tExample Institute of Technology\tView Questionnaire Responses\nOther Author Status\nOrder\tAuthor Name\tAdded in Revision\tEmail Address\tORCID Identifier\tAcademic Degree(s)\tAffiliation\tInstitution\tConfirmed?\tOptions\n2\tBob Placeholder\tR0\tbob.placeholder@example.org\nEdit\t\tMSc\tExample Institute of Technology\tExample Institute of Technology\tYes\tView Questionnaire Responses\n3\tCarol Sample\tR0\tcarol.sample@example.com\nEdit\t\tPhD\tSample University\tSample University\tDeclined\tResend Letter\n4\tDana Dummy\tR0\tdana.dummy@example.net\nEdit\t\t\tPlaceholder College\tPlaceholder College\tNo Response\tResend Letter\nQuestionnaire Not Completed\nTo change a co-author's e-mail address for this submission only, click 'Edit' and then save.",
+    "expected": []
+   }
+  ]
+ },
+ {
+  "family": "Springer Nature: Snapp tracking, Springer Nature profile 'Your research', Nature Portfolio MTS (eJournalPress), Research Square In Review",
+  "samples": [
+   {
+    "name": "snapp_tracking_dashboard_five_submissions",
+    "system": "Springer Nature Snapp",
+    "page_type": "snapp_submissions_list",
+    "text": "Skip to main content\nSpringer Nature\nHelp\nAlice Example\nYour submissions\nTrack progress, complete actions and get help for all your submissions on Snapp.\nStart a new submission\nSearch by title\nSort by: Last updated\nTitle\tSubmitted\tStatus\tLast updated\tActions\nSynthetic Study of Wavelet Features for Bearing Fault Diagnosis\nDiscover Applied Sciences\t17 November 2026\tTechnical check\t17 November 2026\tView submission\nA Synthetic Dataset for Benchmarking Medical Image Registration\nBMC Medical Imaging\t11 November 2026\tEditorial assignment\t13 November 2026\tView submission\nSynthetic Study of Sparse Attention for Low-Resource Speech Recognition\nDiscover Artificial Intelligence\t14 August 2026\tPeer review\nReviewer(s) accepted\t6 November 2026\tView submission\nSynthetic Evaluation of Graph Neural Networks for Traffic Forecasting\nScientific Reports\t3 June 2026\tPeer review\nRevision requested\t28 October 2026\tSubmit revision\nView submission\nSynthetic Study of Federated Learning Under Label Noise\nJournal of Big Data\t20 April 2026\tPublication\t15 October 2026\tView article\nShowing 5 of 5 submissions\nNeed help? Visit Springer Nature Support or contact the journal's editorial office.\nPrivacy policy\nTerms and conditions\nAccessibility\nManage cookies\n© 2026 Springer Nature",
+    "expected": [
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Wavelet Features for Bearing Fault Diagnosis",
+      "raw_status": "Technical check",
+      "stage": "submitted",
+      "status_date": "2026-11-17",
+      "submitted_date": "2026-11-17"
+     },
+     {
+      "manuscript_id": "",
+      "title": "A Synthetic Dataset for Benchmarking Medical Image Registration",
+      "raw_status": "Editorial assignment",
+      "stage": "editor",
+      "status_date": "2026-11-13",
+      "submitted_date": "2026-11-11"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Sparse Attention for Low-Resource Speech Recognition",
+      "raw_status": "Reviewer(s) accepted",
+      "stage": "review",
+      "status_date": "2026-11-06",
+      "submitted_date": "2026-08-14"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Evaluation of Graph Neural Networks for Traffic Forecasting",
+      "raw_status": "Revision requested",
+      "stage": "revise",
+      "status_date": "2026-10-28",
+      "submitted_date": "2026-06-03"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Federated Learning Under Label Noise",
+      "raw_status": "Publication",
+      "stage": "production",
+      "status_date": "2026-10-15",
+      "submitted_date": "2026-04-20"
+     }
+    ]
+   },
+   {
+    "name": "snapp_single_submission_second_round",
+    "system": "Springer Nature Snapp",
+    "page_type": "snapp_submission_tracking",
+    "text": "Skip to main content\nSpringer Nature\nHelp\nAlice Example\nBack to your submissions\nTrack your submission\nSynthetic Study of Contrastive Pretraining for Remote Sensing Change Detection\nScientific Reports\nSubmission ID\n6b2f9c41-3e7a-4d58-9f10-2a6c8e4b7d93\nArticle type\nArticle\nSubmitted\n2 July 2026\nCorresponding author\nAlice Example\nCurrent status\nRevision received\nUpdated 10 November 2026\nYour revised manuscript has passed the technical check and is back with the editor, who will decide whether another round of review is needed.\nSubmission progress\nTechnical check\nCompleted 6 July 2026\nEditorial assignment\nCompleted 9 July 2026\nWith editor\nCompleted 21 July 2026\nPeer review\nIn progress\nReviewer(s) invited\n23 July 2026\nReviewer(s) accepted\n4 August 2026\nReviewer report(s) received\n18 September 2026\nRevision requested\n25 September 2026\nRevision received\n10 November 2026\nFinal decision\nNot started\nRights and open access payments\nNot started\nPublication\nNot started\nActions\nView submitted files\nView decision letter\nWithdraw submission\nGet help\nWhat happens after submission?\nContact the editorial office\nPrivacy policy\nTerms and conditions\nAccessibility\nManage cookies\n© 2026 Springer Nature",
+    "expected": [
+     {
+      "manuscript_id": "6b2f9c41-3e7a-4d58-9f10-2a6c8e4b7d93",
+      "title": "Synthetic Study of Contrastive Pretraining for Remote Sensing Change Detection",
+      "raw_status": "Revision received",
+      "stage": "editor",
+      "status_date": "2026-11-10",
+      "submitted_date": "2026-07-02"
+     }
+    ]
+   },
+   {
+    "name": "sn_profile_your_research_submitted_tab_mixed_systems",
+    "system": "Springer Nature profile (Your research)",
+    "page_type": "sn_profile_your_research",
+    "text": "Skip to main content\nSpringer Nature\nSearch\nAlice Example\nLog out\nYour profile\nYour research\nAccount settings\nLinked accounts\nHi Alice\nYour research\nTrack your submitted manuscripts and find your published articles.\nSubmitted\nPublished\nSynthetic Benchmarks for Transformer Pruning on Edge Devices\nApplied Intelligence · Manuscript number APIN-D-26-00417R1\nSubmitted on 12 October 2026\nUnder Review\nUpdated 9 November 2026\nGo to submission\nSynthetic Study of Sparse Attention for Multilingual Keyword Spotting\nDiscover Artificial Intelligence\nSubmitted on 14 August 2026\nPeer review: Reviewer report(s) received\nUpdated 6 November 2026\nGo to submission\nA Synthetic Cohort Study of Wearable Sleep Metrics\nBMC Medical Informatics and Decision Making\nSubmitted on 28 October 2026\nWith editor\nUpdated 4 November 2026\nGo to submission\nSynthetic Study of Differential Privacy for Clinical Text De-identification\nJournal of Big Data\nSubmitted on 20 April 2026\nRights and open access payments\nACTION REQUIRED\nUpdated 30 September 2026\nGo to submission\nSynthetic Evaluation of Contrastive Pretraining for Crop Yield Mapping\nScientific Reports\nSubmitted on 2 June 2026\nRevision requested\nACTION REQUIRED\nUpdated 25 September 2026\nGo to submission\nSynthetic Analysis of Prompt Sensitivity in Code Generation Models\nDiscover Computing\nSubmitted on 2 March 2026\nRejected\nUpdated 19 May 2026\nGo to submission\nCan't see a submission? Log in with the email address you used when you submitted.\nHelp and support\nPrivacy policy\nTerms and conditions\nAccessibility\nYour Privacy Choices / Manage Cookies\n© 2026 Springer Nature",
+    "expected": [
+     {
+      "manuscript_id": "APIN-D-26-00417R1",
+      "title": "Synthetic Benchmarks for Transformer Pruning on Edge Devices",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "2026-11-09",
+      "submitted_date": "2026-10-12"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Sparse Attention for Multilingual Keyword Spotting",
+      "raw_status": "Peer review: Reviewer report(s) received",
+      "stage": "reviews_done",
+      "status_date": "2026-11-06",
+      "submitted_date": "2026-08-14"
+     },
+     {
+      "manuscript_id": "",
+      "title": "A Synthetic Cohort Study of Wearable Sleep Metrics",
+      "raw_status": "With editor",
+      "stage": "editor",
+      "status_date": "2026-11-04",
+      "submitted_date": "2026-10-28"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Study of Differential Privacy for Clinical Text De-identification",
+      "raw_status": "Rights and open access payments",
+      "stage": "accepted",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-04-20"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Evaluation of Contrastive Pretraining for Crop Yield Mapping",
+      "raw_status": "Revision requested",
+      "stage": "revise",
+      "status_date": "2026-09-25",
+      "submitted_date": "2026-06-02"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Analysis of Prompt Sensitivity in Code Generation Models",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "2026-05-19",
+      "submitted_date": "2026-03-02"
+     }
+    ]
+   },
+   {
+    "name": "nature_mts_live_manuscripts_folder",
+    "system": "Nature Portfolio MTS (eJournalPress)",
+    "page_type": "nature_mts_folder",
+    "text": "Nature Communications\nManuscript Tracking System\nHome\nAuthor Instructions\nReviewer Instructions\nHelp\nTips\nLogout\nJournal Home\nLive Manuscripts\nThe manuscripts below are currently being handled by the editorial office.\nManuscript #\tCurrent Revision #\tSubmission Date\tCurrent Stage\tTitle\nNCOMMS-26-02468\t0\t3rd Nov 26\tManuscript received\n3rd Nov 26\tSynthetic Study of Diffusion Priors for Cryo-EM Denoising\nCheck Status | Send Manuscript Correspondence\nNCOMMS-26-01357\t0\t14th Sep 26\tManuscript under consideration\n2nd Oct 26\tSynthetic Evaluation of Self-Supervised Weather Nowcasting\nCheck Status | Send Manuscript Correspondence\nNCOMMS-26-00975\t0\t21st Jul 26\tUnder review\n18th Aug 26\tSynthetic Study of Spiking Neural Networks for Event Cameras\nCheck Status | Send Manuscript Correspondence\nNCOMMS-26-00864A\t1\t27th Oct 26\tRevision received\n27th Oct 26\tSynthetic Analysis of Battery Degradation with Physics-Informed Learning\nCheck Status | Send Manuscript Correspondence\nReturn to Manuscript Home Page\nTracking System Home | Author Instructions | Reviewer Instructions | Help | Tips | Logout | Journal Home | Terms of Use | Privacy Policy | Cookie Policy\nCopyright © 2026 Springer Nature Limited. All rights reserved.",
+    "expected": [
+     {
+      "manuscript_id": "NCOMMS-26-02468",
+      "title": "Synthetic Study of Diffusion Priors for Cryo-EM Denoising",
+      "raw_status": "Manuscript received",
+      "stage": "submitted",
+      "status_date": "2026-11-03",
+      "submitted_date": "2026-11-03"
+     },
+     {
+      "manuscript_id": "NCOMMS-26-01357",
+      "title": "Synthetic Evaluation of Self-Supervised Weather Nowcasting",
+      "raw_status": "Manuscript under consideration",
+      "stage": "editor",
+      "status_date": "2026-10-02",
+      "submitted_date": "2026-09-14"
+     },
+     {
+      "manuscript_id": "NCOMMS-26-00975",
+      "title": "Synthetic Study of Spiking Neural Networks for Event Cameras",
+      "raw_status": "Under review",
+      "stage": "review",
+      "status_date": "2026-08-18",
+      "submitted_date": "2026-07-21"
+     },
+     {
+      "manuscript_id": "NCOMMS-26-00864A",
+      "title": "Synthetic Analysis of Battery Degradation with Physics-Informed Learning",
+      "raw_status": "Revision received",
+      "stage": "editor",
+      "status_date": "2026-10-27",
+      "submitted_date": "2026-10-27"
+     }
+    ]
+   },
+   {
+    "name": "nature_mts_manuscript_information_accepted",
+    "system": "Nature Portfolio MTS (eJournalPress)",
+    "page_type": "nature_mts_manuscript_information",
+    "text": "Nature Communications\nManuscript Tracking System\nHome\nAuthor Instructions\nReviewer Instructions\nHelp\nTips\nLogout\nJournal Home\nManuscript Information\nManuscript #\tNCOMMS-26-00412B\nCurrent Revision #\t2\nSubmission Date\t2nd Apr 26\nCurrent Stage\tManuscript accepted\n6th Nov 26\nTitle\tSynthetic Study of Graph Priors for Single-Cell Trajectory Inference\nManuscript Type\tArticle\nCorresponding Author\tAlice Example (Example University)\nContributing Authors\tBob Sample , Carol Placeholder , Dan Dummy\nAbstract\tWe present a fully synthetic benchmark of graph priors for trajectory inference. All data, results and names in this record are invented for software testing.\nSubject Terms\tComputational biology and bioinformatics\nAssociated Manuscripts\tNCOMMS-26-00412 , NCOMMS-26-00412A\nDecision Letters\nRevision #\tDecision\tDecision Date\t\n0\tRevise\t12th May 26\tView Letter\n1\tRevise\t4th Aug 26\tView Letter\n2\tAccept\t6th Nov 26\tView Letter\nSend Manuscript Correspondence\nReturn to Manuscript Home Page\nTracking System Home | Author Instructions | Reviewer Instructions | Help | Tips | Logout | Journal Home | Terms of Use | Privacy Policy | Cookie Policy\nCopyright © 2026 Springer Nature Limited. All rights reserved.",
+    "expected": [
+     {
+      "manuscript_id": "NCOMMS-26-00412B",
+      "title": "Synthetic Study of Graph Priors for Single-Cell Trajectory Inference",
+      "raw_status": "Manuscript accepted",
+      "stage": "accepted",
+      "status_date": "2026-11-06",
+      "submitted_date": "2026-04-02"
+     }
+    ]
+   },
+   {
+    "name": "researchsquare_public_timeline_bmc_major_revision",
+    "system": "Research Square In Review",
+    "page_type": "researchsquare_preprint_public_timeline",
+    "text": "Skip to main content\nResearch Square\nBrowse\nPost a preprint\nAuthor services\nLog in\nPREPRINT\nResearch Article\nSynthetic Study of Protein Contact Map Completion with Graph Transformers\nAlice Example, Bob Sample, Carol Placeholder\nThis is a preprint; it has not been peer reviewed by a journal.\nhttps://doi.org/10.21203/rs.3.rs-8123456/v1\nThis work is licensed under a CC BY 4.0 License\nStatus:\nUnder Revision\nBMC Bioinformatics\nVersion 1\nposted 17 Sep, 2026\nPeer Review Timeline\nMajor revision\n12 Nov, 2026\nReviews received\n04 Nov, 2026\nReviewers accepted\n08 Oct, 2026\nReviewers invited\n29 Sep, 2026\nEditor assigned\n22 Sep, 2026\nAbstract\nWe describe a synthetic benchmark created only to test software. No real proteins, data or people are involved.\nKeywords\nsynthetic data, graph transformers, software testing\nDownload PDF\nCite\nShare\nComments\nThere are no comments on this preprint yet.\nAbout Research Square\nPrivacy Policy\nTerms of Service\n© 2026 Research Square",
+    "expected": [
+     {
+      "manuscript_id": "rs-8123456",
+      "title": "Synthetic Study of Protein Contact Map Completion with Graph Transformers",
+      "raw_status": "Major revision",
+      "stage": "revise",
+      "status_date": "2026-11-12",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "researchsquare_public_published_two_rounds",
+    "system": "Research Square In Review",
+    "page_type": "researchsquare_preprint_public_timeline",
+    "text": "Skip to main content\nResearch Square\nBrowse\nPost a preprint\nAuthor services\nLog in\nPREPRINT\nResearch Article\nSynthetic Analysis of Codon Usage Signals in Simulated Bacterial Genomes\nDan Dummy, Erin Example\nhttps://doi.org/10.21203/rs.3.rs-7954321/v2\nThis work is licensed under a CC BY 4.0 License\nStatus:\nPublished\nBMC Genomics\nA peer-reviewed article of this preprint also exists.\nRead the published article\nVersions\nVersion 2\nposted 21 Sep, 2026\nVersion 1\nposted 10 Jun, 2026\nPeer Review Timeline\nAccepted\n02 Nov, 2026\nMinor revision\n23 Oct, 2026\nReviews received\n19 Oct, 2026\nMajor revision\n24 Jul, 2026\nReviews received\n20 Jul, 2026\nReviewers accepted\n22 Jun, 2026\nReviewers invited\n15 Jun, 2026\nEditor assigned\n12 Jun, 2026\nAbstract\nA synthetic study written only to exercise a paste parser. Every gene, number and author here is invented.\nDownload PDF\nCite\nShare\nAbout Research Square\nPrivacy Policy\nTerms of Service\n© 2026 Research Square",
+    "expected": [
+     {
+      "manuscript_id": "rs-7954321",
+      "title": "Synthetic Analysis of Codon Usage Signals in Simulated Bacterial Genomes",
+      "raw_status": "Published",
+      "stage": "production",
+      "status_date": "",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "researchsquare_account_private_timeline_nature_portfolio",
+    "system": "Research Square account (In Review, Nature Portfolio)",
+    "page_type": "researchsquare_account_peer_review_timeline",
+    "text": "Research Square\nMy Articles\nServices\nHelp\nAlice Example\nLog out\nMy Articles\nSynthetic Study of Neural Operator Surrogates for Ocean Circulation\nUnder Review at Nature Portfolio\nOverview\nPeer Review Timeline\nFiles\nServices\nPeer Review Timeline\nNature Machine Intelligence\nEvents are reported by the journal. Please contact the journal with questions about your manuscript.\nEvent\tDate\nReviews received\t11 Nov, 2026\nReviewers accepted\t15 Oct, 2026\nReviewers invited\t02 Oct, 2026\nEditor assigned\t21 Sep, 2026\nPreprint DOI: 10.21203/rs.3.rs-8234567/v1\nPrivacy Policy\nTerms of Service\n© 2026 Research Square",
+    "expected": [
+     {
+      "manuscript_id": "rs-8234567",
+      "title": "Synthetic Study of Neural Operator Surrogates for Ocean Circulation",
+      "raw_status": "Reviews received",
+      "stage": "reviews_done",
+      "status_date": "2026-11-11",
+      "submitted_date": ""
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "family": "Atypon ReX (Research Exchange) author portals",
+  "samples": [
+   {
+    "name": "ieee_author_portal_my_submissions_lines",
+    "system": "IEEE Author Portal (Atypon ReX, ieee.atyponrex.com)",
+    "page_type": "my_submissions",
+    "text": "Skip to main content\nIEEE Author Portal\nMy Submissions\nAlice Example\n\nMy Submissions\n\nPublication\nAll Publications\nSubmission Status\nAll Submission Statuses\nAuthor Role\nAll Author Roles\n\nIEEE Access\nResearch Article\nSynthetic Evaluation of Low-Power Mesh Routing in Example Warehouses\nSubmission Status\nDraft\nLast Modified\n3 November 2026 by Alice Example\nSubmission Started\n28 October 2026 by Alice Example\nResume Submission\n\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nRegular Paper\nSynthetic Study of Gait Embeddings Under Simulated Occlusion\nSubmission Status\nUnder Review\nManuscript ID\nTBIOM-2026-03-0921.R1\nSubmitted On\n2 October 2026 by Alice Example\nSubmission Started\n9 March 2026 by Alice Example\nThis submission has been sent to the editorial office and cannot be edited.\nFurther updates will reach you by email from the editorial office.\nSubmission overview\n\nIEEE Access\nResearch Article\nSynthetic Benchmark of Federated Anomaly Detectors on Example Smart-Grid Traces\nSubmission Status\nIn Revision\nManuscript ID\nAccess-2026-98213\nSubmitted On\n21 August 2026 by Bob Sample\nSubmission Started\n20 August 2026 by Bob Sample\nRevision Due\n6 December 2026\nRequest an extension\nRevise Submission\nShow versions\n\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nRegular Paper\nSynthetic Analysis of Template Aging in Example Iris Datasets\nSubmission Status\nAccepted\nManuscript ID\nTBIOM-2026-01-0907.R2\nAccepted On\n12 October 2026 by Editorial Office\nSubmitted On\n18 September 2026 by Alice Example\nLearn about what happens once your article has been accepted.\nView Accepted Submission Overview\n\nView the submission that replaced this one (TBIOM-2026-11-0952)\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nRegular Paper\nSynthetic Study of Cross-Spectral Face Matching on Example Thermal Imagery\nSubmission Status\nReplaced\nManuscript ID\nTBIOM-2026-02-0915\nSubmitted On\n16 February 2026 by Alice Example\nSubmission Started\n12 February 2026 by Alice Example\nSubmission overview\n\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nRegular Paper\nSynthetic Study of Cross-Spectral Face Matching on Example Thermal Imagery\nSubmission Status\nSubmitted\nManuscript ID\nTBIOM-2026-11-0952\nSubmitted On\n3 November 2026 by Editorial Office\nSubmission Started\n3 November 2026 by Editorial Office\nThis submission has been sent to the editorial office and cannot be edited.\nFurther updates will reach you by email from the editorial office.\nSubmission overview\n\nIEEE Access\nResearch Article\nSynthetic Survey of Example Blockchain Oracles for Imaginary Supply Chains\nSubmission Status\nRejected\nManuscript ID\nAccess-2026-97754\nRejected On\n2 June 2026 by Editorial Office\nSubmitted On\n11 May 2026 by Alice Example\nStart resubmission\nSubmission overview\n\nContact Support\nPrivacy Policy\nTerms & Conditions\n© Copyright 2026 IEEE – All rights reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Evaluation of Low-Power Mesh Routing in Example Warehouses",
+      "raw_status": "Draft",
+      "stage": "",
+      "status_date": "2026-11-03",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "TBIOM-2026-03-0921.R1",
+      "title": "Synthetic Study of Gait Embeddings Under Simulated Occlusion",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-02"
+     },
+     {
+      "manuscript_id": "Access-2026-98213",
+      "title": "Synthetic Benchmark of Federated Anomaly Detectors on Example Smart-Grid Traces",
+      "raw_status": "In Revision",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": "2026-08-21"
+     },
+     {
+      "manuscript_id": "TBIOM-2026-01-0907.R2",
+      "title": "Synthetic Analysis of Template Aging in Example Iris Datasets",
+      "raw_status": "Accepted",
+      "stage": "accepted",
+      "status_date": "2026-10-12",
+      "submitted_date": "2026-09-18"
+     },
+     {
+      "manuscript_id": "TBIOM-2026-02-0915",
+      "title": "Synthetic Study of Cross-Spectral Face Matching on Example Thermal Imagery",
+      "raw_status": "Replaced",
+      "stage": "",
+      "status_date": "",
+      "submitted_date": "2026-02-16"
+     },
+     {
+      "manuscript_id": "TBIOM-2026-11-0952",
+      "title": "Synthetic Study of Cross-Spectral Face Matching on Example Thermal Imagery",
+      "raw_status": "Submitted",
+      "stage": "submitted",
+      "status_date": "2026-11-03",
+      "submitted_date": "2026-11-03"
+     },
+     {
+      "manuscript_id": "Access-2026-97754",
+      "title": "Synthetic Survey of Example Blockchain Oracles for Imaginary Supply Chains",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "2026-06-02",
+      "submitted_date": "2026-05-11"
+     }
+    ]
+   },
+   {
+    "name": "ieee_author_portal_my_submissions_tab_rows",
+    "system": "IEEE Author Portal (Atypon ReX, ieee.atyponrex.com)",
+    "page_type": "my_submissions",
+    "text": "IEEE Author Portal\nMy Submissions\nAlice Example\nMy Submissions\nJournal\nSubmission Status\n\n2027 IEEE International Conference on Example Systems (ICES 2027)\nConference Paper\nSynthetic Evaluation of Example Mesh Routers Under Simulated Interference\nSubmission Status\tAccepted, Pending Agreement\nAccepted On\t9 November 2026 by Editorial Office\nSubmitted On\t15 September 2026 by Alice Example\nManage Submission\n\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nRegular Paper\nSynthetic Study of Keystroke Dynamics on Example Virtual Keyboards\nSubmission Status\tAccepted (Final Files)\nManuscript ID\tTBIOM-2026-05-0936.R1\nAccepted On\t2 November 2026\nby Editorial Office\nSubmitted On\t27 October 2026 by Alice Example\nLearn about what happens once your article has been accepted.\nView Accepted Submission Overview\n\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nSpecial Issue Paper\nSynthetic Review of Example Liveness Detection Benchmarks\nSubmission Status\tDraft Invited\nLast Modified\t14 November 2026 by Alice Example\nSubmission Started\t10 November 2026 by System\nResume Submission\n\nIEEE Access\nResearch Article\nSynthetic Measurement of Example Antenna Arrays in Imaginary Tunnels\nReturned to Draft\nSubmission Status\tDraft\nManuscript ID\tAccess-2026-99107\nLast Modified\t16 November 2026 by Alice Example\nSubmission Started\t22 October 2026 by Alice Example\nResume Submission\n\nIEEE Access\nResearch Article\nSynthetic Characterization of Example Battery Packs Under Fictional Loads\nSubmission failed\nThis submission was removed from consideration.\nTo keep it under consideration as it is, resend it; otherwise resume the submission to edit it.\nResend to journal\nResume submission\nSubmission Status\tSubmitted\nManuscript ID\tAccess-2026-98870\nSubmitted On\t30 September 2026 by Bob Sample\nSubmission Started\t29 September 2026 by Bob Sample\n\nIEEE Access\nResearch Article\nSynthetic Comparison of Example Edge-Caching Policies\nSubmission Status\tWithdrawn\nManuscript ID\tAccess-2026-96120\nWithdrawn On\t29 April 2026 by Editorial Office\nSubmitted On\t2 March 2026 by Alice Example\nSubmission overview\n\nContact Support\nPrivacy Policy\nTerms & Conditions\n© Copyright 2026 IEEE – All rights reserved.\nThis site uses cookies to improve your experience. You can change your settings at any time.\nCookie Settings\nAccept All Cookies\n",
+    "expected": [
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Evaluation of Example Mesh Routers Under Simulated Interference",
+      "raw_status": "Accepted, Pending Agreement",
+      "stage": "accepted",
+      "status_date": "2026-11-09",
+      "submitted_date": "2026-09-15"
+     },
+     {
+      "manuscript_id": "TBIOM-2026-05-0936.R1",
+      "title": "Synthetic Study of Keystroke Dynamics on Example Virtual Keyboards",
+      "raw_status": "Accepted (Final Files)",
+      "stage": "accepted",
+      "status_date": "2026-11-02",
+      "submitted_date": "2026-10-27"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Review of Example Liveness Detection Benchmarks",
+      "raw_status": "Draft Invited",
+      "stage": "",
+      "status_date": "2026-11-14",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "Access-2026-99107",
+      "title": "Synthetic Measurement of Example Antenna Arrays in Imaginary Tunnels",
+      "raw_status": "Draft",
+      "stage": "submitted",
+      "status_date": "2026-11-16",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "Access-2026-98870",
+      "title": "Synthetic Characterization of Example Battery Packs Under Fictional Loads",
+      "raw_status": "Submission failed",
+      "stage": "",
+      "status_date": "",
+      "submitted_date": "2026-09-30"
+     },
+     {
+      "manuscript_id": "Access-2026-96120",
+      "title": "Synthetic Comparison of Example Edge-Caching Policies",
+      "raw_status": "Withdrawn",
+      "stage": "withdrawn",
+      "status_date": "2026-04-29",
+      "submitted_date": "2026-03-02"
+     }
+    ]
+   },
+   {
+    "name": "ieee_author_portal_submission_overview_accepted",
+    "system": "IEEE Author Portal (Atypon ReX, ieee.atyponrex.com)",
+    "page_type": "submission_overview",
+    "text": "Skip to main content\nIEEE Author Portal\nMy Submissions\nAlice Example\nIEEE Transactions on Biometrics, Behavior, and Identity Science\nJOURNAL HOME\nAUTHOR GUIDELINES\nEDITORIAL CONTACT\nPowered by Atypon ReX\n\nSubmission Overview\n\nAccepted\nShow versions\nLearn about what happens once your article has been accepted.\n\nManuscript ID\tTBIOM-2026-01-0907.R2\n\nDecision Letter\nReview decision letter\n\nHistory\nAccepted On\t12 October 2026 by Editorial Office\nSubmitted On\t18 September 2026 by Alice Example\n\nRevision 2\nThis submission has been sent to the editorial office and cannot be edited\n\nArticle Type\tRegular Paper\nPeer Review Type\tDouble anonymized\nTitle\tSynthetic Analysis of Template Aging in Example Iris Datasets\nManuscript Files\tMain Document\tsynthetic_iris_aging_r2.docx\nResponse to Reviewers\tresponse_to_reviewers_r2.pdf\nAbstract\tWe study template aging on a fully synthetic iris corpus generated for this example.\nAll numbers are invented and no real subjects are involved.\nAuthors\tAlice Example (Corresponding Author)\nBob Sample\nCarol Placeholder\nAffiliations\t1. Department of Imaginary Engineering, Example University\n2. Placeholder Institute of Technology\nAdditional Information\tFunding: none declared\nConflicts of interest: none\n\nContact Support\nPrivacy Policy\nTerms & Conditions\n© Copyright 2026 IEEE – All rights reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "TBIOM-2026-01-0907.R2",
+      "title": "Synthetic Analysis of Template Aging in Example Iris Datasets",
+      "raw_status": "Accepted",
+      "stage": "accepted",
+      "status_date": "2026-10-12",
+      "submitted_date": "2026-09-18"
+     }
+    ]
+   },
+   {
+    "name": "wiley_rex_submission_my_submissions",
+    "system": "Wiley Research Exchange Submission (Atypon ReX, wiley.atyponrex.com)",
+    "page_type": "my_submissions",
+    "text": "Skip to main content\nResearch Exchange\nMy Submissions\nAlice Example\n\nMy Submissions\n\nJournal\nAll Journals\nSubmission Status\nAll Submission Statuses\n\nNeed help choosing a journal?\nExplore resources and tools for finding the right journal for your research.\nFind a Journal\n\nExample Journal of Applied Synthetic Chemistry\nResearch Article\nSynthetic Study of Imaginary Catalysts for Example Ammonia Routes\nSubmission Status\nIn Screening\nManuscript ID\nEJASC-2026-0533\nSubmitted On\n10 November 2026 by Alice Example\nSubmission Started\n6 November 2026 by Alice Example\nThis submission has been sent to the editorial office and cannot be edited.\nFurther updates will reach you by email from the editorial office.\nSubmission overview\n\nExample Journal of Applied Synthetic Chemistry\nResearch Article\nSynthetic Kinetics of Example Polymer Melts\nSubmission Status\nUnder Review\nManuscript ID\nEJASC-2026-0377.R1\nSubmitted On\n19 October 2026 by Alice Example\nSubmission Started\n30 September 2026 by Alice Example\nSubmission overview\n\nSynthetic Ecology Letters\nLetter\nSynthetic Survey of Example Pollinator Networks\nSubmission Status\nIn Revision\nManuscript ID\nSEL-2026-0247\nSubmitted On\n2 July 2026 by Alice Example\nSubmission Started\n28 June 2026 by Alice Example\nRevision Due\n8 December 2026\nRequest an extension\nRevise Submission\nShow versions\n\nExample Journal of Applied Synthetic Chemistry\nCommunication\nSynthetic Spectroscopy of Example Chiral Dyes\nSubmission Status\nAccepted, Updates Requested\nManuscript ID\nEJASC-2026-0198.R2\nAccepted On\n5 November 2026 by Editorial Office\nSubmitted On\n28 October 2026 by Alice Example\nUpdate submission\nShow versions\n\nSynthetic Ecology Letters\nLetter\nSynthetic Model of Imaginary Coral Recovery\nSubmission Status\nAccepted, Under Review for Production\nManuscript ID\nSEL-2026-0102.R1\nAccepted On\n22 October 2026 by Editorial Office\nSubmitted On\n13 October 2026 by Bob Sample\nLearn about what happens once your article has been accepted.\nView Accepted Submission Overview\n\nExample Journal of Applied Synthetic Chemistry\nResearch Article\nSynthetic Comparison of Example Solvent Screens\nSubmission Status\nRejected\nManuscript ID\nEJASC-2026-0261\nRejected On\n30 September 2026 by Editorial Office\nSubmitted On\n1 September 2026 by Alice Example\nStart resubmission\nSubmission overview\n\nSynthetic Ecology Letters\nLetter\nSynthetic Comparison of Example Solvent Screens\nSubmission Status\nDraft (Transferred)\nManuscript ID\nSEL-2026-0298\nLast Modified\n2 October 2026 by System\nSubmission Started\n2 October 2026 by System\nDelete\nResume Submission\n\nView the submission that replaced this one\nSynthetic Ecology Letters\nLetter\nSynthetic Census of Example Wetland Birds\nSubmission Status\nReplaced\nManuscript ID\nSEL-2026-0150\nSubmitted On\n3 May 2026 by Alice Example\nSubmission Started\n1 May 2026 by Alice Example\nSubmission overview\n\nSynthetic Ecology Letters\nLetter\nSynthetic Census of Example Wetland Birds\nSubmission Status\nUnder Review\nManuscript ID\nSEL-2026-0233\nSubmitted On\n12 June 2026 by Editorial Office\nSubmission Started\n12 June 2026 by Editorial Office\nSubmission overview\n\nExample Journal of Applied Synthetic Chemistry\nResearch Article\nSynthetic Notes on Example Soil Microbiomes\nSubmission Status\nDraft\nLast Modified\n16 November 2026 by Alice Example\nSubmission Started\n15 November 2026 by Alice Example\nResume Submission\n\nPrivacy Policy\nTerms of Use\nCookie Preferences\nCopyright © 2000-2026 by John Wiley & Sons, Inc., or related companies. All rights reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "EJASC-2026-0533",
+      "title": "Synthetic Study of Imaginary Catalysts for Example Ammonia Routes",
+      "raw_status": "In Screening",
+      "stage": "submitted",
+      "status_date": "",
+      "submitted_date": "2026-11-10"
+     },
+     {
+      "manuscript_id": "EJASC-2026-0377.R1",
+      "title": "Synthetic Kinetics of Example Polymer Melts",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-19"
+     },
+     {
+      "manuscript_id": "SEL-2026-0247",
+      "title": "Synthetic Survey of Example Pollinator Networks",
+      "raw_status": "In Revision",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": "2026-07-02"
+     },
+     {
+      "manuscript_id": "EJASC-2026-0198.R2",
+      "title": "Synthetic Spectroscopy of Example Chiral Dyes",
+      "raw_status": "Accepted, Updates Requested",
+      "stage": "accepted",
+      "status_date": "2026-11-05",
+      "submitted_date": "2026-10-28"
+     },
+     {
+      "manuscript_id": "SEL-2026-0102.R1",
+      "title": "Synthetic Model of Imaginary Coral Recovery",
+      "raw_status": "Accepted, Under Review for Production",
+      "stage": "accepted",
+      "status_date": "2026-10-22",
+      "submitted_date": "2026-10-13"
+     },
+     {
+      "manuscript_id": "EJASC-2026-0261",
+      "title": "Synthetic Comparison of Example Solvent Screens",
+      "raw_status": "Rejected",
+      "stage": "rejected",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-09-01"
+     },
+     {
+      "manuscript_id": "SEL-2026-0298",
+      "title": "Synthetic Comparison of Example Solvent Screens",
+      "raw_status": "Draft (Transferred)",
+      "stage": "",
+      "status_date": "2026-10-02",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "SEL-2026-0150",
+      "title": "Synthetic Census of Example Wetland Birds",
+      "raw_status": "Replaced",
+      "stage": "",
+      "status_date": "",
+      "submitted_date": "2026-05-03"
+     },
+     {
+      "manuscript_id": "SEL-2026-0233",
+      "title": "Synthetic Census of Example Wetland Birds",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-06-12"
+     },
+     {
+      "manuscript_id": "",
+      "title": "Synthetic Notes on Example Soil Microbiomes",
+      "raw_status": "Draft",
+      "stage": "",
+      "status_date": "2026-11-16",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "wiley_authors_dashboard_cards",
+    "system": "Wiley Authors dashboard (authors.wiley.com/dashboard)",
+    "page_type": "wiley_authors_dashboard",
+    "text": "Skip to main content\nWILEY\nAuthors\nHome\nMy dashboard\nResources\nFind a journal\nAlice Example\n\nMy dashboard\nArticle missing?\nSearch\nFilter by journal\nAll journals\nShowing 9 articles\n\nSynthetic Materials Advances\nResearch Article\nSynthetic Screening of Example Perovskite Inks for Imaginary Solar Cells\nEditor Assignment in Progress\nManuscript ID: SYNMA-26-00488\nSubmitted On: 12 November 2026\nSubmission overview\n\nExample Biology Reports\nResearch Article\nSynthetic Atlas of Example Zebrafish Fin Regrowth\nEditor Assigned\nManuscript ID: EXBIO-26-00152\nSubmitted On: 27 October 2026\nSubmission overview\n\nView active submission SYNMA-26-00447\nSynthetic Materials Advances\nResearch Article\nSynthetic Study of Layered Example Oxides for Imaginary Batteries\nReplaced\nManuscript ID: SYNMA-26-00402\nSubmitted On: 9 October 2026\nSubmission overview\n\nSynthetic Materials Advances\nResearch Article\nSynthetic Study of Layered Example Oxides for Imaginary Batteries\nReviewers Invited\nManuscript ID: SYNMA-26-00447\nSubmitted On: 21 October 2026\nSubmission overview\n\nExample Biology Reports\nShort Communication\nSynthetic Time-Lapse of Example Planarian Regeneration\nUnder Review\nManuscript ID: EXBIO-26-00131\nSubmitted On: 14 October 2026\nSubmission overview\n\nSynthetic Materials Advances\nResearch Article\nSynthetic Benchmark of Example Electrolyte Additives\nDecision in Progress\nManuscript ID: SYNMA-26-00396\nSubmitted On: 8 October 2026\nSubmission overview\n\nExample Biology Reports\nResearch Article\nSynthetic Census of Example Gut Organoids\nIn Revision\nManuscript ID: EXBIO-26-00124\nSubmitted On: 8 October 2026\nRevision Due: 30 December 2026\nRequest an extension\nRevise Submission\n\nOPTIONAL OPEN ACCESS\nARTICLE\nExample Journal of Applied Synthetic Chemistry\nResearch Article\nSynthetic Route Mapping for Example Heterocycles\nIn Production\nAuthor: Alice Example\nDOI: 10.1002/ejasc.70031\nEditorial Reference Code: EJASC-2026-0075.R1\nManage Article\n\nExample Biology Reports\nResearch Article\nSynthetic Profiling of Example Yeast Strains\nWithdrawn\nManuscript ID: EXBIO-26-00120\nSubmitted On: 7 October 2026\nWithdrawn On: 2 November 2026\nSubmission overview\n\nHelp\nContact us\nPrivacy Policy\nTerms of Use\nCookie Preferences\nCopyright © 2000-2026 by John Wiley & Sons, Inc., or related companies. All rights reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "SYNMA-26-00488",
+      "title": "Synthetic Screening of Example Perovskite Inks for Imaginary Solar Cells",
+      "raw_status": "Editor Assignment in Progress",
+      "stage": "editor",
+      "status_date": "",
+      "submitted_date": "2026-11-12"
+     },
+     {
+      "manuscript_id": "EXBIO-26-00152",
+      "title": "Synthetic Atlas of Example Zebrafish Fin Regrowth",
+      "raw_status": "Editor Assigned",
+      "stage": "editor",
+      "status_date": "",
+      "submitted_date": "2026-10-27"
+     },
+     {
+      "manuscript_id": "SYNMA-26-00402",
+      "title": "Synthetic Study of Layered Example Oxides for Imaginary Batteries",
+      "raw_status": "Replaced",
+      "stage": "",
+      "status_date": "",
+      "submitted_date": "2026-10-09"
+     },
+     {
+      "manuscript_id": "SYNMA-26-00447",
+      "title": "Synthetic Study of Layered Example Oxides for Imaginary Batteries",
+      "raw_status": "Reviewers Invited",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-21"
+     },
+     {
+      "manuscript_id": "EXBIO-26-00131",
+      "title": "Synthetic Time-Lapse of Example Planarian Regeneration",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-14"
+     },
+     {
+      "manuscript_id": "SYNMA-26-00396",
+      "title": "Synthetic Benchmark of Example Electrolyte Additives",
+      "raw_status": "Decision in Progress",
+      "stage": "decision",
+      "status_date": "",
+      "submitted_date": "2026-10-08"
+     },
+     {
+      "manuscript_id": "EXBIO-26-00124",
+      "title": "Synthetic Census of Example Gut Organoids",
+      "raw_status": "In Revision",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": "2026-10-08"
+     },
+     {
+      "manuscript_id": "EJASC-2026-0075.R1",
+      "title": "Synthetic Route Mapping for Example Heterocycles",
+      "raw_status": "In Production",
+      "stage": "production",
+      "status_date": "",
+      "submitted_date": ""
+     },
+     {
+      "manuscript_id": "EXBIO-26-00120",
+      "title": "Synthetic Profiling of Example Yeast Strains",
+      "raw_status": "Withdrawn",
+      "stage": "withdrawn",
+      "status_date": "2026-11-02",
+      "submitted_date": "2026-10-07"
+     }
+    ]
+   },
+   {
+    "name": "wiley_rex_submission_overview_in_revision",
+    "system": "Wiley Research Exchange Submission (Atypon ReX, wiley.atyponrex.com)",
+    "page_type": "submission_overview",
+    "text": "Skip to main content\nResearch Exchange\nMy Submissions\nAlice Example\nSynthetic Ecology Letters\nJOURNAL HOME\nAUTHOR GUIDELINES\nEDITORIAL CONTACT\nPowered by Atypon ReX\n\nSubmission Overview\n\nIn Revision\nRevision Due\t8 December 2026\nRequest an extension\nRevise Submission\nShow versions\n\nManuscript ID\tSEL-2026-0247\n\nDecision Letter\nReview decision letter\n\nHistory\nRevision Requested On\t9 October 2026 by Editorial Office\nSubmitted On\t2 July 2026 by Alice Example\n\nInitial Submission\nThis submission has been sent to the editorial office and cannot be edited\n\nArticle Type\tLetter\nTitle\tSynthetic Survey of Example Pollinator Networks\nManuscript Files\tMain Document\tsynthetic_pollinators_main.docx\nFigures\tfigure1_network.tif\nfigure2_degree.tif\nAbstract\tWe describe an invented pollinator network built only for software testing.\nNo field data were collected.\nAuthors\tAlice Example (Corresponding Author)\nDana Fictional\nAffiliations\t1. Example Field Station, Imaginary University\nAdditional Information\tData availability: synthetic data only\n\nPrivacy Policy\nTerms of Use\nCookie Preferences\nCopyright © 2000-2026 by John Wiley & Sons, Inc., or related companies. All rights reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "SEL-2026-0247",
+      "title": "Synthetic Survey of Example Pollinator Networks",
+      "raw_status": "In Revision",
+      "stage": "revise",
+      "status_date": "2026-10-09",
+      "submitted_date": "2026-07-02"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "family": "ScholarOne Manuscripts (Silverchair since Nov 2024; formerly Clarivate / Thomson Reuters), Author Center / Author Dashboard",
+  "samples": [
+   {
+    "name": "s1_newui_submitted_queue_ieee_style",
+    "system": "ScholarOne Manuscripts (new UI, IEEE-style site)",
+    "page_type": "author_dashboard_submitted_queue",
+    "text": "ScholarOne Manuscripts™\nAlice Example\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n1 Revised Manuscripts in Draft\n3 Submitted Manuscripts\n6 Manuscripts with Decisions\n2 Manuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nEnglish Language Editing Service\nSubmitted Manuscripts\nSTATUS\tID\tTITLE\tCREATED\tSUBMITTED\nContact Journal\n\nADM: Not Assigned\n\nAwaiting Admin Processing\tXMI-2026-1187\tSynthetic Study of Placeholder Tissue Segmentation in Mock CT Volumes\nView Submission\t17-Nov-2026\t18-Nov-2026\nContact Journal\n\nEIC: Example, Edwin\nAE: Sample, Sasha\nADM: Placeholder, Pat\n\nAwaiting Reviewer Scores\tXMI-2026-0412.R1\tSynthetic Study of Imaginary Contrast Agents for Simulated MRI\nView Submission\t20-Oct-2026\t21-Oct-2026\nContact Journal\n\nEIC: Example, Edwin\nAE: Demo, Dana\nADM: Placeholder, Pat\n\nAwaiting Reviewer Scores\nAwaiting Final Decision\tXMI-2026-0655\tA Synthetic Benchmark for Fictional Ultrasound Denoising\nView Submission\t03-Aug-2026\t04-Aug-2026\n© ScholarOne, Inc., 2026. All Rights Reserved.\nScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "XMI-2026-1187",
+      "title": "Synthetic Study of Placeholder Tissue Segmentation in Mock CT Volumes",
+      "raw_status": "Awaiting Admin Processing",
+      "stage": "submitted",
+      "status_date": "",
+      "submitted_date": "2026-11-18"
+     },
+     {
+      "manuscript_id": "XMI-2026-0412.R1",
+      "title": "Synthetic Study of Imaginary Contrast Agents for Simulated MRI",
+      "raw_status": "Awaiting Reviewer Scores",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-21"
+     },
+     {
+      "manuscript_id": "XMI-2026-0655",
+      "title": "A Synthetic Benchmark for Fictional Ultrasound Denoising",
+      "raw_status": "Awaiting Reviewer Scores; Awaiting Final Decision",
+      "stage": "decision",
+      "status_date": "",
+      "submitted_date": "2026-08-04"
+     }
+    ]
+   },
+   {
+    "name": "s1_newui_decisions_queue_ieee_style_with_versions",
+    "system": "ScholarOne Manuscripts (new UI, IEEE-style site)",
+    "page_type": "author_dashboard_decisions_queue",
+    "text": "ScholarOne Manuscripts™\nAlice Example\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n1 Revised Manuscripts in Draft\n3 Submitted Manuscripts\n6 Manuscripts with Decisions\n2 Manuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nEnglish Language Editing Service\nManuscripts with Decisions\nACTION\tSTATUS\tID\tTITLE\tSUBMITTED\tDECISIONED\na revision has been started\tContact Journal\n\nAE: Demo, Dana\nADM: Placeholder, Pat\n\nMajor Revision (05-Nov-2026)\n\nDue on: 04-Jan-2027\n\nview decision letter\tXMI-2026-0871\tSynthetic Evaluation of Hypothetical Lesion Trackers\nView Submission\t12-Jul-2026\t05-Nov-2026\n\tContact Journal\n\nAE: Sample, Sasha\nADM: Placeholder, Pat\n\nMajor Revision (30-Sep-2026)\n\nview decision letter\tXMI-2026-0412\tSynthetic Study of Imaginary Contrast Agents for Simulated MRI\nView Submission\t02-Jun-2026\t30-Sep-2026\ntransfer copyright\tContact Journal\n\nAE: Sample, Sasha\nADM: Placeholder, Pat\n\nAccept (14-Oct-2026)\n\nview decision letter\tXMI-2026-0233.R2\tSynthetic Phantoms for an Imaginary Elastography Protocol\nView Submission\t29-Sep-2026\t14-Oct-2026\n\tContact Journal\n\nAE: Sample, Sasha\nADM: Placeholder, Pat\n\nMinor Revision (19-Aug-2026)\n\nview decision letter\tXMI-2026-0233.R1\tSynthetic Phantoms for an Imaginary Elastography Protocol\nView Submission\t28-Jul-2026\t19-Aug-2026\n\tContact Journal\n\nAE: Sample, Sasha\nADM: Placeholder, Pat\n\nMajor Revision (01-Jun-2026)\n\nview decision letter\tXMI-2026-0233\tSynthetic Phantoms for an Imaginary Elastography Protocol\nView Submission\t14-Mar-2026\t01-Jun-2026\n\tContact Journal\n\nAE: Demo, Dana\nADM: Placeholder, Pat\n\nReject (02-Sep-2026)\n\nview decision letter\tXMI-2026-0377\tToward a Fictional Atlas of Made-Up Retinal Layers\nView Submission\t10-May-2026\t02-Sep-2026\n© ScholarOne, Inc., 2026. All Rights Reserved.\nScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "XMI-2026-0871",
+      "title": "Synthetic Evaluation of Hypothetical Lesion Trackers",
+      "raw_status": "Major Revision",
+      "stage": "revise",
+      "status_date": "2026-11-05",
+      "submitted_date": "2026-07-12"
+     },
+     {
+      "manuscript_id": "XMI-2026-0412",
+      "title": "Synthetic Study of Imaginary Contrast Agents for Simulated MRI",
+      "raw_status": "Major Revision",
+      "stage": "revise",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-06-02"
+     },
+     {
+      "manuscript_id": "XMI-2026-0233.R2",
+      "title": "Synthetic Phantoms for an Imaginary Elastography Protocol",
+      "raw_status": "Accept",
+      "stage": "accepted",
+      "status_date": "2026-10-14",
+      "submitted_date": "2026-03-14"
+     },
+     {
+      "manuscript_id": "XMI-2026-0377",
+      "title": "Toward a Fictional Atlas of Made-Up Retinal Layers",
+      "raw_status": "Reject",
+      "stage": "rejected",
+      "status_date": "2026-09-02",
+      "submitted_date": "2026-05-10"
+     }
+    ]
+   },
+   {
+    "name": "s1_newui_revised_draft_queue",
+    "system": "ScholarOne Manuscripts (new UI, IEEE-style site)",
+    "page_type": "author_dashboard_revised_drafts_queue",
+    "text": "ScholarOne Manuscripts™\nAlice Example\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n1 Revised Manuscripts in Draft\n3 Submitted Manuscripts\n6 Manuscripts with Decisions\n2 Manuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nEnglish Language Editing Service\nRevised Manuscripts in Draft\nCONTINUE\tID\tTITLE\tCREATED\tDELETE\nContinue\tDraft (XMI-2026-0871.R1)\tSynthetic Evaluation of Hypothetical Lesion Trackers\nView Submission\t07-Nov-2026\nDue on: 04-Jan-2027\tDelete\n© ScholarOne, Inc., 2026. All Rights Reserved.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "XMI-2026-0871.R1",
+      "title": "Synthetic Evaluation of Hypothetical Lesion Trackers",
+      "raw_status": "Revised Manuscripts in Draft",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": ""
+     }
+    ]
+   },
+   {
+    "name": "s1_legacy_ui_decisions_queue_tandf_style",
+    "system": "ScholarOne Manuscripts (classic 'My Manuscripts' UI, T&F-style site)",
+    "page_type": "legacy_author_dashboard_decisions_queue",
+    "text": "Edit Account | Instructions & Forms | Log Out | Get Help Now\nJournal of Synthetic Engineering\nMain Menu → Author Dashboard\nYou are logged in as Alice Example\nDashboard\nTo submit a new manuscript, use the link in Author Resources.\nClick a queue under \"My Manuscripts\" to list its manuscripts at the bottom of the screen.\nMy Manuscripts\tAuthor Resources\n0 Unsubmitted and Manuscripts in Draft\n0 Revised Manuscripts in Draft\n1 Submitted Manuscripts\n4 Manuscripts with Decisions\n1 Manuscripts I Have Co-Authored\n0 Withdrawn Manuscripts\n0 Invited Manuscripts\tClick here to submit a new manuscript\n\nThis section lists the subjects of your five most recent e-mails.\nJournal of Synthetic Engineering - Decision on Manuscript ID TJSE-2026-0345 (25-Oct-2026)\tDelete\nJournal of Synthetic Engineering - Manuscript ID TJSE-2026-0101.R1 accepted (30-Sep-2026)\tDelete\nJournal of Synthetic Engineering - Decision on Manuscript ID TJSE-2026-0402 (09-Aug-2026)\tDelete\nManuscripts with Decisions\nManuscript ID\tManuscript Title\tDate Submitted\tDate Decisioned\tStatus\tActions\nTJSE-2026-0101.R1\tSynthetic Study of Imaginary Bridge Damping [View Submission]\t14-Aug-2026\t30-Sep-2026\tADM: Placeholder, Priya\n\nAccept (30-Sep-2026)\n\nview decision letter\t\nTJSE-2026-0101\tSynthetic Study of Imaginary Bridge Damping [View Submission]\t02-Mar-2026\t20-Jul-2026\tADM: Placeholder, Priya\n\nMinor Revision (20-Jul-2026)\n\nview decision letter\t\nTJSE-2026-0345\tA Synthetic Survey of Fictional Fatigue Models [View Submission]\t11-Jun-2026\t25-Oct-2026\tADM: Placeholder, Priya\n\nMajor Revision (25-Oct-2026)\nDue on: 24-Dec-2026\n\nview decision letter\tcreate a revision\nTJSE-2026-0402\tMock Data for an Invented Corrosion Index [View Submission]\t01-Jul-2026\t09-Aug-2026\tADM: Placeholder, Priya\n\nReject (09-Aug-2026)\n\nview decision letter\t\ntop\nScholarOne Manuscripts™ © ScholarOne, Inc., 2026. All Rights Reserved.\n",
+    "expected": [
+     {
+      "manuscript_id": "TJSE-2026-0101.R1",
+      "title": "Synthetic Study of Imaginary Bridge Damping",
+      "raw_status": "Accept",
+      "stage": "accepted",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-03-02"
+     },
+     {
+      "manuscript_id": "TJSE-2026-0345",
+      "title": "A Synthetic Survey of Fictional Fatigue Models",
+      "raw_status": "Major Revision",
+      "stage": "revise",
+      "status_date": "2026-10-25",
+      "submitted_date": "2026-06-11"
+     },
+     {
+      "manuscript_id": "TJSE-2026-0402",
+      "title": "Mock Data for an Invented Corrosion Index",
+      "raw_status": "Reject",
+      "stage": "rejected",
+      "status_date": "2026-08-09",
+      "submitted_date": "2026-07-01"
+     }
+    ]
+   },
+   {
+    "name": "s1_newui_submission_confirmation_oa_suffix",
+    "system": "ScholarOne Manuscripts (new UI, Wiley/OUP-style site)",
+    "page_type": "submission_confirmation",
+    "text": "ScholarOne Manuscripts™\nBob Sample\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nSubmission Confirmation\nPrint\nThank you for your submission\nSubmitted to\tJournal of Example Materials Letters\nManuscript ID\tEXM-202611-0815-OA\nTitle\tSynthetic Study of Imaginary Grain Boundaries in Toy Alloys\nAuthors\tSample, Bob\nExample, Alice\nDate Submitted\t19-Nov-2026\nAuthor Dashboard\n© ScholarOne, Inc., 2026. All Rights Reserved.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "EXM-202611-0815-OA",
+      "title": "Synthetic Study of Imaginary Grain Boundaries in Toy Alloys",
+      "raw_status": "Submission Confirmation",
+      "stage": "submitted",
+      "status_date": "2026-11-19",
+      "submitted_date": "2026-11-19"
+     }
+    ]
+   },
+   {
+    "name": "s1_newui_sps_style_two_pastes_submitted_and_decisions",
+    "system": "ScholarOne Manuscripts (new UI, IEEE Signal Processing Society-style multi-journal site)",
+    "page_type": "author_dashboard_submitted_plus_decisions_concatenated",
+    "text": "ScholarOne Manuscripts™\nCarol Placeholder\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n2\nSubmitted Manuscripts\n4\nManuscripts with Decisions\n1\nManuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nSubmitted Manuscripts\nSTATUS\tID\tTITLE\tCREATED\tSUBMITTED\nContact Journal\nADM: Not Assigned\nSubmitted\tT-XSP-05123-2026\tSynthetic Study of Toy Sparse Recovery on Invented Graph Signals\nView Submission\t16-Nov-2026\t17-Nov-2026\nContact Journal\nAE: Sample, Sasha\nADM: Demo, Devi\nIn Peer Review\tT-XSP-03210-2026.R1\tA Synthetic Look at Fictional Beamforming Under Mock Interference\nView Submission\t29-Oct-2026\t30-Oct-2026\n© ScholarOne, Inc., 2026. All Rights Reserved.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\nScholarOne Manuscripts™\nCarol Placeholder\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n2\nSubmitted Manuscripts\n4\nManuscripts with Decisions\n1\nManuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nManuscripts with Decisions\nACTION\tSTATUS\tID\tTITLE\tSUBMITTED\tDECISIONED\n\tContact Journal\nAE: Sample, Sasha\nADM: Demo, Devi\nRQ - Major Revision (22-Sep-2026)\nview decision letter\tT-XSP-03210-2026\tA Synthetic Look at Fictional Beamforming Under Mock Interference\nView Submission\t04-Jul-2026\t22-Sep-2026\ncreate a revision\tContact Journal\nAE: Example, Ezra\nADM: Demo, Devi\nAQ - Accepted with Mandatory Revisions (30-Oct-2026)\nDue on: 20-Nov-2026\nview decision letter\tT-XIP-01999-2026\tSynthetic Texture Priors for an Imaginary Super-Resolution Task\nView Submission\t18-May-2026\t30-Oct-2026\n\tContact Journal\nAE: Example, Ezra\nADM: Demo, Devi\nA - Accepted (15-Jul-2026)\nview decision letter\tT-XSP-01020-2026.R1\tMock Theory of Placeholder Filter Banks\nView Submission\t20-Jun-2026\t15-Jul-2026\n\tContact Journal\nAE: Sample, Sasha\nADM: Demo, Devi\nR - Rejected (11-Jun-2026)\nview decision letter\tT-XSP-00777-2026\tAn Invented Estimator for Synthetic Radar Clutter\nView Submission\t02-Apr-2026\t11-Jun-2026\n© ScholarOne, Inc., 2026. All Rights Reserved.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "T-XSP-05123-2026",
+      "title": "Synthetic Study of Toy Sparse Recovery on Invented Graph Signals",
+      "raw_status": "Submitted",
+      "stage": "submitted",
+      "status_date": "",
+      "submitted_date": "2026-11-17"
+     },
+     {
+      "manuscript_id": "T-XSP-03210-2026.R1",
+      "title": "A Synthetic Look at Fictional Beamforming Under Mock Interference",
+      "raw_status": "In Peer Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-07-04"
+     },
+     {
+      "manuscript_id": "T-XIP-01999-2026",
+      "title": "Synthetic Texture Priors for an Imaginary Super-Resolution Task",
+      "raw_status": "AQ - Accepted with Mandatory Revisions",
+      "stage": "revise",
+      "status_date": "2026-10-30",
+      "submitted_date": "2026-05-18"
+     },
+     {
+      "manuscript_id": "T-XSP-01020-2026.R1",
+      "title": "Mock Theory of Placeholder Filter Banks",
+      "raw_status": "A - Accepted",
+      "stage": "accepted",
+      "status_date": "2026-07-15",
+      "submitted_date": "2026-06-20"
+     },
+     {
+      "manuscript_id": "T-XSP-00777-2026",
+      "title": "An Invented Estimator for Synthetic Radar Clutter",
+      "raw_status": "R - Rejected",
+      "stage": "rejected",
+      "status_date": "2026-06-11",
+      "submitted_date": "2026-04-02"
+     }
+    ]
+   },
+   {
+    "name": "s1_newui_coauthored_queue_sage_style",
+    "system": "ScholarOne Manuscripts (new UI, Sage-style site)",
+    "page_type": "author_dashboard_coauthored_queue",
+    "text": "ScholarOne Manuscripts™\nDana Demo\nInstructions & Forms\nHelp\nLog Out\nHome\nAuthor\nReview\nAuthor Dashboard\nAuthor Dashboard\n1 Submitted Manuscripts\n3 Manuscripts I Have Co-Authored\nStart New Submission\n5 Most Recent E-mails\nManuscripts I Have Co-Authored\nSTATUS\tID\tTITLE\tCREATED\tSUBMITTED\nEIC: Example, Erin\nUnder Review\tXJR-2026-09-0123\tSynthetic Survey of Invented Community Health Indicators\nView Submission\t08-Sep-2026\t09-Sep-2026\nEIC: Example, Erin\nRequired Reviews Complete\tXJR-2026-05-0042.R1\tMock Interviews on a Fictional Commuting Habit\nView Submission\t13-Oct-2026\t14-Oct-2026\nEIC: Example, Erin\nDecision in Process\tXJR-2026-07-0077\tA Placeholder Scale for Imaginary Workplace Wellbeing\nView Submission\t21-Jul-2026\t22-Jul-2026\n© ScholarOne, Inc., 2026. All Rights Reserved.\nTerms of Use | Privacy Policy | Cookie Policy | Get Help Now\n",
+    "expected": [
+     {
+      "manuscript_id": "XJR-2026-09-0123",
+      "title": "Synthetic Survey of Invented Community Health Indicators",
+      "raw_status": "Under Review",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-09-09"
+     },
+     {
+      "manuscript_id": "XJR-2026-05-0042.R1",
+      "title": "Mock Interviews on a Fictional Commuting Habit",
+      "raw_status": "Required Reviews Complete",
+      "stage": "reviews_done",
+      "status_date": "",
+      "submitted_date": "2026-10-14"
+     },
+     {
+      "manuscript_id": "XJR-2026-07-0077",
+      "title": "A Placeholder Scale for Imaginary Workplace Wellbeing",
+      "raw_status": "Decision in Process",
+      "stage": "decision",
+      "status_date": "",
+      "submitted_date": "2026-07-22"
+     }
+    ]
+   },
+   {
+    "name": "s1_cn_locale_submitted_queue_aas_cn_style_UNVERIFIED_LABELS",
+    "system": "ScholarOne Manuscripts (Simplified Chinese UI, 自动化学报 aas-cn-style site; labels are guesses)",
+    "page_type": "author_dashboard_submitted_queue_zh",
+    "text": "ScholarOne Manuscripts™\n张 示例\n中文（简体）\n说明与表格\n帮助\n退出\n首页\n作者\n审稿\n作者中心\n作者中心\n3 已提交的稿件\n1 有决定的稿件\n开始新投稿\n最近 5 封电子邮件\n已提交的稿件\n状态\t编号\t标题\t创建日期\t提交日期\n联系期刊\n\nADM: 李, 示例\n\n等待管理员处理\tAAS-2026-0311\t基于合成数据的示例鲁棒控制方法研究\n查看投稿\t15-Nov-2026\t16-Nov-2026\n联系期刊\n\nEIC: 王, 示例\nAE: 赵, 示例\nADM: 李, 示例\n\n等待审稿人评分\tAAS-2026-0127.R1\t一种虚构多智能体系统的示例一致性分析\n查看投稿\t27-Oct-2026\t28-Oct-2026\n联系期刊\n\nEIC: 王, 示例\nADM: 李, 示例\n\nAwaiting EIC Decision\tAAS-2026-0198\t面向模拟数据集的示例强化学习调度算法\n查看投稿\t01-Aug-2026\t02-Aug-2026\n© ScholarOne, Inc., 2026. 保留所有权利。\n",
+    "expected": [
+     {
+      "manuscript_id": "AAS-2026-0311",
+      "title": "基于合成数据的示例鲁棒控制方法研究",
+      "raw_status": "等待管理员处理",
+      "stage": "submitted",
+      "status_date": "",
+      "submitted_date": "2026-11-16"
+     },
+     {
+      "manuscript_id": "AAS-2026-0127.R1",
+      "title": "一种虚构多智能体系统的示例一致性分析",
+      "raw_status": "等待审稿人评分",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-10-28"
+     },
+     {
+      "manuscript_id": "AAS-2026-0198",
+      "title": "面向模拟数据集的示例强化学习调度算法",
+      "raw_status": "Awaiting EIC Decision",
+      "stage": "decision",
+      "status_date": "",
+      "submitted_date": "2026-08-02"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "family": "Chinese journal submission systems: 勤云 e-tiller (new /<code>/author/ and legacy /ch/author/*.aspx), 知网腾云 / CNKI 期刊协同采编系统 (*.cbpt.cnki.net 作者工作中心), 北大方正 Founder (*.portal.founderss.cn), and in-house systems such as 计算机学报 (cjc.ict.ac.cn/wltg)",
+  "samples": [
+   {
+    "name": "etiller_new_author_manuscript_list_jos_style",
+    "system": "勤云 e-tiller（新版 Java 平台，/<刊代码>/author/，JOS 式页头）",
+    "page_type": "etiller_author_manuscript_list",
+    "text": "作者中心\n主办：中国科学院软件研究所\n中国计算机学会\n微信小程序\n微信服务号\n微信订阅号\n主页\n期刊介绍\n编委会\n服务介绍\n投稿指南\n出版道德\n联系我们\nE-mail Alert\nEnglish\n欢迎您：Alice Example\n退出\n作者首页\n在线投稿\n我的稿件\n个人信息\n修改密码\n\n我的稿件\n稿件编号\t稿件标题\t投稿日期\t稿件状态\t最后处理日期\t操作\n20261103006\t合成图扩散在玩具代码检索中的应用\t2026-11-03\t新到稿件\t2026-11-03\t查看 撤稿\n20260914012\t合成数据驱动的玩具程序修复方法\t2026-09-14\t审稿中\t2026-10-08\t查看\n20260702004\t面向示例系统的合成调度框架\t2026-07-02\t退修\n（修改截止：2026-12-05）\t2026-11-05\t查看\n上传修改稿\n20260519021\t虚构并发程序的合成测试生成\t2026-05-19\t已修回\t2026-10-27\t查看\n20260410017\t虚构编译器的合成基准测试研究\t2026-04-10\t录用\t2026-08-21\t查看 下载录用通知\n20260126003\t一种虚构的形式化验证示例\t2026-01-26\t退稿\t2026-03-02\t查看\n共 6 条记录  第 1/1 页\n首页 上一页 下一页 尾页\n\n友情链接: 中国科学院软件研究所 中国计算机学会 中国科学院 国家自然科学基金委员会 CCF数字图书馆\n版权所有：中国科学院软件研究所\n技术支持： 北京勤云科技发展有限公司",
+    "expected": [
+     {
+      "manuscript_id": "20261103006",
+      "title": "合成图扩散在玩具代码检索中的应用",
+      "raw_status": "新到稿件",
+      "stage": "submitted",
+      "status_date": "2026-11-03",
+      "submitted_date": "2026-11-03"
+     },
+     {
+      "manuscript_id": "20260914012",
+      "title": "合成数据驱动的玩具程序修复方法",
+      "raw_status": "审稿中",
+      "stage": "review",
+      "status_date": "2026-10-08",
+      "submitted_date": "2026-09-14"
+     },
+     {
+      "manuscript_id": "20260702004",
+      "title": "面向示例系统的合成调度框架",
+      "raw_status": "退修",
+      "stage": "revise",
+      "status_date": "2026-11-05",
+      "submitted_date": "2026-07-02"
+     },
+     {
+      "manuscript_id": "20260519021",
+      "title": "虚构并发程序的合成测试生成",
+      "raw_status": "已修回",
+      "stage": "editor",
+      "status_date": "2026-10-27",
+      "submitted_date": "2026-05-19"
+     },
+     {
+      "manuscript_id": "20260410017",
+      "title": "虚构编译器的合成基准测试研究",
+      "raw_status": "录用",
+      "stage": "accepted",
+      "status_date": "2026-08-21",
+      "submitted_date": "2026-04-10"
+     },
+     {
+      "manuscript_id": "20260126003",
+      "title": "一种虚构的形式化验证示例",
+      "raw_status": "退稿",
+      "stage": "rejected",
+      "status_date": "2026-03-02",
+      "submitted_date": "2026-01-26"
+     }
+    ]
+   },
+   {
+    "name": "etiller_new_manuscript_detail_processing_history",
+    "system": "勤云 e-tiller（新版 Java 平台，/<刊代码>/author/）",
+    "page_type": "etiller_manuscript_detail",
+    "text": "作者中心\n主办：中国科学院软件研究所\n中国计算机学会\n主页\n期刊介绍\n编委会\n投稿指南\n联系我们\nEnglish\n欢迎您：Alice Example\n退出\n作者首页\n在线投稿\n我的稿件\n个人信息\n\n稿件详情\n稿件编号：20260702004\n稿件标题：面向示例系统的合成调度框架\n英文标题：A Synthetic Scheduling Framework for Example Systems\n稿件类型：研究论文\n投稿日期：2026-07-02\n当前状态：退修\n修改截止日期：2026-12-05\n\n稿件处理过程\n处理时间\t处理过程\t说明\n2026-11-05 14:30\t退修\t请按审稿意见修改，并提交修改说明\n2026-11-02 09:12\t终审\t\n2026-10-21 16:45\t审稿意见已返回\t\n2026-07-10 10:02\t审稿中\t已送同行专家评议\n2026-07-06 15:20\t初审\t通过\n2026-07-02 09:41\t新到稿件\t\n\n审稿意见\n专家意见1\n专家意见2\n附件\n原稿.pdf\n上传修改稿\n返回\n技术支持： 北京勤云科技发展有限公司",
+    "expected": [
+     {
+      "manuscript_id": "20260702004",
+      "title": "面向示例系统的合成调度框架",
+      "raw_status": "退修",
+      "stage": "revise",
+      "status_date": "2026-11-05",
+      "submitted_date": "2026-07-02"
+     }
+    ]
+   },
+   {
+    "name": "etiller_legacy_aspx_author_list",
+    "system": "勤云 e-tiller（旧版 ASP.NET，/<刊代码>/ch/author/login.aspx；状态词取自中国图象图形学报公开说明）",
+    "page_type": "etiller_legacy_author_list",
+    "text": "《示例视觉学报》编辑部\n首页\n期刊介绍 内容介绍 收录情况\n编委会\n投稿须知 处理流程 撰稿要求 同行评议\n期刊服务 作者 读者 审稿专家\n在线留言\nEnglish Version\n作者中心\n欢迎您，Bob Example！ [退出]\n作者首页 | 我要投稿 | 稿件查询 | 个人信息 | 修改密码\n稿件查询\n您共有 7 篇稿件\n序号\t稿件编号\t稿件标题\t投稿日期\t稿件状态\t处理日期\t操作\n1\t260853\t合成视频中的玩具目标跟踪方法\t2026-10-21\t新到稿件\t2026-10-21\t查看 修改\n2\t260517\t虚构光照下的合成图像增强\t2026-08-06\t初审部分审回\t2026-10-15\t查看\n3\t260402\t示例三维重建的合成先验\t2026-06-11\t初审已审回\t2026-09-30\t查看\n4\t260318\t合成手写体的玩具识别网络\nA Toy Recognition Network for Synthetic Handwriting\t2026-05-02\t修后再审\t2026-11-10\t查看 上传修改稿\n5\t260201\t合成文档图像的版面分析\t2026-03-25\t修后发表\t2026-10-19\t查看 上传修改稿\n6\t251187\t一种虚构的显著性检测模型\t2025-12-08\t已采用\t2026-05-06\t查看\n7\t250962\t合成纹理的玩具检索方法\t2025-09-17\t退稿\t2025-11-28\t查看\n\n在线采编平台\n在线投稿\n在线审稿\n下载中心\n期刊Copyright 示例视觉学报 │ 本系统由 北京勤云科技发展有限公司开发",
+    "expected": [
+     {
+      "manuscript_id": "260853",
+      "title": "合成视频中的玩具目标跟踪方法",
+      "raw_status": "新到稿件",
+      "stage": "submitted",
+      "status_date": "2026-10-21",
+      "submitted_date": "2026-10-21"
+     },
+     {
+      "manuscript_id": "260517",
+      "title": "虚构光照下的合成图像增强",
+      "raw_status": "初审部分审回",
+      "stage": "review",
+      "status_date": "2026-10-15",
+      "submitted_date": "2026-08-06"
+     },
+     {
+      "manuscript_id": "260402",
+      "title": "示例三维重建的合成先验",
+      "raw_status": "初审已审回",
+      "stage": "reviews_done",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-06-11"
+     },
+     {
+      "manuscript_id": "260318",
+      "title": "合成手写体的玩具识别网络",
+      "raw_status": "修后再审",
+      "stage": "revise",
+      "status_date": "2026-11-10",
+      "submitted_date": "2026-05-02"
+     },
+     {
+      "manuscript_id": "260201",
+      "title": "合成文档图像的版面分析",
+      "raw_status": "修后发表",
+      "stage": "revise",
+      "status_date": "2026-10-19",
+      "submitted_date": "2026-03-25"
+     },
+     {
+      "manuscript_id": "251187",
+      "title": "一种虚构的显著性检测模型",
+      "raw_status": "已采用",
+      "stage": "accepted",
+      "status_date": "2026-05-06",
+      "submitted_date": "2025-12-08"
+     },
+     {
+      "manuscript_id": "250962",
+      "title": "合成纹理的玩具检索方法",
+      "raw_status": "退稿",
+      "stage": "rejected",
+      "status_date": "2025-11-28",
+      "submitted_date": "2025-09-17"
+     }
+    ]
+   },
+   {
+    "name": "etiller_legacy_manuscript_detail_processing_history",
+    "system": "勤云 e-tiller（旧版 ASP.NET，/ch/author/）",
+    "page_type": "etiller_manuscript_detail",
+    "text": "《示例视觉学报》编辑部\n首页\n投稿须知\nEnglish Version\n作者中心\n欢迎您，Bob Example！ [退出]\n作者首页 | 我要投稿 | 稿件查询 | 个人信息 | 修改密码\n稿件详细信息\n稿件编号：\t260402\n稿件标题：\t示例三维重建的合成先验\n英文标题：\tSynthetic Priors for Example 3D Reconstruction\n作者：\tBob Example，Carol Example\n稿件类型：\t研究论文\n投稿日期：\t2026-06-11\n稿件状态：\t初审已审回\n稿件处理过程\n处理日期\t处理过程\t说明\n2026-06-11\t新到稿件\t投稿成功\n2026-06-15\t预审\t通过\n2026-06-15\t审理费通知\t已发送\n2026-06-19\t编辑部收到审理费\t\n2026-06-22\t审稿中\t\n2026-08-30\t初审部分审回\t\n2026-09-30\t初审已审回\t等待送终审\n附件\n原稿全文（PDF）\n[返回]\n本系统由 北京勤云科技发展有限公司开发",
+    "expected": [
+     {
+      "manuscript_id": "260402",
+      "title": "示例三维重建的合成先验",
+      "raw_status": "初审已审回",
+      "stage": "reviews_done",
+      "status_date": "2026-09-30",
+      "submitted_date": "2026-06-11"
+     }
+    ]
+   },
+   {
+    "name": "cnki_author_work_centre_submitted_list",
+    "system": "知网腾云 / CNKI 期刊协同采编系统（*.cbpt.cnki.net 作者工作中心，2016 版界面）",
+    "page_type": "cnki_author_work_centre_folder_list",
+    "text": "《合成科学学报》 ----作者工作中心\n2026-11-19 10:42\n您好，张示例【 退出 |个人资料 】\n站内信息【 0条 / 共2条 】\n当前身份【 作者 更换 】\n帮助\n意见反馈\n语种\n稿件中心\n系统导航\n返回工作桌面\n稿件中心\n我的稿件管理\n待修改稿件(0)\n已投稿件(5)\n草稿(1)\n我的其他投稿(0)\n我的约稿管理\n投稿\n稿件中心 >> 我的稿件管理 >> 已投稿件\n\n已投稿件\n共5条结果：  每页显示 10条 20条 50条\n序号\t\t标题\t作者\t计划栏目\t稿号\t学科\t投稿时间↓\t当前阶段\t立即处理\n1\t\t合成遥感图像的玩...\t张示例\t\t2026.11.02.0005\t\t2026/11/02\t初审\t\n2\t\t虚构传感网络中的...\t张示例\t\t2026.09.08.0012\t信息科学\t2026/09/08\t专家评审\t\n3\t\t合成多模态数据集...\t张示例\t研究论文\t2026.07.14.0031\t\t2026/07/14\t复审\t\n4\t\t玩具模型综述\t张示例\t综述\t2026.05.20.0007\t\t2026/05/20\t在线出版[录用]\t\n5\t\t一种虚构的合成...\t张示例\t\t2026.03.11.0019\t\t2026/03/11\t终审[退稿]\t\n全选/取消全选\n第1页 共1页\n1\n跳转\n本系统由中国知网提供技术支持\n使用帮助\n技术支持: http://find.cb.cnki.net\n电子邮件: cb@cnki.net",
+    "expected": [
+     {
+      "manuscript_id": "2026.11.02.0005",
+      "title": "合成遥感图像的玩...",
+      "raw_status": "初审",
+      "stage": "editor",
+      "status_date": "",
+      "submitted_date": "2026-11-02"
+     },
+     {
+      "manuscript_id": "2026.09.08.0012",
+      "title": "虚构传感网络中的...",
+      "raw_status": "专家评审",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-09-08"
+     },
+     {
+      "manuscript_id": "2026.07.14.0031",
+      "title": "合成多模态数据集...",
+      "raw_status": "复审",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-07-14"
+     },
+     {
+      "manuscript_id": "2026.05.20.0007",
+      "title": "玩具模型综述",
+      "raw_status": "在线出版[录用]",
+      "stage": "production",
+      "status_date": "",
+      "submitted_date": "2026-05-20"
+     },
+     {
+      "manuscript_id": "2026.03.11.0019",
+      "title": "一种虚构的合成...",
+      "raw_status": "终审[退稿]",
+      "stage": "rejected",
+      "status_date": "",
+      "submitted_date": "2026-03-11"
+     }
+    ]
+   },
+   {
+    "name": "cnki_review_history_popup",
+    "system": "知网腾云 / CNKI 期刊协同采编系统（查看审理历史弹窗）",
+    "page_type": "cnki_review_history_popup",
+    "text": "审稿流程名称 查看审理历史\n帮助\n稿件编号: 2026.07.14.0031\n标题: 合成多模态数据集上的玩具检索评测研究\n作者: 张示例\n稿件类型: 中文稿件\n关键词: 合成数据;玩具检索;示例评测\n投稿人: 张示例\n投稿日期: 2026/07/14\n稿件操作\t查看费用情况\n文件下载\t原稿全文\t2026/07/14 10:05:33\n修改稿全文\t2026/10/20 21:47:10\n审稿流程\n历史阶段\t处理人\t开始时间\t计划完成时间\t实际完成时间\t处理结果\t历史明细\n初审\t*\t2026/07/14\t2026/07/21\t2026/07/18\t通过\t查看\n专家评审\t*\t2026/07/18\t2026/08/17\t2026/09/26\t退修\t查看\n作者修改\t*\t2026/09/26\t2026/10/26\t2026/10/20\t已修回\t查看\n当前阶段\t处理人\t开始时间\t计划完成时间\t实际完成时间\t处理状态\t操作\n复审\t*\t2026/10/21\t2026/11/20\t\t[待完成]\t\n关闭本页",
+    "expected": [
+     {
+      "manuscript_id": "2026.07.14.0031",
+      "title": "合成多模态数据集上的玩具检索评测研究",
+      "raw_status": "复审",
+      "stage": "review",
+      "status_date": "2026-10-21",
+      "submitted_date": "2026-07-14"
+     }
+    ]
+   },
+   {
+    "name": "cnki_legacy_2011_submitted_list_unlabeled_status",
+    "system": "知网 CNKI 期刊协同采编系统（2011 版作者工作中心，状态列无表头、括号包裹）",
+    "page_type": "cnki_author_work_centre_folder_list",
+    "text": "《示例地学学报》《ACTA EXEMPLI GEOSCIENTIAE》----作者工作中心\n2026-11-19 09:15\n您好， 王示例老师【退出 |个人资料 】\n站内信息 【 0条(0) 】 | 当前身份 【 作者 更换 】\n工作桌面\n稿件管理\n稿件管理\n我的稿件管理\n责编退改稿件\n评审后退改稿件\n副主编退改稿件\n主编退改稿件\n录用稿件\n已投稿件\n退稿稿件\n草稿\n我的约稿管理\n待回应的约稿请求\n待提交的约稿稿件\n已提交的约稿稿件\n已投稿件\n共（ 4 ）条结果\t每页显示数量：10条 20条 50条\n序号\t稿号\t标题\t作者\t投稿时间\t\t操作\n1\t编辑部202610014\t合成冰川数据的...\t王示例\t2026-10-21\t(初审)\t\n2\t编辑部202607031\t虚构断层带的玩...\t王示例\t2026-07-09\t(外审)\t\n3\t编辑部202604008\t示例沉积模型的...\t王示例\t2026-04-16\t(评审后退改)\t\n4\t编辑部202512022\t合成地貌的玩具...\t王示例\t2025-12-30\t(录用)\t\n第 1 页 共 1 页\t1\n投稿须知 | 版权协议 | 论文模板 | 期刊首页\n本系统由中国知网提供技术支持 使用帮助 技术支持： cb@cnki.net http://cb.cnki.net",
+    "expected": [
+     {
+      "manuscript_id": "编辑部202610014",
+      "title": "合成冰川数据的...",
+      "raw_status": "(初审)",
+      "stage": "editor",
+      "status_date": "",
+      "submitted_date": "2026-10-21"
+     },
+     {
+      "manuscript_id": "编辑部202607031",
+      "title": "虚构断层带的玩...",
+      "raw_status": "(外审)",
+      "stage": "review",
+      "status_date": "",
+      "submitted_date": "2026-07-09"
+     },
+     {
+      "manuscript_id": "编辑部202604008",
+      "title": "示例沉积模型的...",
+      "raw_status": "(评审后退改)",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": "2026-04-16"
+     },
+     {
+      "manuscript_id": "编辑部202512022",
+      "title": "合成地貌的玩具...",
+      "raw_status": "(录用)",
+      "stage": "accepted",
+      "status_date": "",
+      "submitted_date": "2025-12-30"
+     }
+    ]
+   },
+   {
+    "name": "cnki_needs_revision_folder",
+    "system": "知网腾云 / CNKI 期刊协同采编系统（待修改稿件文件夹，sk+年月+序号稿号）",
+    "page_type": "cnki_author_work_centre_folder_list",
+    "text": "《示例工程学报》 ----作者工作中心\n2026-11-19 11:05\n您好，李样例【 退出 |个人资料 】\n站内信息【 2条 / 共5条 】\n当前身份【 作者 更换 】\n帮助\n稿件中心\n系统导航\n返回工作桌面\n稿件中心\n我的稿件管理\n待修改稿件(2)\n已投稿件(4)\n草稿(0)\n我的其他投稿(1)\n我的约稿管理\n投稿\n稿件中心 >> 我的稿件管理 >> 待修改稿件\n\n待修改稿件\n共2条结果：  每页显示 10条 20条 50条\n序号\t\t标题\t作者\t计划栏目\t稿号\t学科\t投稿时间↓\t当前阶段\t立即处理\n1\t\t合成桥梁监测数据的...\t李样例\t\tsk2026090042\t\t2026/09/03\t退修\t\n2\t\t虚构材料的玩具疲劳...\t李样例\t研究简报\tsk2026100007\t材料\t2026/10/09\t初审[退改]\t\n全选/取消全选\n第1页 共1页\n1\n跳转\n本系统由中国知网提供技术支持",
+    "expected": [
+     {
+      "manuscript_id": "sk2026090042",
+      "title": "合成桥梁监测数据的...",
+      "raw_status": "退修",
+      "stage": "revise",
+      "status_date": "",
+      "submitted_date": "2026-09-03"
+     },
+     {
+      "manuscript_id": "sk2026100007",
+      "title": "虚构材料的玩具疲劳...",
+      "raw_status": "初审[退改]",
+      "stage": "submitted",
+      "status_date": "",
+      "submitted_date": "2026-10-09"
+     }
+    ]
+   },
+   {
+    "name": "cnki_author_desktop_counts_only_negative",
+    "system": "知网腾云 / CNKI 期刊协同采编系统（工作桌面：只有分类计数，没有稿件）",
+    "page_type": "cnki_author_desktop",
+    "text": "《示例农业学报》 ----作者工作中心\n2026-11-19 08:30\n您好，作者【 退出 |个人资料 】\n站内信息【 1条 / 共3条 】\n当前身份【 作者 更换 】\n帮助\n意见反馈\n语种\n稿件中心\n隐藏提示信息\n温馨提示\n* 工作中心用于与编辑部沟通：可查看在审稿件、系统公告和站内信。\n* 稿件处理列表按已投、待修改、录用、退稿等分类，点击分类可查看审理阶段。\n* 约稿处理列表显示编辑部的约稿及您的处理情况。\n稿件处理\n合计\n待修改稿件\t1篇\n已投稿件\t3篇\n草稿\t0篇\n我的其他投稿\t2篇\n约稿处理\n待我回应的约稿请求\t0篇\n待我提交的约稿稿件\t0篇\n已完成的约稿稿件\t0篇\n作者投稿\n导航式投稿（推荐）\n一步式投稿\n系统公告\n本区域显示编辑部公告\n暂无公告\n站内信息\n本区域显示最近收到的站内信息\n录用后注意事项\n给编辑部写信\n本系统由中国知网提供技术支持",
+    "expected": []
+   },
+   {
+    "name": "founder_portal_my_manuscripts_cjig_style",
+    "system": "北大方正 Founder（*.portal.founderss.cn 作者中心，Element UI；状态词沿用中国图象图形学报公开说明）",
+    "page_type": "founder_author_manuscript_list",
+    "text": "中国图象图形学报\n作者中心\n首页\n投稿须知\n下载中心\n联系我们\nAlice Example\n退出登录\n我要投稿\n我的稿件\n消息通知\n个人中心\n首页 / 我的稿件\n全部\n审稿中\n待修改\n已采用\n已退稿\n查询\n重置\n稿件编号\t稿件标题\t稿件类型\t投稿时间\t稿件状态\t状态更新时间\t\n260731\t合成街景图像的玩具语义分割方法\t研究论文\t2026-08-12 09:31:07\t初审部分审回\t2026-10-30 15:02:44\t\n260466.R1\t虚构医学影像的合成配准网络\t研究论文\t2026-09-28 20:15:36\t审稿中\t2026-10-02 10:20:00\t\n260381\t合成场景图像的玩具超分辨率网络\t研究论文\t2026-06-03 10:12:45\t终审已审回\t2026-11-12 16:20:31\t\n260157\t示例点云数据的合成补全研究\t研究论文\t2026-02-26 14:48:09\t已采用\t2026-07-15 11:36:52\t\n251290\t一种虚构的图像去雾玩具模型\t研究论文\t2025-12-19 08:05:33\t退稿\t2026-02-03 17:24:10\t\n操作\n查看\n查看\n查看\n查看\n查看\n共 5 条\n1\n前往\n页\n技术支持由北京北大方正电子有限公司提供\n本系统建议在Chrome、IE9+以上版本浏览器阅读本站内容，360浏览器请切换至极速模式",
+    "expected": [
+     {
+      "manuscript_id": "260731",
+      "title": "合成街景图像的玩具语义分割方法",
+      "raw_status": "初审部分审回",
+      "stage": "review",
+      "status_date": "2026-10-30",
+      "submitted_date": "2026-08-12"
+     },
+     {
+      "manuscript_id": "260466.R1",
+      "title": "虚构医学影像的合成配准网络",
+      "raw_status": "审稿中",
+      "stage": "review",
+      "status_date": "2026-10-02",
+      "submitted_date": "2026-09-28"
+     },
+     {
+      "manuscript_id": "260381",
+      "title": "合成场景图像的玩具超分辨率网络",
+      "raw_status": "终审已审回",
+      "stage": "decision",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-06-03"
+     },
+     {
+      "manuscript_id": "260157",
+      "title": "示例点云数据的合成补全研究",
+      "raw_status": "已采用",
+      "stage": "accepted",
+      "status_date": "2026-07-15",
+      "submitted_date": "2026-02-26"
+     },
+     {
+      "manuscript_id": "251290",
+      "title": "一种虚构的图像去雾玩具模型",
+      "raw_status": "退稿",
+      "stage": "rejected",
+      "status_date": "2026-02-03",
+      "submitted_date": "2025-12-19"
+     }
+    ]
+   },
+   {
+    "name": "founder_portal_manuscript_detail_timeline",
+    "system": "北大方正 Founder（*.portal.founderss.cn 稿件详情，竖排字段 + 时间线）",
+    "page_type": "founder_manuscript_detail",
+    "text": "中国图象图形学报\n作者中心\n首页\n投稿须知\n下载中心\n联系我们\nAlice Example\n退出登录\n我要投稿\n我的稿件\n消息通知\n个人中心\n首页 / 我的稿件 / 稿件详情\n返回\n基本信息\n稿件编号\n260381\n稿件标题\n合成场景图像的玩具超分辨率网络\n英文标题\nA Toy Super-Resolution Network for Synthetic Scenes\n稿件类型\n研究论文\n投稿时间\n2026-06-03 10:12:45\n稿件状态\n终审已审回\n作者信息\n序号\t姓名\t单位\t通讯作者\n1\tAlice Example\t示例大学 计算机学院\t是\n2\tBob Example\t虚构研究院\t否\n稿件文件\n原稿.pdf\n处理记录\n2026-11-12 16:20:31\n终审已审回\n2026-10-09 09:15:02\n初审已审回\n2026-08-27 14:40:18\n初审部分审回\n2026-06-20 11:03:55\n审稿中\n2026-06-05 09:00:12\n编辑部收到审理费\n2026-06-03 16:45:20\n审理费通知\n2026-06-03 10:12:45\n新到稿件\n技术支持由北京北大方正电子有限公司提供\n本系统建议在Chrome、IE9+以上版本浏览器阅读本站内容，360浏览器请切换至极速模式",
+    "expected": [
+     {
+      "manuscript_id": "260381",
+      "title": "合成场景图像的玩具超分辨率网络",
+      "raw_status": "终审已审回",
+      "stage": "decision",
+      "status_date": "2026-11-12",
+      "submitted_date": "2026-06-03"
+     }
+    ]
+   },
+   {
+    "name": "cjc_inhouse_asp_query_list",
+    "system": "计算机学报自建 ASP 投稿系统（cjc.ict.ac.cn/wltg/new/submit/，登录后「登录/查询」页）",
+    "page_type": "cjc_query_list",
+    "text": "计算机学报\n网络投稿\n注 册\n登 录 / 查 询\n征稿指南\n作者：Bob Example（bob.example@example.com）  退出\n注册稿件编号\t提交稿件\t查询稿件\t提交修改稿\t提交最终稿\t修改个人信息\n稿件查询结果\n稿件编号\t题目\t投稿方向\t注册时间\t审理状态\t最后处理时间\n2026-0917\t合成多智能体系统的玩具调度研究\t人工智能\t2026-3-9 10:21:05\t修改稿审理中\t2026-10-28 16:02:11\n2026-1433\t一种虚构的分布式存储协议\t计算机系统结构\t2026-5-21 9:03:47\t审稿中\t2026-6-2 14:30:00\n2026-2208\t面向示例数据的合成索引结构\t数据库\t2026-8-2 20:11:39\t退修\n请在规定期限内提交修改稿\t2026-11-6 11:15:22\n2025-3120\t虚构网络中的合成路由算法\t计算机网络\t2025-11-6 15:40:02\t录用\t2026-9-18 10:05:16\n2025-2744\t合成程序的玩具静态分析\t计算机软件\t2025-9-15 8:55:30\t退稿\t2025-12-1 17:20:45\n说明：修改稿、最终稿请按通知时限提交，逾期按弃稿处理。\nCopyright © 计算机学报\n网上投稿： http://cjc.ict.ac.cn\nE-mail： cjc@ict.ac.cn",
+    "expected": [
+     {
+      "manuscript_id": "2026-0917",
+      "title": "合成多智能体系统的玩具调度研究",
+      "raw_status": "修改稿审理中",
+      "stage": "review",
+      "status_date": "2026-10-28",
+      "submitted_date": "2026-03-09"
+     },
+     {
+      "manuscript_id": "2026-1433",
+      "title": "一种虚构的分布式存储协议",
+      "raw_status": "审稿中",
+      "stage": "review",
+      "status_date": "2026-06-02",
+      "submitted_date": "2026-05-21"
+     },
+     {
+      "manuscript_id": "2026-2208",
+      "title": "面向示例数据的合成索引结构",
+      "raw_status": "退修",
+      "stage": "revise",
+      "status_date": "2026-11-06",
+      "submitted_date": "2026-08-02"
+     },
+     {
+      "manuscript_id": "2025-3120",
+      "title": "虚构网络中的合成路由算法",
+      "raw_status": "录用",
+      "stage": "accepted",
+      "status_date": "2026-09-18",
+      "submitted_date": "2025-11-06"
+     },
+     {
+      "manuscript_id": "2025-2744",
+      "title": "合成程序的玩具静态分析",
+      "raw_status": "退稿",
+      "stage": "rejected",
+      "status_date": "2025-12-01",
+      "submitted_date": "2025-09-15"
+     }
+    ]
+   }
+  ]
+ }
+]

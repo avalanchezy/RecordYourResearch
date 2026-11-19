@@ -23,6 +23,7 @@ labels: bug
 - [ ] OpenReview（会议 / Venue:            ）
 - [ ] 爱思唯尔：粘贴官方结果 / Elsevier: pasted official page
 - [ ] 爱思唯尔一键查稿（实验）/ Elsevier one-click query (experimental)
+- [ ] 从投稿系统导入 / Import from a submission system（系统 / System:            ）
 - [ ] Editorial Manager（非爱思唯尔期刊 / non-Elsevier journal）
 - [ ] ScholarOne
 - [ ] 其他 / Other:

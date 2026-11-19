@@ -6,13 +6,13 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.1.1. **The user interface is in Chinese only.** UI labels are quoted in Chinese below so you can find them.
+This is v0.2.0. **The user interface is in Chinese only.** UI labels are quoted in Chinese below so you can find them.
 
 ## Overview
 
 - **OpenReview, fully automatic**: bind your own OpenReview account and sync all your submissions across venues (status, number of released reviews, decisions) with one click. While the app is running it syncs again about once a day.
 - **Elsevier journals, semi-automatic**: look up the status on the official page yourself, then paste the page text into the app. It extracts the status, reviewer counts, dates and revision due date and records them on the timeline. There is also an experimental one-click query, off by default.
-- **Other channels, manual**: IEEE, Springer, ACM, MDPI, CMT and others are logged by hand with an Editorial Manager / ScholarOne-style status vocabulary.
+- **Other submission systems, semi-automatic (beta)**: IEEE, Springer, Taylor & Francis, Wiley, MDPI and Chinese journal systems such as 勤云, 方正 and 知网腾云. Log in to the official system yourself, copy the page that lists your manuscripts and paste it into 「从投稿系统导入」 (import from a submission system). The app parses each manuscript's number, title, status and date locally, and you review them before they go on the timeline. The app never logs in to these systems and makes no network calls for this. Anything it can't recognise can still be logged by hand.
 - **Built first for Chinese CS/AI researchers**: venues show CCF ranks, CAS journal ranks (中科院分区表, upgraded edition 2025), XR journal ranks (新锐期刊分区表 2026) and CAS journal-warning badges, offline and out of the box. If you have a JCR licence, you can import JCR yourself.
 
 The project is not affiliated with Elsevier, OpenReview, Clarivate, the National Science Library of the Chinese Academy of Sciences (中国科学院文献情报中心), 新锐学术 or the China Computer Federation (CCF). See the [disclaimer](#disclaimer).
@@ -20,7 +20,8 @@ The project is not affiliated with Elsevier, OpenReview, Clarivate, the National
 ### Current limitations
 
 - Single user, single machine: no login, no sharing, no multi-device sync, no mobile app.
-- Only OpenReview is fully automatic. For Elsevier you look up the status on the official page yourself and solve any captcha there. Other channels are manual.
+- Only OpenReview is fully automatic. For Elsevier and other submission systems you log in to the official page yourself (solving any captcha there) and paste the page. Anything you can't paste, or that isn't recognised, has to be logged by hand.
+- 「从投稿系统导入」 is a beta. Parsing is rule-based and was tested against synthetic sample pages built from each system's public documentation, not real accounts. A redesigned system may not be recognised, or a status may land in the wrong stage, so check the preview before importing.
 - PDF parsing is rule-based, not OCR. Scanned or encrypted PDFs cannot be parsed, and extracted data must be checked before you save it.
 - OpenReview accounts with multi-factor authentication (MFA) are not supported for automatic sync.
 - OpenReview account sync covers venues on API v2 (api2, most venues since 2023). For older venues that exist only on the old API, fill in the forum id under 「编辑信息」 and use the single-paper query.
@@ -32,10 +33,10 @@ The project is not affiliated with Elsevier, OpenReview, Clarivate, the National
 - **New-submission wizard ("＋ 新建投稿")**: drop a PDF and the app extracts the title, authors, abstract and keywords locally with PyMuPDF. It also picks up the conference or journal and year, including the headers of double-blind CVF, NeurIPS, ICLR, ICML, ECCV and AAAI submissions. From an Editorial Manager cover page it reads the manuscript number and corresponding author, and it finds DOI / arXiv ids and the cover-letter date. It preselects the tracking channel and autocompletes the venue name with ranking badges. Everything is a draft until you confirm it.
 - **Status timeline**: one timeline per submission (newest first). Raw statuses from every channel are normalised to one set of stages:
   已提交 submitted → 编辑处理 editor → 外审中 under review → 审稿齐 reviews complete → 决策中 decision → 返修 revision → 已录用 accepted / 已拒稿 rejected / 已撤稿 withdrawn / 制作中 in production.
-  The app shows days under review and days in the current stage. It warns you when a revision deadline is 3 days away or past, and nudges you when a paper has been with the editor for more than 4 weeks. Backdated entries never override the current status, and automatic channels only record real changes.
-- **Overview ("总览")**: a "since your last visit" inbox lists every status change found by OpenReview sync or polling, including when you click 「同步我的投稿」 or 「立即全量轮询」 yourself. Manual entries, pasted official results, the single-paper 「立即查询」 and 「一键查稿」 are not listed. A bell badge and `(N)` in the tab title show the unread count. Desktop notifications are optional and only fire while the page is open, even in a background tab. The page checks for changes every 5 minutes and when you switch back to it. The overview also shows submissions found on OpenReview but not yet in your library (待建档: import, import and link, or ignore), reminders, stats and the stage distribution.
+  The app shows days under review and days in the current stage. It warns you when a revision deadline is 3 days away or past, and nudges you when a paper has been with the editor for more than 4 weeks. Backdated entries never override the current status, and automatic channels only record real changes. Each entry shows its source: manual, OpenReview, Elsevier or 「粘贴·投稿系统」 (pasted from a submission system).
+- **Overview ("总览")**: a "since your last visit" inbox lists every status change found by OpenReview sync or polling, including when you click 「同步我的投稿」 or 「立即全量轮询」 yourself. Manual entries, pasted official results, imports from a submission system, the single-paper 「立即查询」 and 「一键查稿」 are not listed. A bell badge and `(N)` in the tab title show the unread count. Desktop notifications are optional and only fire while the page is open, even in a background tab. The page checks for changes every 5 minutes and when you switch back to it. The overview also shows submissions found on OpenReview but not yet in your library (待建档: import, import and link, or ignore), reminders, stats and the stage distribution.
 - **List ("投稿列表")**: categories 在投在审 / 已录用 / 已拒稿 / 已撤稿 / 归档 / 全部 / 回收站 (active, accepted, rejected, withdrawn, archived, all, recycle bin), with a stage filter, search and sorting. You can export the current list as CSV: it opens directly in Excel (UTF-8 with BOM), is safe against formula injection and has a dated filename. The top-bar 「导出台账 CSV」 exports everything (archived included, recycle bin excluded).
-- **Detail drawer**: a latest-status card, the timeline, related submissions (转投 resubmitted / 扩写 extended / 会议版·期刊版 conference & journal versions…) and links to the OpenReview page or the submission system. If you leave the submission-system link empty, the app infers it from the channel or manuscript number. The resubmit flow copies a rejected paper into a new submission and suggests CCF venues in the same field at the same or one lower rank. Deleting moves a submission to the recycle bin (回收站), where it can be restored; after 30 days it is permanently deleted together with its PDF (the purge runs with the daily background tasks, so not under `--no-daily`). Archiving, moving to the recycle bin, unlinking and deleting a timeline entry can be undone from the notification (「撤销」). Every view has its own URL (deep links, browser back/forward).
+- **Detail drawer**: a latest-status card, the timeline, related submissions (转投 resubmitted / 扩写 extended / 会议版·期刊版 conference & journal versions…) and links to the OpenReview page or the submission system. Journal submissions on the manual channel also get a 「📋 从投稿系统导入」 button that jumps to the import panel. If you leave the submission-system link empty, the app infers it from the channel or manuscript number. The resubmit flow copies a rejected paper into a new submission and suggests CCF venues in the same field at the same or one lower rank. Deleting moves a submission to the recycle bin (回收站), where it can be restored; after 30 days it is permanently deleted together with its PDF (the purge runs with the daily background tasks, so not under `--no-daily`). Archiving, moving to the recycle bin, unlinking and deleting a timeline entry can be undone from the notification (「撤销」). Every view has its own URL (deep links, browser back/forward).
 - **Ranking badges**: out of the box you get CCF-A/B/C (CCF list 2026), CAS rank 1–4 / Top (中科院分区表, upgraded edition 2025), XR rank 1–4 / Top (新锐期刊分区表 2026) and ⚠ warning badges (CAS warning lists 2024/2025 and the XR warning flag). Imported JCR data adds the JCR quartile and impact factor. Tooltips show the source and edition, e.g. 「中科院分区表升级版 2025（中科院文献情报中心）」 or 「新锐期刊分区表 2026（xr-scholar.com）」, and data you imported yourself is marked 「（你导入的数据）」. Badges use strict matching only, and workshops or "Findings" never inherit the main venue's rank.
 
 ## Screenshots
@@ -129,6 +130,7 @@ The data folder contains:
   1. If you bind an OpenReview account, it calls the official OpenReview API to log in and read your own submissions.
   2. Once you enable the experimental Elsevier one-click query, each query you click sends the manuscript number, the corresponding author's name in pinyin, the journal acronym and a random device id to Elsevier China's manuscript-query service (`dsp-api.elsevier.cn`). The 「拉取期刊缩写字典」 (journal-acronym dictionary) button, shown only while the feature is on, sends only the random device id.
 - PDFs are parsed locally. The browser hands the file to the app running on your machine.
+- 「从投稿系统导入」 adds no network calls: pasted text is parsed locally. The app never logs in to or contacts those submission systems and does not store their passwords.
 - The browser's localStorage keeps only UI preferences, such as the list category and sort order.
 - External links in the drawer (OpenReview page, submission system) open in your browser only when you click them.
 - The database and PDFs are not encrypted on disk (only the OpenReview password is protected), so use full-disk encryption.
@@ -162,9 +164,73 @@ The OpenReview API no longer allows anonymous reads (they get 403 ChallengeRequi
 > [!CAUTION]
 > This is not an official API that Elsevier offers to third-party tools. It may stop working at any time and may conflict with Elsevier's website terms. Use it at your own risk.
 
-### Other channels (manual)
+### Import from a submission system (semi-automatic, beta)
 
-Use "＋ 登记状态变化" (log a status change) in the drawer. Pick a stage and, optionally, a raw status from an Editorial Manager / ScholarOne-style list (Submitted to Journal, With Editor, Under Review, Required Reviews Complete, Decision in Process, Revise - Major, …). You can backdate an entry and set a revision due date.
+**Why paste instead of logging in.** Only OpenReview offers an author API that permits automated access, which is why OpenReview is fully automatic. IEEE, Taylor & Francis, Springer, Wiley, Elsevier, MDPI and the others have no author API, and their terms forbid scripted login or crawling. For example, the Elsevier / Editorial Manager terms forbid robots and systematic retrieval, and the EasyChair and Microsoft CMT terms forbid automated access. Their logins often have captchas, which the app never bypasses. So the app **never logs in to or contacts** these systems and does not store their passwords.
+
+**How it works**:
+
+1. Log in to the official submission system yourself.
+2. Open a page that lists your manuscripts, or one manuscript's status page. Menu pages without a manuscript list yield nothing:
+   - Editorial Manager: from the Author Main Menu, open a folder such as Submissions Being Processed or Submissions with a Decision, and copy that page;
+   - ScholarOne: the Author Dashboard queue pages;
+   - IEEE Author Portal and Wiley Research Exchange: the My Submissions page.
+3. Press `Ctrl+A`, `Ctrl+C` and paste into the 「从投稿系统导入」 panel on the 渠道查询 page. Pasting parses automatically; there is also a 「🔍 解析预览」 (preview) button.
+
+Journal submissions on the manual channel have a 「📋 从投稿系统导入」 button in the drawer that jumps to the panel.
+
+**Recognised systems** (detected from the page text):
+
+- ScholarOne Manuscripts (IEEE legacy UI, Taylor & Francis, Wiley, SAGE, OUP, IOP, ACM journals, 自动化学报);
+- Editorial Manager (Springer journals not yet on Snapp, Elsevier, PLOS…);
+- IEEE Author Portal and Wiley Research Exchange;
+- Springer Nature Snapp and Nature journals' tracking, plus Research Square timelines;
+- MDPI SuSy, the Taylor & Francis Submission Portal and Frontiers;
+- Chinese journal systems such as 勤云, 方正 and 知网腾云 (e.g. 软件学报, 中国图象图形学报, 计算机学报).
+
+Unknown systems get a best-effort generic parse.
+
+**The preview table** shows, for each manuscript, the ID, title, official status → stage and date, plus what will happen:
+
+| Preview | Meaning |
+|---|---|
+| 记入时间线 (record) | Matches a submission in your library; the new status is recorded on import |
+| 已是最新 (up to date) | Nothing new; nothing is written |
+| 新建 (new) | No match; a new submission will be created. The journal name is required, and you can fill it in or correct it in the preview |
+| 状态未识别 (unrecognised) | Shown, but cannot be imported |
+| 草稿 / 已被取代，不导入 (draft / superseded) | Drafts that were never submitted, records replaced by a newer one, failed submissions, and items in Editorial Manager's Incomplete or Waiting for Author's Approval folders. Shown, but cannot be imported or created |
+| 缺标题，不能新建 (no title) | No match, and the page shows no title to create one from |
+| 对上了多篇，请手动处理 (several matches) | Several candidates, or two different pasted manuscripts claim the same record. The candidate #ids are listed; cannot be imported |
+| 在回收站里（先恢复再导入） (in the recycle bin) | The matched submission is in the recycle bin; restore it first |
+
+**How rows are matched to your library**:
+
+- Rows with a manuscript number match by number only: an identical number wins; otherwise the number is compared ignoring revision suffixes such as R1 or .R1.
+- Rows without a number match by identical title only, and only against journal submissions. The journal name must agree when the page shows one, and a rejected or withdrawn record never takes a new in-progress status.
+- Truncated titles (ending in "…") may match by prefix, with at least 6 CJK characters or 20 Latin characters.
+- Title matches show the matched record's title and venue with the hint 「按标题对上，请核对」 (matched by title, please check) and are **not** pre-ticked. Number matches and 新建 rows are pre-ticked.
+
+After checking, tick the rows you want and click 「✓ 导入选中」 (import selected).
+
+**On import**:
+
+- Each status is recorded on the timeline with the source 「粘贴·投稿系统」, at the official date when the page shows one.
+- If the official date is earlier than the submission's registration entry (for example, a record created today without a submission date), the registration entry moves before it, so the imported status becomes current, as with the Elsevier paste. If the timeline already has a later entry, the imported status goes into the history and the notification says the current status did not change.
+- The manuscript number and submission date are filled in if they are empty.
+- Pasting the same page again records nothing twice: an entry with the same stage, text and day is skipped. If one paste lists the same manuscript twice, it is created only once.
+- New submissions are created on the manual channel, with a note saying which system they came from.
+- Imports are not listed in 「自上次查看以来」, just like pasted Elsevier results.
+
+**No network**: everything is parsed locally from the text you paste; nothing is sent anywhere.
+
+**Elsevier**: the per-paper 「粘贴官方结果」 (which also reads reviewer counts) stays. The new import also works with Elsevier's Editorial Manager: from the Author Main Menu, open a folder such as Submissions Being Processed and copy that page (the menu page itself lists no manuscripts).
+
+> [!NOTE]
+> This is a beta feature. Parsing is rule-based and was tested against synthetic sample pages built from each system's public documentation, not real accounts, so some statuses will not be recognised or will land in the wrong stage. Check the preview before importing. If that happens, log the status manually and open an "Unrecognized status" issue with only the raw status text, the system and the expected stage. **Never** paste whole pages, manuscript numbers or titles into issues.
+
+### Manual logging (fallback)
+
+When the import doesn't recognise your system or status, or you can't copy the page, use "＋ 登记状态变化" (log a status change) in the drawer. Pick a stage and, optionally, a raw status from an Editorial Manager / ScholarOne-style list (Submitted to Journal, With Editor, Under Review, Required Reviews Complete, Decision in Process, Revise - Major, …). You can backdate an entry and set a revision due date.
 
 ## Ranking data
 
@@ -217,7 +283,9 @@ Columns for a JCR CSV or a replacement CAS/XR CSV (header row; saved as UTF-8 or
 - **Why must I bind an OpenReview account?** Anonymous API reads are blocked. The app only reads what your account can see.
 - **"Needs re-binding" after moving to a new computer?** Expected: stored passwords are tied to the original machine and user. On the 「渠道查询」 page, unbind and bind your OpenReview account again.
 - **The Elsevier query says a captcha is required.** By design the app never bypasses it. Look the status up on the official page and paste it.
-- **A status was not recognised or went to the wrong stage.** Open an "Unrecognized status" issue with the raw status text, the channel and the expected stage only.
+- **Can IEEE or Springer sync automatically like OpenReview?** No. These systems have no author API, their terms forbid scripted login or crawling, and their logins often have captchas, so the app never logs in for you. Use 「从投稿系统导入」: you log in and copy the page, and the app parses it locally.
+- **How do I import from a submission system?** Log in and open a page that lists your manuscripts: an Editorial Manager folder such as Submissions Being Processed, a ScholarOne Author Dashboard queue, or My Submissions on IEEE / Wiley. One manuscript's status page also works. Press `Ctrl+A`, `Ctrl+C` and paste into 「从投稿系统导入」 on the 渠道查询 page. Check the preview (title matches are not pre-ticked, so confirm each one), tick the rows and click 「✓ 导入选中」. It is a beta, so review before importing.
+- **A status was not recognised or went to the wrong stage.** Log it manually, then open an "Unrecognized status" issue with only the raw status text, the channel or submission system and the expected stage. Don't paste whole pages, manuscript numbers, titles or screenshots.
 - **No badge or no CAS rank for a journal?** The CAS and XR tables are bundled, but badges use strict matching only: try the journal's full name under 「编辑信息」, or look it up in 分级速查. The ranking tables cover journals only; conferences get CCF ranks. JCR is not bundled and must be imported.
 - **Does it keep syncing when the browser is closed?** Yes, as long as `run.py` is running. Desktop notifications need the page open.
 - **Can I host it for my lab?** No. There is no login, and OpenReview's terms forbid third-party use on your behalf. Everyone should run their own copy.
@@ -228,11 +296,11 @@ Columns for a JCR CSV or a replacement CAS/XR CSV (header row; saved as UTF-8 or
 
 ## Disclaimer
 
-- This is an independent open-source project. It is not affiliated with, endorsed or sponsored by Elsevier, OpenReview, Clarivate, the National Science Library of CAS, 新锐学术 or CCF. Names and trademarks belong to their owners and are used only to describe compatibility. No logos are used.
+- This is an independent open-source project. It is not affiliated with, endorsed or sponsored by Elsevier, OpenReview, Clarivate, the National Science Library of CAS, 新锐学术, CCF, or the other publishers and submission systems mentioned here (IEEE, Springer Nature, Taylor & Francis, Wiley, MDPI and others). Names and trademarks belong to their owners and are used only to describe compatibility. No logos are used.
 - Status information comes from your own entries, pasted official pages or responses from official services, and may be late or wrong. **The official submission system and the editorial office are always authoritative.** Don't rely on this tool for deadlines.
 - Ranking badges are for reference only and are not an evaluation of any venue or paper; **the publishers' official data always prevails**. Bundled data may be outdated or contain transcription errors. CCF itself says its list is not meant as a basis for academic evaluation.
 - The Elsevier one-click query is unofficial and experimental. Use it at your own risk.
-- You are responsible for complying with the terms of the services you use.
+- You are responsible for complying with the terms of the services you use, including each submission system.
 - The software is provided "as is", without warranty; see sections 15 and 16 of the AGPL-3.0.
 
 ## Licence
