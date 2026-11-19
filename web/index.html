@@ -474,8 +474,8 @@
       </div>
     </div>
     <div class="panel">
-      <h3>期刊 / 会议分级速查 <span class="badge-src">CCF 推荐目录 · 中科院预警名单{{ rankDatasets.cas ? ' · 中科院分区' : '' }}{{ rankDatasets.xr ? ' · 新锐分区' : '' }}{{ rankDatasets.jcr ? ' · JCR' : '' }}</span></h3>
-      <p class="hint small" v-if="rankMissingHint()">内置 CCF 推荐目录与中科院国际期刊预警名单{{ rankMissingHint() }}。</p>
+      <h3>期刊 / 会议分级速查 <span class="badge-src">{{ rankSourcesText() }}</span></h3>
+      <p class="hint small" v-if="rankMissingHint()">{{ rankMissingHint() }}</p>
       <div class="rank-search">
         <input v-model="rankQ" placeholder="输入期刊名或会议简称，如 Pattern Recognition / NeurIPS / ESWA…"
                @keyup.enter="doRankSearch()">

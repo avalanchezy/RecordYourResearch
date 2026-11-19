@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""学术分级匹配引擎：CCF 推荐目录 / 中科院预警名单（随项目发布）+ 可选导入的中科院分区 / 新锐分区 / JCR。
+"""学术分级匹配引擎：CCF 推荐目录 / 中科院预警名单 / 中科院分区 2025 / 新锐分区 2026（随项目发布）+ 可选导入的 JCR。
 
 数据全部本地（<数据目录>/rankings/rankings.db，首次启动自动从 data-sources/ 构建），离线可用。
 - 徽章与建档卡片（venue_rankings / card_for_venue）只用严格匹配：简称或全称精确命中
@@ -11,6 +11,7 @@
 import difflib
 import os
 import re
+import shutil
 import sqlite3
 from contextlib import closing
 
@@ -374,17 +375,82 @@ def _ed(key: str, default: str) -> str:
     return meta().get(f"{key}_edition") or default
 
 
+def editions() -> dict:
+    m = meta()
+    return {k: m.get(f"{k}_edition") or "" for k in ("ccf", "cas", "xr", "jcr")}
+
+
+def imported() -> list[str]:
+    """你自己导入的数据集：这些表不会被自动重建覆盖。"""
+    m = meta()
+    if "imported" in m:
+        return [k for k in (m.get("imported") or "").split(",") if k]
+    if "datasets" in m:
+        # 0.1.0 生成的库没有这条记录：那时中科院 / 新锐 / JCR 只可能来自你自己导入
+        return [k for k in ("cas", "xr", "jcr") if k in (m.get("datasets") or "").split(",")]
+    # 元信息读不出来（很旧或损坏的库）：表里有中科院 / 新锐 / JCR 数据就当作你导入的，不自动覆盖
+    if not available():
+        return []
+    try:
+        with closing(_conn()) as c:
+            r = c.execute("SELECT MAX(cas_part<>''), MAX(xr_part<>''), MAX(jcr_quartile<>'') FROM journals").fetchone()
+        return [k for k, v in zip(("cas", "xr", "jcr"), r or ()) if v]
+    except sqlite3.Error:
+        return []
+
+
+def source(key: str) -> str:
+    """数据集来源：'imported'（你导入的）或 'bundled'（随项目附带）。"""
+    return "imported" if key in imported() else "bundled"
+
+
+_FP = {"value": None}
+
+
+def _bundle_fp() -> str | None:
+    """随附数据的指纹；文件暂时读不了（被占用、权限、网盘占位文件）时返回 None，下次再试。"""
+    if _FP["value"] is None:
+        from . import rankings_build
+        try:
+            _FP["value"] = rankings_build.bundle_fingerprint()
+        except OSError:
+            return None
+    return _FP["value"]
+
+
+def outdated() -> bool:
+    """随附的数据比你的分级库新，但库里有你导入的数据，所以没有自动重建。"""
+    fp = _bundle_fp()
+    return bool(fp) and available() and meta().get("bundle") != fp and bool(imported())
+
+
 def ensure_db(log=print) -> bool:
-    """首次启动：分级库不存在就用随项目发布的 CCF 目录 + 预警名单构建一个（不含任何受许可数据）。"""
-    if available():
-        return True
+    """启动时：分级库不存在就用随项目附带的数据构建；随附数据有更新、且库里没有你导入的数据时自动重建。"""
     try:
         from . import rankings_build
+        if available():
+            fp = _bundle_fp()
+            if fp is None or meta().get("bundle") == fp:
+                return True                   # 读不到随附数据时保留现有的库
+            mine = imported()
+            if mine:
+                log(f"[info] 随项目附带的分级数据有更新，但你的分级库里有自己导入的数据（{'、'.join(mine)}），"
+                    "没有自动重建：运行 tools/build_rankings.py 并带上原来的 CSV 即可合并。")
+                return True
+            log("[info] 随项目附带的分级数据有更新，正在重建分级库…（旧库另存为 rankings.db.bak）")
+            try:
+                shutil.copy2(DB_PATH, DB_PATH + ".bak")
+            except OSError:
+                pass
         rankings_build.build(log=log)
         return True
     except Exception as e:
         log(f"[warn] 分级库自动构建失败（不影响其他功能）：{type(e).__name__}: {e}")
         return False
+
+
+def _src_note(key: str, bundled_note: str) -> str:
+    return "（你导入的数据）" if source(key) == "imported" else bundled_note
 
 
 def _ccf_index(c):
@@ -789,11 +855,12 @@ def badge_summary(rank_data: dict) -> list[dict]:
     cas = j.get("cas")
     if isinstance(cas, dict) and cas.get("part"):
         out.append({"scope": "cas", "label": f"中科院{cas['part']}区" + ("Top" if cas.get("top") else ""),
-                    "title": f"中科院分区表 {_ed('cas', '')}（你导入的数据）· {cas.get('field') or ''} · {cas.get('wos') or ''}"})
+                    "title": f"中科院分区表升级版 {_ed('cas', '')}{_src_note('cas', '（中科院文献情报中心）')}"
+                             f" · {cas.get('field') or ''} · {cas.get('wos') or ''}"})
     xr = j.get("xr")
     if isinstance(xr, dict) and xr.get("part"):
         out.append({"scope": "xr", "label": f"新锐{xr['part']}区" + ("Top" if xr.get("top") else ""),
-                    "title": f"新锐期刊分区表 {_ed('xr', '')}（你导入的数据）· {xr.get('field') or ''}"})
+                    "title": f"新锐期刊分区表 {_ed('xr', '')}{_src_note('xr', '（xr-scholar.com）')} · {xr.get('field') or ''}"})
         wl = _xr_warning_label(xr.get("warning"))
         if wl:
             out.append({"scope": "warn", "label": wl,

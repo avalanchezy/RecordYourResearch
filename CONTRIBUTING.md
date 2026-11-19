@@ -63,10 +63,10 @@ python -m pytest
 | `web/app.js` | 前端逻辑 |
 | `web/style.css` | 样式 |
 | `web/vendor/vue.global.prod.js` | 随项目附带的 Vue 3.4.38，**不要修改** |
-| `tools/build_rankings.py` | 导入分级数据的命令行工具 |
+| `tools/build_rankings.py` | 重建分级库、导入或替换分级数据的命令行工具 |
 | `tools/parse_ccf.py` | 从 CCF 官方 PDF 生成 `data-sources/ccf_2026.json` |
 | `tools/demo_seed.py` | 往一个空数据目录里灌入虚构的演示投稿（试用、截图、调试用） |
-| `data-sources/` | 随项目发布的公开数据，有各自的条款（见 [DATA_SOURCES.md](DATA_SOURCES.md)） |
+| `data-sources/` | 随项目附带的分级数据和 `SHA256SUMS`，权利归各自的发布方（见 [DATA_SOURCES.md](DATA_SOURCES.md)） |
 | `tests/` | pytest 测试 |
 
 关于 `web/index.html`：它是 in-DOM 模板，浏览器先把它当普通 HTML 解析，Vue 再在运行时编译。所以属性名会被浏览器转成小写（绑定时请用 kebab-case）；`<table>`、`<select>` 等元素里只能放 HTML 允许的子元素。
@@ -106,14 +106,17 @@ python -m pytest
 - 代码、测试、fixture、示例、截图、issue、PR 和提交信息里，**一律不要**出现真实的论文标题、稿件编号、人名、邮箱、OpenReview forum ID、PDF 或数据库。
 - 用一眼就能看出是虚构的例子：稿件编号 `ABC-D-25-00000`、标题「DemoNet: A Synthetic Network for Testing」、作者 Alice Example、邮箱 `alice@example.com`、拼音 `XIAOMING WANG`。
 - 截图请用 `tools/demo_seed.py` 生成的演示数据，或在一个全新的数据目录（`--data-dir`）里手动建几篇演示投稿后再截。
-- 不要提交数据目录、`*.db`、PDF、导入用的 CSV（中科院分区表 / 新锐 / JCR）或 `rankings.db`。`.gitignore` 已经排除了这些文件，请不要用 `git add -f` 绕过。
+- 不要提交数据目录、`*.db`、PDF、你自己导入用的 CSV（例如 JCR）或 `rankings.db`。`.gitignore` 已经排除了这些文件，请不要用 `git add -f` 绕过。`data-sources/` 里的随附数据文件按下一节的规则维护。
 
 ## `data-sources/` 的贡献
 
-- 只接受来自公开发布资料的事实信息，并注明来源。
+- **CSV 按字节原样保存**：`.gitattributes` 里对 `data-sources/*.csv` 和 `data-sources/SHA256SUMS` 设置了 `-text`，Git 不做换行转换；两个 JSON 文件按普通文本处理。请不要用会改动编码、换行符或文件末尾的工具「整理」这些 CSV。
+- `cas_2025.csv`、`xr_2026.csv` 是上游公开镜像中文件的原样副本，不在本仓库里修改内容；要更新，就把它们换成上游的新文件，同样原样复制。
+- `ccf_2026.json`、`cas_warning_lists.json` 是本项目根据公开资料整理的转录。修正转录错误时，请在 PR 里附上官方来源（链接，以及对应的领域、类别、序号或通知）；改 JSON 不需要动 `SHA256SUMS`。
+- **同步更新 `SHA256SUMS`**：它只记录上游原样副本（CSV）。新增或替换 CSV 之后，在 `data-sources/` 目录里运行 `sha256sum cas_2025.csv xr_2026.csv > SHA256SUMS`（Windows 上请在 Git Bash 里运行；不要用 PowerShell 的 `>`，它会写成 UTF-16），再用 `sha256sum -c SHA256SUMS` 确认（macOS 用 `shasum -a 256 -c SHA256SUMS`）。测试会检查 `SHA256SUMS` 正好列出 `data-sources/` 里的全部 CSV 文件；`<hash>  <name>` 和 `<hash> *<name>` 两种写法都可以，Git Bash 默认的输出就行。
+- **写清来源**：在 `DATA_SOURCES.md` 里记录发布方、版本或发布日期、获取途径（上游仓库、文件路径和 commit）和条目数，上游副本还要写 SHA-256，中英文两部分都要更新。
+- 新增随附数据集请先开 issue 讨论。不接受 JCR 数据（Clarivate 禁止再分发），也不接受抓取任何分级数据的脚本。
 - 只报告问题、不提交修改时，请用「数据来源异议 / Data source concern」issue 模板（转录错误和权利异议都用它）。
-- 修正转录错误时，请在 PR 里附上官方来源（链接，以及对应的领域、类别、序号或通知）。
-- 不接受受许可保护的数据集（中科院分区表、新锐期刊分区表、JCR 等），也不接受抓取这些数据的脚本。
 
 ## 提交 PR
 
@@ -125,6 +128,8 @@ python -m pytest
 ## 许可
 
 本项目以 AGPL-3.0-or-later 发布。提交贡献即表示你同意以 AGPL-3.0-or-later 授权你的贡献，并确认你有权这样授权（例如代码是你自己写的，或来自许可证兼容的来源并已注明出处）。
+
+例外：`data-sources/` 里的第三方数据不在 AGPL 授权范围内，权利归其发布方所有。提交这类文件只表示你确认：它是所注明上游文件未经修改的原样副本，或是依据所注明的公开来源整理的。
 
 ---
 
@@ -153,5 +158,12 @@ Thanks for helping! RecordYourResearch is a small local-only tool for individual
   3. If you change the regex fallback rules (`_RULES`), add negative tests; order matters.
   4. For Chinese statuses, change two places in `server.py`: the `_ZH_STAGE` dict and the `_PASTE_PATTERNS["stage_zh"]` regex. Also add the status to `RAW_STATUS_MAP` in `app/stages.py`, and add a paste-parser test (see `test_official_paste_parser_records_status` in `tests/test_api.py`).
 - **Synthetic data only**: never put real titles, manuscript numbers, names, emails, OpenReview forum ids, PDFs or databases in code, tests, screenshots, issues, PRs or commit messages. Use `ABC-D-25-00000`, "DemoNet: …", Alice Example, `alice@example.com`.
-- **`data-sources/`**: only public facts with a cited source; no licensed datasets (CAS, XR, JCR) and no scrapers for them. To report a transcription error or a rights concern without a PR, use the "Data source concern" issue template.
-- **Licence**: by contributing you agree that your contribution is licensed under AGPL-3.0-or-later and that you have the right to license it.
+- **`data-sources/`**:
+  - The CSV files and `SHA256SUMS` are stored byte-exact (`data-sources/*.csv -text` and `data-sources/SHA256SUMS -text` in `.gitattributes`); don't let tools reformat them. The two JSON files get normal text handling.
+  - `cas_2025.csv` and `xr_2026.csv` are unmodified copies of upstream mirror files. Update them by replacing them with newer upstream files, never by editing.
+  - `ccf_2026.json` and `cas_warning_lists.json` are our own transcriptions. Fixes need an official source; they don't touch `SHA256SUMS`.
+  - `SHA256SUMS` covers only the upstream CSV copies. After adding or replacing a CSV, run `sha256sum cas_2025.csv xr_2026.csv > SHA256SUMS` in `data-sources/`. On Windows, use Git Bash, not PowerShell's `>`, which writes UTF-16. Verify with `sha256sum -c SHA256SUMS`, or `shasum -a 256 -c SHA256SUMS` on macOS. A test checks that `SHA256SUMS` lists exactly the CSV files in `data-sources/`; both `<hash>  <name>` and `<hash> *<name>` are accepted, so Git Bash's default output is fine.
+  - Document the provenance in `DATA_SOURCES.md`, in both languages: publisher, edition or release date, where it came from (upstream repository, path, commit) and entry count, plus the SHA-256 for upstream copies.
+  - Discuss new bundled datasets in an issue first. No JCR data (Clarivate forbids redistribution) and no scrapers.
+  - To report a transcription error or a rights concern without a PR, use the "Data source concern" issue template.
+- **Licence**: by contributing you agree that your contribution is licensed under AGPL-3.0-or-later and that you have the right to license it. Exception: third-party data in `data-sources/` is not covered by the AGPL, and its publishers keep all rights. Submitting such a file only confirms that it is an unmodified copy of the cited upstream file, or was compiled from the cited public source.

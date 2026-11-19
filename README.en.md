@@ -6,14 +6,14 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.1, the first public release. **The user interface is in Chinese only.** UI labels are quoted in Chinese below so you can find them.
+This is v0.1.1. **The user interface is in Chinese only.** UI labels are quoted in Chinese below so you can find them.
 
 ## Overview
 
 - **OpenReview, fully automatic**: bind your own OpenReview account and sync all your submissions across venues (status, number of released reviews, decisions) with one click. While the app is running it syncs again about once a day.
 - **Elsevier journals, semi-automatic**: look up the status on the official page yourself, then paste the page text into the app. It extracts the status, reviewer counts, dates and revision due date and records them on the timeline. There is also an experimental one-click query, off by default.
 - **Other channels, manual**: IEEE, Springer, ACM, MDPI, CMT and others are logged by hand with an Editorial Manager / ScholarOne-style status vocabulary.
-- **Built first for Chinese CS/AI researchers**: venues show CCF ranking and CAS journal-warning badges. If you have legitimate access to the CAS journal ranking (中科院分区表), the XR ranking (新锐期刊分区表) or JCR, you can import them yourself.
+- **Built first for Chinese CS/AI researchers**: venues show CCF ranks, CAS journal ranks (中科院分区表, upgraded edition 2025), XR journal ranks (新锐期刊分区表 2026) and CAS journal-warning badges, offline and out of the box. If you have a JCR licence, you can import JCR yourself.
 
 The project is not affiliated with Elsevier, OpenReview, Clarivate, the National Science Library of the Chinese Academy of Sciences (中国科学院文献情报中心), 新锐学术 or the China Computer Federation (CCF). See the [disclaimer](#disclaimer).
 
@@ -24,7 +24,7 @@ The project is not affiliated with Elsevier, OpenReview, Clarivate, the National
 - PDF parsing is rule-based, not OCR. Scanned or encrypted PDFs cannot be parsed, and extracted data must be checked before you save it.
 - OpenReview accounts with multi-factor authentication (MFA) are not supported for automatic sync.
 - OpenReview account sync covers venues on API v2 (api2, most venues since 2023). For older venues that exist only on the old API, fill in the forum id under 「编辑信息」 and use the single-paper query.
-- Licensed ranking data (CAS, XR, JCR) is not included.
+- JCR (impact factors and quartiles) is not bundled, because Clarivate forbids redistribution. If you have a licence, you can import it yourself.
 - Windows 10/11 is the primary platform; macOS and Linux are best effort.
 
 ## Features
@@ -36,7 +36,7 @@ The project is not affiliated with Elsevier, OpenReview, Clarivate, the National
 - **Overview ("总览")**: a "since your last visit" inbox lists every status change found by OpenReview sync or polling, including when you click 「同步我的投稿」 or 「立即全量轮询」 yourself. Manual entries, pasted official results, the single-paper 「立即查询」 and 「一键查稿」 are not listed. A bell badge and `(N)` in the tab title show the unread count. Desktop notifications are optional and only fire while the page is open, even in a background tab. The page checks for changes every 5 minutes and when you switch back to it. The overview also shows submissions found on OpenReview but not yet in your library (待建档: import, import and link, or ignore), reminders, stats and the stage distribution.
 - **List ("投稿列表")**: categories 在投在审 / 已录用 / 已拒稿 / 已撤稿 / 归档 / 全部 / 回收站 (active, accepted, rejected, withdrawn, archived, all, recycle bin), with a stage filter, search and sorting. You can export the current list as CSV: it opens directly in Excel (UTF-8 with BOM), is safe against formula injection and has a dated filename. The top-bar 「导出台账 CSV」 exports everything (archived included, recycle bin excluded).
 - **Detail drawer**: a latest-status card, the timeline, related submissions (转投 resubmitted / 扩写 extended / 会议版·期刊版 conference & journal versions…) and links to the OpenReview page or the submission system. If you leave the submission-system link empty, the app infers it from the channel or manuscript number. The resubmit flow copies a rejected paper into a new submission and suggests CCF venues in the same field at the same or one lower rank. Deleting moves a submission to the recycle bin (回收站), where it can be restored; after 30 days it is permanently deleted together with its PDF (the purge runs with the daily background tasks, so not under `--no-daily`). Archiving, moving to the recycle bin, unlinking and deleting a timeline entry can be undone from the notification (「撤销」). Every view has its own URL (deep links, browser back/forward).
-- **Ranking badges**: CCF-A/B/C (CCF list 2026) and ⚠ CAS warning-list badges work out of the box. Imported CAS, XR and JCR data adds more badges. Tooltips show the source and edition. Badges use strict matching only, and workshops or "Findings" never inherit the main venue's rank.
+- **Ranking badges**: out of the box you get CCF-A/B/C (CCF list 2026), CAS rank 1–4 / Top (中科院分区表, upgraded edition 2025), XR rank 1–4 / Top (新锐期刊分区表 2026) and ⚠ warning badges (CAS warning lists 2024/2025 and the XR warning flag). Imported JCR data adds the JCR quartile and impact factor. Tooltips show the source and edition, e.g. 「中科院分区表升级版 2025（中科院文献情报中心）」 or 「新锐期刊分区表 2026（xr-scholar.com）」, and data you imported yourself is marked 「（你导入的数据）」. Badges use strict matching only, and workshops or "Findings" never inherit the main venue's rank.
 
 ## Screenshots
 
@@ -74,6 +74,8 @@ python run.py
 PowerShell may block `.venv\Scripts\activate` because of its execution policy. You can skip activation and call the environment's Python directly: `.venv\Scripts\python -m pip install -r requirements.txt`, then `.venv\Scripts\python run.py`.
 
 **One-click start**: double-click `start.bat` on Windows, or run `./start.sh` (or `sh start.sh`) on macOS or Linux. The script creates `.venv`, installs the requirements, starts the app and opens your browser once the server is ready. It re-runs the install automatically if a previous install failed or the requirements changed. If something still looks broken, delete `.venv` and run the script again. Packages installed this way live only in `.venv`, so run the tools with `.venv\Scripts\python` (`.venv/bin/python` on macOS/Linux).
+
+On first start the app creates the data folder (default `./data`) and builds the local ranking database from the bundled CCF list, warning lists, CAS 2025 and XR 2026 tables, which takes a few seconds.
 
 **Try it with demo data**: fill a new, empty folder with made-up submissions, then point the app at it. This makes no network calls and leaves your real data alone.
 
@@ -170,23 +172,34 @@ Use "＋ 登记状态变化" (log a status change) in the drawer. Pick a stage a
 |---|---|---|
 | CCF list of recommended international conferences and journals (7th edition, 2026) | yes | `data-sources/ccf_2026.json` |
 | CAS international journal warning lists 2024 & 2025 | yes | `data-sources/cas_warning_lists.json` |
-| 中科院分区表 (CAS journal ranking, upgraded edition) | no | subscriber database, import your own |
-| 新锐期刊分区表 (XR journal ranking) | no | terms restrict reuse, import your own |
-| JCR | no | Clarivate forbids redistribution and derivative databases, import your own |
+| 中科院分区表 (CAS journal ranking, upgraded edition) 2025 | yes | `data-sources/cas_2025.csv`, 21,772 journals |
+| 新锐期刊分区表 (XR journal ranking) 2026, xr-scholar.com | yes | `data-sources/xr_2026.csv`, 22,299 journals |
+| JCR | no | Clarivate forbids redistribution; import your own if you have a licence |
 
-The included files have their own terms and are **not** covered by the AGPL; see [DATA_SOURCES.md](DATA_SOURCES.md). To import data you are entitled to use:
+- The four bundled files work offline, out of the box. The data comes from its original publishers, who keep all rights, and it is **not** covered by the AGPL.
+- `ccf_2026.json` and `cas_warning_lists.json` are this project's own transcriptions of the official PDF and public notices.
+- The CAS and XR tables (`cas_2025.csv`, `xr_2026.csv`) are unmodified, byte-identical copies of the corresponding files in the public [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR) mirror; `data-sources/SHA256SUMS` lets you verify them. We bundle them so researchers get badges offline, out of the box.
+- Rights holders who object can open an issue with the ["Data source concern" template](https://github.com/avalanchezy/RecordYourResearch/issues/new?template=data_source.md), and we will remove the file promptly.
+- According to a [report by IT之家 (ITHome)](https://www.ithome.com/0/934/100.htm), the National Science Library of CAS announced on 2026-03-27 that it stops updating the journal ranking from 2026, so the 2025 edition is the last one.
+- Sources, editions, entry counts and checksums are in [DATA_SOURCES.md](DATA_SOURCES.md).
+
+**Importing or replacing data**:
 
 ```bash
-python tools/build_rankings.py --cas FILE --xr FILE --jcr FILE
+python tools/build_rankings.py                  # rebuild from the bundled data only
+python tools/build_rankings.py --jcr FILE       # add JCR data you are licensed to use
+python tools/build_rankings.py --xr FILE        # replace the bundled XR table, e.g. with a newer edition
 ```
 
 - If you installed with start.bat or start.sh, use `.venv\Scripts\python` (`.venv/bin/python` on macOS/Linux) instead of `python`.
-- Pass only the files you have.
+- `--jcr FILE` adds JCR. `--cas FILE` and `--xr FILE` replace the bundled table with your CSV. You can combine them.
 - Each run rebuilds the whole ranking database, so pass every CSV you want to keep.
-- Optional `--cas-edition`, `--xr-edition` and `--jcr-edition` labels appear in badge tooltips. Use `--data-dir PATH` if you changed the data folder.
-- Restart the app afterwards.
+- Optional `--cas-edition`, `--xr-edition` and `--jcr-edition` labels appear in badge tooltips; otherwise the edition comes from the CSV's 年份 column (CAS, XR) or the `IF(<year>)` header (JCR). Use `--data-dir PATH` if you changed the data folder.
+- Restart the app afterwards. Data you imported is marked 「（你导入的数据）」 in tooltips.
+- When a later version ships updated bundled data, startup rebuilds the ranking database automatically. If you imported your own CSVs, the app keeps your database and logs a message, and the 分级速查 card on the 渠道查询 page tells you to rerun `tools/build_rankings.py` with your CSVs.
+- Keep the CSVs you import (JCR in particular), and any `rankings.db` that contains them, inside your data folder. Never commit or share them.
 
-Expected columns (CSV with a header row, saved as UTF-8 or GBK, so Excel's 「CSV（逗号分隔）」 format on Chinese Windows works; required columns are listed in [DATA_SOURCES.md](DATA_SOURCES.md#english-summary)):
+Columns for a JCR CSV or a replacement CAS/XR CSV (header row; saved as UTF-8 or GBK, so Excel's 「CSV（逗号分隔）」 format on Chinese Windows works; required columns are listed in [DATA_SOURCES.md](DATA_SOURCES.md#english-summary)):
 
 - CAS: `Journal`, `ISSN/EISSN`, `大类`, `大类分区`, `Top`, `Web of Science`
 - XR: `Journal`, `ISSN`, `EISSN`, `大类中文名`, `大类新锐分区`, `Top`, `预警标记`
@@ -205,7 +218,7 @@ Expected columns (CSV with a header row, saved as UTF-8 or GBK, so Excel's 「CS
 - **"Needs re-binding" after moving to a new computer?** Expected: stored passwords are tied to the original machine and user. On the 「渠道查询」 page, unbind and bind your OpenReview account again.
 - **The Elsevier query says a captcha is required.** By design the app never bypasses it. Look the status up on the official page and paste it.
 - **A status was not recognised or went to the wrong stage.** Open an "Unrecognized status" issue with the raw status text, the channel and the expected stage only.
-- **No badge or no CAS rank for a journal?** CAS, XR and JCR data must be imported. Badges use strict matching, so try the venue's full name.
+- **No badge or no CAS rank for a journal?** The CAS and XR tables are bundled, but badges use strict matching only: try the journal's full name under 「编辑信息」, or look it up in 分级速查. The ranking tables cover journals only; conferences get CCF ranks. JCR is not bundled and must be imported.
 - **Does it keep syncing when the browser is closed?** Yes, as long as `run.py` is running. Desktop notifications need the page open.
 - **Can I host it for my lab?** No. There is no login, and OpenReview's terms forbid third-party use on your behalf. Everyone should run their own copy.
 - **Port 8765 is in use.** If RecordYourResearch is already running there, starting it again does not start a second copy; with `--open` (or start.bat / start.sh) it opens the browser to the running one. If another program uses the port, use `--port 8766`.
@@ -217,7 +230,7 @@ Expected columns (CSV with a header row, saved as UTF-8 or GBK, so Excel's 「CS
 
 - This is an independent open-source project. It is not affiliated with, endorsed or sponsored by Elsevier, OpenReview, Clarivate, the National Science Library of CAS, 新锐学术 or CCF. Names and trademarks belong to their owners and are used only to describe compatibility. No logos are used.
 - Status information comes from your own entries, pasted official pages or responses from official services, and may be late or wrong. **The official submission system and the editorial office are always authoritative.** Don't rely on this tool for deadlines.
-- Ranking badges are for reference only and are not an evaluation of any venue or paper; bundled data may be outdated or contain transcription errors. CCF itself says its list is not meant as a basis for academic evaluation.
+- Ranking badges are for reference only and are not an evaluation of any venue or paper; **the publishers' official data always prevails**. Bundled data may be outdated or contain transcription errors. CCF itself says its list is not meant as a basis for academic evaluation.
 - The Elsevier one-click query is unofficial and experimental. Use it at your own risk.
 - You are responsible for complying with the terms of the services you use.
 - The software is provided "as is", without warranty; see sections 15 and 16 of the AGPL-3.0.
@@ -225,6 +238,6 @@ Expected columns (CSV with a header row, saved as UTF-8 or GBK, so Excel's 「CS
 ## Licence
 
 - Code: [GNU AGPL-3.0-or-later](LICENSE), because the project depends on PyMuPDF, which is licensed under AGPL-3.0 (or an Artifex commercial licence).
-- Files under `data-sources/` are **not** covered by the AGPL; see [DATA_SOURCES.md](DATA_SOURCES.md).
+- Files under `data-sources/` are **not** covered by the AGPL; their publishers keep all rights. See [DATA_SOURCES.md](DATA_SOURCES.md).
 - The bundled Vue 3.4.38 (`web/vendor/vue.global.prod.js`) is MIT-licensed; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for all third-party licences.
 - Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately as described in [SECURITY.md](SECURITY.md).

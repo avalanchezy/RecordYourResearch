@@ -101,6 +101,8 @@ createApp({
       // 实验功能开关 / 分级数据集 / 版本信息（来自 /api/stages）
       features: { elsevier_query: false },
       rankDatasets: {},
+      rankEditions: {},
+      rankOutdated: false,
       secretStorage: '',
       appVersion: '', repoUrl: '',
       pollLogs: [],
@@ -195,6 +197,8 @@ createApp({
       this.commonVenues = r.common_venues || [];
       this.features = r.features || { elsevier_query: false };
       this.rankDatasets = r.rank_datasets || {};
+      this.rankEditions = r.rank_editions || {};
+      this.rankOutdated = !!r.rank_outdated;
       this.secretStorage = r.secret_storage || '';
       this.appVersion = r.version || '';
       this.repoUrl = r.repo || '';
@@ -1073,7 +1077,16 @@ createApp({
     },
     rankMissingHint() {
       const d = this.rankDatasets || {};
-      return (d.cas || d.xr || d.jcr) ? '' : '（中科院分区 / 新锐分区 / JCR 需你自己导入，见 README「分级数据」）';
+      if (this.rankOutdated) return '随项目附带的分级数据有更新；你的分级库里有自己导入的数据，所以没有自动重建。'
+        + '运行 tools/build_rankings.py 并带上原来的 CSV（例如 --jcr 你的JCR.csv）即可合并，见 README「分级数据」。';
+      if (!d.ccf) return '分级库不可用：运行 tools/build_rankings.py 重建（见 README「分级数据」）。';
+      return (d.cas || d.xr) ? '' : '分级库里没有中科院分区 / 新锐分区：运行 tools/build_rankings.py 重建（见 README「分级数据」）。';
+    },
+    rankSourcesText() {
+      const d = this.rankDatasets || {}, e = this.rankEditions || {};
+      const ed = k => (e[k] ? ' ' + e[k] : '');
+      return ['CCF 推荐目录' + ed('ccf'), d.cas ? '中科院分区' + ed('cas') : '', d.xr ? '新锐分区' + ed('xr') : '',
+              d.jcr ? 'JCR' + ed('jcr') : '', '中科院预警名单'].filter(Boolean).join(' · ');
     },
     secretStorageText(s) {
       return { dpapi: 'Windows 凭据保护：只有这台电脑上的当前 Windows 用户能解开',

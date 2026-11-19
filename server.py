@@ -42,7 +42,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 app = FastAPI(title="RecordYourResearch", version=config.VERSION,
               docs_url=None, redoc_url=None, openapi_url=None)
 db.init_db()
-rk.ensure_db()          # 首次启动：用随项目发布的 CCF 目录 + 预警名单构建分级库
+rk.ensure_db()          # 首次启动构建分级库（CCF + 预警名单 + 中科院 2025 + 新锐 2026）；随附数据更新后自动重建
 
 VENUE_TYPES = ("journal", "conference")
 TRACKERS = ("manual", "openreview", "elsevier")
@@ -77,6 +77,8 @@ async def _local_only(request: Request, call_next):
     resp.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["Referrer-Policy"] = "no-referrer"
+    if not request.url.path.startswith("/api/"):
+        resp.headers["Cache-Control"] = "no-cache"   # 页面与脚本每次向本机校验：升级后不会拿旧的 app.js 配新页面
     return resp
 
 
@@ -376,7 +378,8 @@ def _log_poll(conn, channel, target, ok, latency_ms, error=""):
 def stages():
     return {"stages": STAGES, "common_venues": openreview.COMMON_VENUES,
             "categories": CATEGORY_STAGES, "features": _features(),
-            "rank_datasets": rk.datasets(), "version": config.VERSION,
+            "rank_datasets": rk.datasets(), "rank_editions": rk.editions(), "rank_outdated": rk.outdated(),
+            "version": config.VERSION,
             "repo": config.REPO_URL, "secret_storage": vault.backend()}
 
 

@@ -17,8 +17,10 @@
 **/uploads/
 **/pdfs/
 
-# Licensed ranking datasets (中科院分区 / 新锐 / JCR) — import locally, never commit
+# Ranking CSVs you import yourself (e.g. JCR) — never commit. Bundled data lives in data-sources/.
 *.csv
+!data-sources/cas_2025.csv
+!data-sources/xr_2026.csv
 *.xls
 *.xlsx
 ccf*.pdf

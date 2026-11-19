@@ -160,5 +160,5 @@ OUT.write_text(json.dumps({
     "released": "2026-03-31（4月9日勘误更新）",
     "retrieved": "2026-11-17",
     "items": records,
-}, ensure_ascii=False, indent=1), encoding="utf-8")
+}, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")      # Windows 上也写 LF
 print("saved →", OUT)

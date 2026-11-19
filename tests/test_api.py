@@ -18,9 +18,13 @@ def _new(client, title="DemoNet: Synthetic Paper", **venue):
 def test_first_run_builds_public_rankings(client):
     assert rk.available()
     ds = rk.datasets()
-    assert ds["ccf"] and ds["warning_lists"] and not ds["jcr"] and not ds["cas"]
+    assert ds["ccf"] and ds["warning_lists"] and ds["cas"] and ds["xr"] and not ds["jcr"]
+    assert rk.imported() == [] and not rk.outdated()
     r = client.post("/api/rankings/lookup", json={"name": "NeurIPS", "venue_type": "conference"}).json()
     assert r["ccf"]["rank"] == "A" and r["available"] is True
+    st = client.get("/api/stages").json()
+    assert st["rank_editions"]["cas"] == "2025" and st["rank_editions"]["xr"] == "2026"
+    assert st["rank_outdated"] is False and st["rank_datasets"]["cas"]
 
 
 def test_badges_show_source_and_edition(client):
@@ -28,6 +32,10 @@ def test_badges_show_source_and_edition(client):
     d = client.get(f"/api/submissions/{sid}").json()
     ccf = [b for b in d["badges"] if b["scope"] == "ccf"]
     assert ccf and "CCF 推荐目录" in ccf[0]["title"]
+    cas = [b for b in d["badges"] if b["scope"] == "cas"]       # 随项目附带的中科院 2025 / 新锐 2026
+    xr = [b for b in d["badges"] if b["scope"] == "xr"]
+    assert cas and "中科院分区表升级版 2025（中科院文献情报中心）" in cas[0]["title"]
+    assert xr and "新锐期刊分区表 2026（xr-scholar.com）" in xr[0]["title"]
 
 
 def test_timeline_and_event_undo(client):

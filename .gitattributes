@@ -2,3 +2,6 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 *.png binary
+# 随附的两份上游 CSV 原样存储，不做换行转换（与上游逐字节一致，见 data-sources/SHA256SUMS）
+data-sources/*.csv -text
+data-sources/SHA256SUMS -text

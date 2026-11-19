@@ -65,8 +65,17 @@ Packages in `requirements-dev.txt` (for example pytest) are only used to develop
 
 ## 4. Data files
 
-The files under `data-sources/` are data, not software, and are **not** covered by the AGPL. See [DATA_SOURCES.md](DATA_SOURCES.md) for their sources and terms.
+The files under `data-sources/` are data, not software. They are **not** covered by the AGPL, and their publishers keep all rights.
+
+| File | Content | Publisher |
+|---|---|---|
+| `ccf_2026.json` | CCF list of recommended international conferences and journals, 7th edition (2026), compiled by this project from the official PDF | China Computer Federation (CCF) |
+| `cas_warning_lists.json` | International journal warning lists, 2024 and 2025 editions, compiled from public notices | National Science Library, Chinese Academy of Sciences |
+| `cas_2025.csv` | CAS journal ranking (中科院分区表), upgraded edition 2025: an unmodified copy of a file in the public hitfyd/ShowJCR mirror | National Science Library, Chinese Academy of Sciences |
+| `xr_2026.csv` | XR journal ranking (新锐期刊分区表) 2026: an unmodified copy of a file in the public hitfyd/ShowJCR mirror | xr-scholar.com |
+
+`data-sources/SHA256SUMS` holds the checksums of the two unmodified copies, `cas_2025.csv` and `xr_2026.csv`. See [DATA_SOURCES.md](DATA_SOURCES.md) for provenance and editions, and for how rights holders can ask for a file to be removed.
 
 ## 5. Trademarks
 
-OpenReview, Elsevier (爱思唯尔), Editorial Manager, ScholarOne, Clarivate, Journal Citation Reports (JCR), CCF and the other names mentioned in this project are trademarks or names of their respective owners. They are used only to describe compatibility. The project includes no logos of these organisations and is not affiliated with them.
+OpenReview, Elsevier (爱思唯尔), Editorial Manager, ScholarOne, Clarivate, Journal Citation Reports (JCR), CCF, 中科院分区表, 新锐期刊分区表 and the other names mentioned in this project are trademarks or names of their respective owners. They are used only to describe compatibility. The project includes no logos of these organisations and is not affiliated with them.
