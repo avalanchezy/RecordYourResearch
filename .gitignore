@@ -1,0 +1,73 @@
+# ============================================================
+# data/ holds your PRIVATE data (tracker.db, PDFs, uploads, backups, logs)
+# and any ranking files you imported. Nothing under data/ is ever committed.
+# ============================================================
+/data/
+/demo-data/
+
+# belt-and-braces: databases, backups, manuscripts anywhere in the tree
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.part
+**/backups/
+**/uploads/
+**/pdfs/
+
+# Licensed ranking datasets (中科院分区 / 新锐 / JCR) — import locally, never commit
+*.csv
+*.xls
+*.xlsx
+ccf*.pdf
+
+# Manuscripts & review files (tests generate their PDFs on the fly)
+*.pdf
+*.doc
+*.docx
+
+# Logs
+*.log
+logs/
+
+# Screenshots: only sanitized demo screenshots under docs/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+!docs/**/*.png
+!docs/**/*.jpg
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments & secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+*.pem
+*.key
+
+# Editors / OS / tooling
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 报告安全漏洞 / Report a security vulnerability
+    url: https://github.com/avalanchezy/RecordYourResearch/security/advisories/new
+    about: "请私下报告，不要公开提 issue（见 SECURITY.md）。链接打不开时，开一个只写「需要私下报告安全问题」、不含任何细节的 issue，维护者会联系你。/ Report privately, not in a public issue (see SECURITY.md). If the link does not work, open an issue that only says you need to report a security problem privately (no details); the maintainers will contact you."

@@ -1,0 +1,138 @@
+{
+ "title": "国际期刊预警名单（International Journal Early Warning List）",
+ "issuer": "中国科学院文献情报中心 期刊分区表团队",
+ "note": "公开发布的名单，仅收录刊名与预警原因（事实信息）。不属于本项目 AGPL 授权范围；权利人如有异议请提 issue，我们会移除。2025 版之后未见新的单独名单。",
+ "provenance": "依据各年度公开通知整理；转录与 hitfyd/ShowJCR 仓库（GPL-3.0）中的同名数据核对一致。",
+ "editions": [
+  {
+   "year": "2025",
+   "released": "2025-03-20",
+   "count": 5,
+   "items": [
+    {
+     "journal": "Wireless Personal Communications",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "Natural Resources Forum",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "Computers & Electrical Engineering",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "NUMERICAL HEAT TRANSFER PART A-APPLICATIONS",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "SCALABLE COMPUTING-PRACTICE AND EXPERIENCE",
+     "reason": "论文工厂"
+    }
+   ]
+  },
+  {
+   "year": "2024",
+   "released": "2024",
+   "count": 24,
+   "items": [
+    {
+     "journal": "CANCERS",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "DIAGNOSTICS",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "ENVIRONMENTAL SCIENCE AND POLLUTION RESEARCH",
+     "reason": "引用操纵、论文工厂"
+    },
+    {
+     "journal": "FUEL",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "JOURNAL OF CLINICAL MEDICINE",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "JOURNAL OF PERSONALIZED MEDICINE",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "RADIOLOGIA MEDICA",
+     "reason": "引用操纵"
+    },
+    {
+     "journal": "BIOENGINEERED",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "CONNECTION SCIENCE",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "MULTIMEDIA TOOLS AND APPLICATIONS",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "PSYCHIATRIA DANUBINA",
+     "reason": "论文工厂"
+    },
+    {
+     "journal": "JOURNAL OF BIOBASED MATERIALS AND BIOENERGY",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "JOURNAL OF BIOMATERIALS AND TISSUE ENGINEERING",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "JOURNAL OF BIOMEDICAL NANOTECHNOLOGY",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "JOURNAL OF NANOELECTRONICS AND OPTOELECTRONICS",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "JOURNAL OF SENSORS",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "MATERIALS EXPRESS",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "SCIENCE OF ADVANCED MATERIALS",
+     "reason": "论文工厂、中国作者占比畸高"
+    },
+    {
+     "journal": "ALTERNATIVE THERAPIES IN HEALTH AND MEDICINE",
+     "reason": "中国作者占比畸高"
+    },
+    {
+     "journal": "CMES-COMPUTER MODELING IN ENGINEERING & SCIENCES",
+     "reason": "中国作者占比畸高"
+    },
+    {
+     "journal": "EXPERIMENTAL AND THERAPEUTIC MEDICINE",
+     "reason": "中国作者占比畸高"
+    },
+    {
+     "journal": "FRONTIERS IN ENERGY RESEARCH",
+     "reason": "中国作者占比畸高"
+    },
+    {
+     "journal": "MATHEMATICAL BIOSCIENCES AND ENGINEERING",
+     "reason": "中国作者占比畸高"
+    },
+    {
+     "journal": "TROPICAL JOURNAL OF PHARMACEUTICAL RESEARCH",
+     "reason": "中国作者占比畸高"
+    }
+   ]
+  }
+ ]
+}

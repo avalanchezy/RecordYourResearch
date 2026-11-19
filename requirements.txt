@@ -1,0 +1,10 @@
+# Python 3.10+ (CI: 3.10, 3.12, 3.14)
+fastapi>=0.110,<1
+uvicorn>=0.27,<1
+pydantic>=2,<3
+httpx>=0.27,<1
+python-multipart>=0.0.9
+# PyMuPDF (AGPL-3.0). 2.x pulls in extra layout models / dependencies; stay on 1.x for now.
+pymupdf>=1.24,<2
+# macOS / Linux: store the OpenReview password in the system keychain (Windows uses DPAPI)
+keyring>=24; sys_platform != "win32"
