@@ -181,6 +181,28 @@ def test_official_paste_parser_records_status(client):
     assert bad["warning"]
 
 
+def test_official_paste_splits_glued_old_new_reviewer_counts(client):
+    """官方页对有变化的计数显示「旧值 →(图标) 新值」，复制后粘成 "02"、"23"：要拆成旧值和新值。"""
+    sid = _new(client, "Transition Paper", tracker="elsevier", journal_acronym="ESWA")
+    client.patch(f"/api/submissions/{sid}", json={"manuscript_number": "ESWA-D-25-00001"})
+    head = "Manuscript Number\nESWA-D-25-00001\n当前进度：\nUnder Review\n"
+    first = head + "更新时间：2025年1月10日\n评审完成：\n0\n接受评审邀请：\n2\n发出评审邀请*：\n5"
+    assert client.post(f"/api/submissions/{sid}/elsevier-paste/confirm", json={"text": first}).json()["written"]
+    later = (head + "更新时间：2025年1月20日\n评审完成：\n02\n接受评审邀请：\n23\n发出评审邀请*：\n8\n"
+             "*此为系统记录的邀请数，仅供参考。稿件在同行评审中所需的完成评审数取决于期刊要求。")
+    p = client.post(f"/api/submissions/{sid}/elsevier-paste", json={"text": later}).json()
+    assert p["reviewers"] == {"completed": 2, "accepted": 3, "invited": 8}
+    assert p["reviewers_prev"] == {"completed": 0, "accepted": 2}
+    assert not p["reviewers_ambiguous"] and "0→2" in p["reviewers_note"]
+    assert client.post(f"/api/submissions/{sid}/elsevier-paste/confirm", json={"text": later}).json()["written"]
+    again = client.post(f"/api/submissions/{sid}/elsevier-paste/confirm", json={"text": later}).json()
+    assert not again["written"]                  # 同一页面重复粘贴：不重复记录
+    events = [e for e in client.get(f"/api/submissions/{sid}").json()["events"] if e["source"] == "elsevier"]
+    latest = max(events, key=lambda e: (e["observed_at"], e["id"]))
+    assert latest["payload"]["reviewers"] == {"completed": 2, "accepted": 3, "invited": 8}
+    assert latest["payload"]["reviewers_prev"] == {"completed": 0, "accepted": 2}
+
+
 def test_failed_bind_stores_nothing(client, fake_openreview, secure_store, monkeypatch, server_mod):
     def bad_login(email, pw):
         raise RuntimeError("OpenReview 登录失败：用户名或密码错误")

@@ -26,6 +26,7 @@ from pydantic import BaseModel
 from app import config
 from app import db
 from app import elsevier
+from app.elsevier_counters import parse_reviewer_counters
 from app import openreview
 from app import rankings as rk
 from app import syspaste
@@ -1798,11 +1799,6 @@ _PASTE_PATTERNS = {
     "stage_zh": re.compile(r"(同行评审进行中|正在评审|编辑初审|编辑处理中|初审阶段|"
                            r"所需审稿意见完成|同行评审完成|审稿完成|决策中|返修|修改中|"
                            r"已提交|已录用|已接受|已拒稿|已退稿|已撤稿|制作中)"),
-    "reviewers_done": _label_re(r"评审完成|Reviews?\s+completed|Completed\s+reviews?", r"(\d+)"),
-    "reviewers_accepted": _label_re(r"接受评审邀请|Reviewers?\s+accepted|"
-                                    r"Review\s+invitations?\s+accepted|Accepted\s+invitations?", r"(\d+)"),
-    "reviewers_invited": _label_re(r"发出评审邀请|Reviewers?\s+invited|Review\s+invitations?\s+sent|"
-                                   r"Invitations?\s+sent", r"(\d+)"),
     "submitted": _label_re(r"提交日期|提交时间|投稿日期|Date\s+submitted|Submission\s+date|"
                            r"Submitted\s+on|Submitted", _DATE_PAT),
     "updated": _label_re(r"更新时间|最后更新|更新日期|Last\s+updated|Updated\s+on|Updated|"
@@ -1835,8 +1831,10 @@ def _status_key(line: str) -> str:
     return re.sub(r"\s+", " ", k).strip(" .;:，。")
 
 
-def _parse_official_paste(text: str) -> dict:
-    """自适应解析官方查询页粘贴文本（中文微信页 / 英文页 / 单行粘贴；含二维码提示语等噪声）。"""
+def _parse_official_paste(text: str, prev_reviewers: dict | None = None) -> dict:
+    """自适应解析官方查询页粘贴文本（中文微信页 / 英文页 / 单行粘贴；含二维码提示语等噪声）。
+
+    prev_reviewers：该稿上次记录的审稿人统计，用来拆分官方页「旧值→新值」粘连的数字。"""
     if not text or not text.strip():
         raise HTTPException(400, "粘贴内容为空")
     t = _prep_paste(text)
@@ -1863,12 +1861,11 @@ def _parse_official_paste(text: str) -> dict:
             if _status_key(line) in RAW_STATUS_MAP:
                 out["stage"], out["raw"] = RAW_STATUS_MAP[_status_key(line)], line.strip()
                 break
-    # ④ 审稿人统计
-    for key, pat in (("completed", "reviewers_done"), ("accepted", "reviewers_accepted"),
-                     ("invited", "reviewers_invited")):
-        m = _PASTE_PATTERNS[pat].search(t)
-        if m:
-            out["reviewers"][key] = int(m.group(1))
+    # ④ 审稿人统计：官方页对有变化的计数显示「旧值 →(图标) 新值」，复制后粘成 "02"、"23"，
+    #    交给 elsevier_counters 拆分（参考上次记录 + 完成 ≤ 接受 ≤ 邀请），读法有歧义时给出提示
+    out.update({"reviewers_prev": {}, "reviewers_at_least": [], "reviewers_ambiguous": False,
+                "reviewers_note": ""})
+    out.update(parse_reviewer_counters(text, prev_reviewers))
     # ⑤ 日期
     for key, pat in (("observed_at", "updated"), ("submitted_at", "submitted"),
                      ("revise_due", "revise_due")):
@@ -1889,6 +1886,16 @@ def _parse_official_paste(text: str) -> dict:
     return out
 
 
+def _last_reviewers(c, sid: int) -> dict | None:
+    """该稿时间线上最近一次记录的审稿人统计。"""
+    for r in c.execute("SELECT payload FROM status_events WHERE submission_id=?"
+                       " ORDER BY observed_at DESC, id DESC", (sid,)).fetchall():
+        pl = db._jload(r["payload"], {})
+        if isinstance(pl, dict) and isinstance(pl.get("reviewers"), dict) and pl["reviewers"]:
+            return pl["reviewers"]
+    return None
+
+
 def _ms_base(s: str) -> str:
     """稿件编号去掉修改稿后缀：ESWA-D-25-00000R1 → ESWA-D-25-00000。"""
     return re.sub(r"R\d+$", "", (s or "").strip().upper())
@@ -1907,7 +1914,8 @@ def elsevier_paste(sid: int, p: PasteIn):
     """粘贴官方查询页文本 → 自适应解析 → 预览（不写入，前端确认后再调 confirm）。"""
     with db.get_db() as c:
         sub = _require_live_sub(c, sid)
-    parsed = _parse_official_paste(p.text)
+        prev = _last_reviewers(c, sid)
+    parsed = _parse_official_paste(p.text, prev)
     parsed["warning"] = _paste_mismatch(sub["manuscript_number"], parsed)
     stored = sub["submitted_at"] or ""
     parsed["submitted_note"] = "" if not parsed["submitted_at"] else (
@@ -1921,7 +1929,7 @@ def elsevier_paste_confirm(sid: int, p: PasteIn):
     """确认写入：状态事件 + 审稿人统计 + 日期回填（与上次官方结果完全相同则不重复记事件）。"""
     with db.get_db() as c:
         sub = _require_live_sub(c, sid)
-        parsed = _parse_official_paste(p.text)
+        parsed = _parse_official_paste(p.text, _last_reviewers(c, sid))
         mismatch = _paste_mismatch(sub["manuscript_number"], parsed)
         if mismatch:
             raise HTTPException(400, mismatch)
@@ -1934,6 +1942,10 @@ def elsevier_paste_confirm(sid: int, p: PasteIn):
         payload = {"official_paste": True}
         if parsed["reviewers"]:
             payload["reviewers"] = parsed["reviewers"]
+            if parsed["reviewers_prev"]:
+                payload["reviewers_prev"] = parsed["reviewers_prev"]       # 官方显示的旧值
+            if parsed["reviewers_at_least"]:
+                payload["reviewers_at_least"] = parsed["reviewers_at_least"]  # 「5+」只知下限
         if parsed["observed_at"]:
             payload["official_date"] = parsed["observed_at"]
         # ① 先以官方提交日期为准（顺带挪动建档时的初始事件），再记本次状态——时间线顺序才对
