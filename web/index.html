@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>论文投稿追踪系统</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=0.2.1">
 </head>
 <body>
 <div id="app">
@@ -763,10 +763,12 @@ Expert Systems with Applications
             <b v-else-if="pasteForm.parsed.recognized">未识别状态行（有审稿人统计，按「外审中」记）</b>
             <b v-else class="pf-none">未识别到任何状态信息，不会写入</b>
             <em>{{ pasteForm.parsed.raw }}</em></div>
-          <div class="pf-row" v-if="pasteForm.parsed.reviewers && pasteForm.parsed.reviewers.invited !== undefined">
-            <span>审稿人</span><b>发出邀请 {{ pasteForm.parsed.reviewers.invited }} ·
-            接受 {{ pasteForm.parsed.reviewers.accepted ?? '—' }} ·
-            完成 {{ pasteForm.parsed.reviewers.completed ?? '—' }}</b></div>
+          <div class="pf-row" v-if="pasteForm.parsed.reviewers && Object.keys(pasteForm.parsed.reviewers).length">
+            <span>审稿人</span><b>发出邀请 {{ rvNum(pasteForm.parsed, 'invited') }} ·
+            接受 {{ rvNum(pasteForm.parsed, 'accepted') }} ·
+            完成 {{ rvNum(pasteForm.parsed, 'completed') }}</b></div>
+          <div class="pf-row" :class="{ 'pf-amb': pasteForm.parsed.reviewers_ambiguous }" v-if="pasteForm.parsed.reviewers_note">
+            <span>{{ pasteForm.parsed.reviewers_ambiguous ? '⚠ 核对' : '人数变化' }}</span><em>{{ pasteForm.parsed.reviewers_note }}</em></div>
           <div class="pf-row" v-if="pasteForm.parsed.observed_at"><span>更新时间</span><b>{{ pasteForm.parsed.observed_at }}</b>
             <em v-if="pasteForm.parsed._future">官方日期晚于本机日期（北京时间与本地时区差），将按现在记录</em></div>
           <div class="pf-row" v-if="pasteForm.parsed.submitted_at"><span>提交日期</span><b>{{ pasteForm.parsed.submitted_at }}{{ pasteForm.parsed.submitted_note }}</b></div>
@@ -868,7 +870,7 @@ Expert Systems with Applications
           <span v-if="detail.stage_since">{{ fmtDate(detail.stage_since) }} 起<template v-if="detail.days_in_stage != null"> · 已 {{ detail.days_in_stage }} 天</template></span>
           <span v-if="detail.days_total != null">{{ detail.result_at ? '审稿用时' : '投稿至今' }} {{ detail.days_total }} 天</span>
           <span v-if="detail.current_stage==='revise' && detail.revise_due" :class="dueClass(detail.revise_due)">返修截止 {{ detail.revise_due }}（{{ dueText(detail.revise_due) }}）</span>
-          <span v-if="latestEvent.payload && latestEvent.payload.reviewers">审稿人：邀请 {{ latestEvent.payload.reviewers.invited ?? '—' }} · 接受 {{ latestEvent.payload.reviewers.accepted ?? '—' }} · 完成 {{ latestEvent.payload.reviewers.completed ?? '—' }}</span>
+          <span v-if="latestEvent.payload && latestEvent.payload.reviewers">审稿人：邀请 {{ rvNum(latestEvent.payload, 'invited') }} · 接受 {{ rvNum(latestEvent.payload, 'accepted') }} · 完成 {{ rvNum(latestEvent.payload, 'completed') }}</span>
           <span v-if="latestEvent.payload && latestEvent.payload.decision">决策：{{ latestEvent.payload.decision }}</span>
           <span v-if="detail.last_synced_at" :title="fmtTs(detail.last_synced_at)">上次自动查询 {{ relTime(detail.last_synced_at) }}</span>
         </div>
@@ -886,9 +888,9 @@ Expert Systems with Applications
                   @click="deleteEvent(e)">✕</button>
           <p v-if="e.raw_status">{{ e.raw_status }}</p>
           <p v-if="e.payload?.reviewers" class="tl-reviewers">
-            审稿人：发出邀请 {{ e.payload.reviewers.invited ?? '—' }} ·
-            接受 {{ e.payload.reviewers.accepted ?? '—' }} ·
-            完成 {{ e.payload.reviewers.completed ?? '—' }}</p>
+            审稿人：发出邀请 {{ rvNum(e.payload, 'invited') }} ·
+            接受 {{ rvNum(e.payload, 'accepted') }} ·
+            完成 {{ rvNum(e.payload, 'completed') }}</p>
           <p v-if="e.payload?.decision" class="tl-decision">决策：{{ e.payload.decision }}</p>
         </li>
       </ul>
@@ -999,6 +1001,6 @@ Expert Systems with Applications
     独立开源工具，与爱思唯尔（Elsevier）、OpenReview、Clarivate、中国科学院文献情报中心、新锐学术、CCF 均无关联；相关名称与商标归各自所有者。</footer>
 </div>
 <script src="vendor/vue.global.prod.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=0.2.1"></script>
 </body>
 </html>

@@ -405,6 +405,12 @@ createApp({
     chipStyle(k) { return { background: this.stageColor(k) }; },
     trackerLabel(t) { return { openreview: 'OpenReview', elsevier: '爱思唯尔', manual: '手动' }[t] || t; },
     srcLabel(s) { return { manual: '手动', openreview: '自动·OR', elsevier: '半自动·爱思唯尔', paste: '粘贴·投稿系统' }[s] || s; },
+    // 审稿人计数：src 是解析预览或事件 payload；「5+」这种官方隐藏了具体人数的项带上 +
+    rvNum(src, k) {
+      const v = src && src.reviewers ? src.reviewers[k] : undefined;
+      if (v === undefined || v === null) return '—';
+      return (src.reviewers_at_least || []).includes(k) ? `${v}+` : `${v}`;
+    },
     relLabel(r) {
       const dir = { 转投: ['转投为 →', '← 转投自'], 扩写: ['扩写为 →', '← 扩写自'] }[r.relation];
       return dir ? (r.direction === 'in' ? dir[1] : dir[0]) : r.relation;
