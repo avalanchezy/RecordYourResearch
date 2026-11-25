@@ -6,7 +6,7 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.4.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
+This is v0.5.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
 
 ## Overview
 
@@ -98,6 +98,21 @@ Restart the app afterwards. The engine is [RapidOCR](https://github.com/RapidAI/
 - The preview shows how many lines were read and the lowest confidence; below 85 % it is highlighted so you check the numbers against the screenshot.
 - Records written from a screenshot carry an "OCR" tag in the timeline, with the confidence on hover.
 - Why not bundle a 1B-parameter vision model: it is large (1–2 GB), slow on a CPU, and a generative model can invent digits. For fields like reviewer counts and dates, rule-based parsing with consistency checks is more reliable.
+
+**Optional: smart assistant (small local model)**. Off by default. Under Channels → 🤖 Smart assistant, click "Download and set up": the app downloads the prebuilt [llama.cpp](https://github.com/ggml-org/llama.cpp) inference engine and a quantised [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) model (Apache-2.0), about 0.9 GB in total, checks them against pinned SHA-256 hashes and runs them on `127.0.0.1`. You can download from Hugging Face or the hf-mirror.com mirror, and an interrupted download resumes. No GPU is needed and nothing leaves your computer.
+
+When enabled you get three things:
+
+1. **Read an editor's letter**: in a submission, "✉️ Paste editor's letter" detects accept / minor / major revision / reject / desk reject and the revision deadline (a stated date, or "within 60 days" counted from the letter date). You confirm before it goes into the timeline.
+2. **Unknown status words**: when a submission-system import shows a status the parser has never seen, "🤖 Classify" suggests a stage and "Remember" saves it as a rule. From then on the rule recognises it without the model. You can also set stages by hand without the model.
+3. **Ask in plain language**: the overview gets "🤖 Ask about my submissions", e.g. "Which papers have been under review for more than 3 months?", "How many papers per venue?", "How long do reviews take?". The model only maps the question to one of 8 fixed query templates and fills in the parameters; what runs is read-only parameterised SQL, shown in the UI.
+
+Small models make mistakes, so the design is rules first, model second:
+
+- What the rules can decide (say the letter says "major revision") is decided by the rules; the model's reading is a cross-check, and disagreements are flagged so you look at the letter.
+- Dates, manuscript numbers and quotes from the model must be found in the original text, and numbers must actually appear in the question; anything else is dropped.
+- Nothing is saved until you confirm; the timeline marks records the model took part in ("AI"), and events record the model version.
+- The model stops after 20 idle minutes to free memory, and stops when the app exits. You can disable it or delete the files at any time.
 
 **Tests**:
 

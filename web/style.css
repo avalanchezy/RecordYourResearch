@@ -729,3 +729,29 @@ code.path { font-family: Consolas, monospace; font-size: 12px; background: #f1f5
 .ocr-note.low { color: #92400e; background: #fffbeb; border-color: #fde68a; }
 .tl-ocr { margin-left: 6px; font-size: 10.5px; font-weight: 600; letter-spacing: .03em; color: #1e40af;
   background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 0 4px; }
+
+/* 智能助手（可选本地模型） */
+.ai-state { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.ai-state small { color: #64748b; }
+.ai-dot { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; display: inline-block; }
+.ai-dot.on { background: #16a34a; } .ai-dot.idle { background: #22c55e80; } .ai-dot.busy { background: #f59e0b; }
+.ai-progress { margin: 6px 0; } .ai-progress small { color: #475569; }
+.ai-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+.ai-bar i { display: block; height: 100%; background: #2563eb; transition: width .4s; }
+.ai-src { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 6px; }
+.ai-sub { margin: 16px 0 4px; font-size: 14px; }
+.rule-add { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 6px 0 10px; }
+.rule-add input { flex: 1 1 220px; min-width: 160px; }
+.rule-note { color: #475569; }
+.rule-fix { display: inline-flex; gap: 4px; align-items: center; margin-left: 6px; flex-wrap: wrap; }
+.tl-ai { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+.src-letter { background: #6d28d9; }
+.ai-agree { font-weight: 600; } .ai-agree.ag-agree { color: #15803d; } .ai-agree.ag-disagree,
+.ai-agree.ag-model_only, .ai-agree.ag-ambiguous, .ai-agree.ag-none { color: #b45309; }
+.letter-sel { max-width: 260px; }
+.ask-row { display: flex; gap: 8px; } .ask-row input { flex: 1; }
+.ask-examples { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 4px; font-size: 12.5px; }
+.ask-examples a { color: #2563eb; text-decoration: none; } .ask-examples a:hover { text-decoration: underline; }
+.ask-explain { margin: 10px 0 6px; } .ask-explain small { color: #64748b; margin-left: 8px; }
+.ask-sql { margin-top: 8px; font-size: 12px; } .ask-sql pre { white-space: pre-wrap; word-break: break-word;
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; }

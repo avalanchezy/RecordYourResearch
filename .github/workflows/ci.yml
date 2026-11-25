@@ -41,3 +41,32 @@ jobs:
         run: python -m pip install -r requirements-dev.txt -r requirements-ocr.txt
       - name: OCR tests (real engine, synthetic images)
         run: python -m pytest -q -rs tests/test_ocr.py tests/test_ocr_real.py
+
+  # 可选的本地小模型：按界面上的流程真实下载 llama.cpp + Qwen3.5-0.8B（约 1 GB，之后走缓存），
+  # 校验哈希、通过看门狗启动，再用合成数据跑三个智能功能
+  ai:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      RYR_AI_REAL: "1"
+      PAPER_TRACKER_AI_DIR: ${{ github.workspace }}/.ryr-ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: .ryr-ai
+          key: ryr-ai-${{ runner.os }}-${{ hashFiles('app/ai.py') }}
+      - name: Install
+        run: python -m pip install -r requirements-dev.txt
+      - name: List model files (for pinning hashes)
+        continue-on-error: true
+        run: python tools/ai_probe.py
+      - name: Local model tests (real download, real inference)
+        timeout-minutes: 45
+        run: python -m pytest -q -s -rs tests/test_ai.py tests/test_ai_real.py

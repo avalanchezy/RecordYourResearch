@@ -68,6 +68,15 @@ Notes:
 
 RapidOCR in turn installs OpenCV (`opencv-python-headless`, Apache-2.0), NumPy, Shapely, pyclipper, Pillow and a few small helpers; their licences ship with the installed packages.
 
+### Optional: smart assistant (downloaded only when you click "Download and set up")
+
+| Component | Licence | Used for |
+|---|---|---|
+| [llama.cpp](https://github.com/ggml-org/llama.cpp) prebuilt `llama-server` (release `b12380`) | MIT | Runs the local model on the CPU, on 127.0.0.1 only |
+| [Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B), GGUF quantisation by [Unsloth](https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF) | Apache-2.0 | Reading editors' letters, classifying unknown status words, mapping questions to query templates |
+
+Both are downloaded at the user's request into the data folder (`data/ai/`), checked against SHA-256 hashes pinned in `app/ai.py`, and are not redistributed with this repository.
+
 ## 3. Development and test dependencies
 
 Packages in `requirements-dev.txt` (for example pytest) are only used to develop and test the project. They are not part of the application.

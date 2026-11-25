@@ -27,6 +27,7 @@ from app import config
 from app import db
 from app import elsevier
 from app import ocr
+from app import ai, smart
 from app.elsevier_counters import parse_reviewer_counters
 from app import openreview
 from app import rankings as rk
@@ -45,6 +46,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 app = FastAPI(title="RecordYourResearch", version=config.VERSION,
               docs_url=None, redoc_url=None, openapi_url=None)
 db.init_db()
+smart.load_status_rules()        # 用户确认过的状态词规则 → stages.normalize
 rk.ensure_db()          # 首次启动构建分级库（CCF + 预警名单 + 中科院 2025 + 新锐 2026）；随附数据更新后自动重建
 
 VENUE_TYPES = ("journal", "conference")
@@ -383,7 +385,8 @@ def stages():
             "categories": CATEGORY_STAGES, "features": _features(),
             "rank_datasets": rk.datasets(), "rank_editions": rk.editions(), "rank_outdated": rk.outdated(),
             "version": config.VERSION, "demo": config.DEMO,
-            "repo": config.REPO_URL, "secret_storage": vault.backend(), "ocr": ocr.status()}
+            "repo": config.REPO_URL, "secret_storage": vault.backend(), "ocr": ocr.status(),
+            "ai": {"enabled": ai.enabled(), "supported": bool(ai.platform_key())}}
 
 
 # ---------- 设置：实验功能开关（存在本机数据库 meta 表） ----------
@@ -616,6 +619,191 @@ async def parse_pdf_api(file: UploadFile = File(...)):
     draft["upload_id"] = upload_id
     draft["file_name"] = os.path.basename(file.filename or "")
     return draft
+
+
+# ---------- 智能助手（可选的本地小模型，默认关闭；在「渠道查询」页下载部署） ----------
+class AiInstallIn(BaseModel):
+    source: str = "huggingface"
+
+
+class AiEnableIn(BaseModel):
+    enabled: bool
+
+
+def _ai_call(fn, *a):
+    try:
+        return fn(*a)
+    except ai.AiError as e:
+        raise HTTPException(503 if isinstance(e, ai.AiUnavailable) else 502, str(e))
+
+
+@app.get("/api/ai/status")
+def ai_status():
+    return ai.status()
+
+
+@app.post("/api/ai/install")
+def ai_install(p: AiInstallIn):
+    if p.source not in ai.SOURCES:
+        raise HTTPException(400, "未知的下载源")
+    if not ai.platform_key():
+        raise HTTPException(400, "当前系统没有现成的推理引擎包（支持 Windows x64、Linux x64、macOS）")
+    return _ai_call(ai.install, p.source)
+
+
+@app.post("/api/ai/cancel")
+def ai_cancel():
+    return ai.cancel()
+
+
+@app.post("/api/ai/enable")
+def ai_enable(p: AiEnableIn):
+    if p.enabled and not ai.installed()["both"]:
+        raise HTTPException(400, "还没下载完模型，先点「下载并部署」")
+    return ai.set_enabled(p.enabled)
+
+
+@app.post("/api/ai/start")
+def ai_start():
+    _ai_call(ai.ensure_running)
+    return ai.status()
+
+
+@app.post("/api/ai/stop")
+def ai_stop():
+    ai.stop()
+    return ai.status()
+
+
+@app.post("/api/ai/remove")
+def ai_remove():
+    return _ai_call(ai.remove)
+
+
+# 读编辑来信：规则 + 本地模型（若启用）给出决定类型、返修截止日，校验后由用户确认写入
+class LetterIn(BaseModel):
+    text: str
+
+
+class LetterConfirmIn(BaseModel):
+    text: str
+    decision: str
+    deadline: str = ""
+    observed_at: str = ""
+
+
+@app.post("/api/submissions/{sid}/letter")
+def letter_preview(sid: int, p: LetterIn):
+    if len(p.text or "") > 100_000:
+        raise HTTPException(413, "来信太长了（10 万字以内）")
+    with db.get_db() as c:
+        sub = dict(_require_live_sub(c, sid))
+    try:
+        return smart.analyze_letter(p.text, sub)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/submissions/{sid}/letter/confirm")
+def letter_confirm(sid: int, p: LetterConfirmIn):
+    d = smart.DECISIONS.get(p.decision)
+    if not d or not d[0]:
+        raise HTTPException(400, "请选择决定类型（不是决定信的不会写入）")
+    stage, _zh, en = d
+    with db.get_db() as c:
+        sub = dict(_require_live_sub(c, sid))
+    res = smart.cached_analysis(sid, p.text)
+    if res is None:
+        try:
+            res = smart.analyze_letter(p.text, sub, use_model=False)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+    deadline = _check_date(p.deadline, "返修截止日") if (p.deadline or "").strip() else ""
+    if stage != "revise":
+        deadline = ""
+    observed = None
+    ts = (p.observed_at or res.get("letter_date") or "").strip()
+    if ts:
+        observed = db.norm_ts(ts)
+        if not observed:
+            raise HTTPException(400, "来信日期格式应为 YYYY-MM-DD")
+        if (db.parse_ts(observed) - datetime.now()).total_seconds() > 600:
+            observed = None
+    model = res.get("model") or {}
+    payload = {"letter": True, "decision": p.decision,
+               "via": res["via"] if p.decision == res["decision"] else "user",
+               "agreement": res["agreement"]}
+    if model.get("model"):
+        payload["model"] = model["model"]
+    if deadline:
+        payload["deadline"] = deadline
+        payload["deadline_via"] = (res.get("deadline_how") or "stated") if deadline == res.get("deadline") else "user"
+    raw = f"Decision letter: {en}" + (f" (revision due {deadline})" if deadline else "")
+    with db.get_db() as c:
+        _require_live_sub(c, sid)
+        eid = db.add_event(c, sid, stage, raw, "letter", payload, observed)
+        if deadline:
+            c.execute("UPDATE submissions SET revise_due=? WHERE id=?", (deadline, sid))
+        cur = c.execute("SELECT current_stage FROM submissions WHERE id=?", (sid,)).fetchone()
+    return {"ok": True, "id": eid, "current_stage": cur["current_stage"],
+            "backdated": cur["current_stage"] != stage}
+
+
+# 状态词规则：认不出的状态文字 → 模型建议 / 手动指定 → 存成规则，之后由规则直接识别
+class StatusRuleIn(BaseModel):
+    raw: str
+    stage: str
+    source: str = "user"
+
+
+class StatusKeyIn(BaseModel):
+    key: str
+
+
+class SuggestIn(BaseModel):
+    raw: str
+
+
+@app.get("/api/status-rules")
+def status_rules():
+    return smart.list_status_rules()
+
+
+@app.post("/api/status-rules")
+def status_rule_save(p: StatusRuleIn):
+    try:
+        smart.save_status_rule(p.raw, p.stage, p.source)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return smart.list_status_rules()
+
+
+@app.post("/api/status-rules/delete")
+def status_rule_delete(p: StatusKeyIn):
+    smart.delete_status_rule(p.key)
+    return smart.list_status_rules()
+
+
+@app.post("/api/status-rules/suggest")
+def status_rule_suggest(p: SuggestIn):
+    try:
+        return smart.suggest_stage(p.raw)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+# 用自然语言提问：问题 → 固定模板的参数化 SQL（只读），把执行的 SQL 一并返回
+class AskIn(BaseModel):
+    q: str
+    use_model: bool = True
+
+
+@app.post("/api/ask")
+def ask(p: AskIn):
+    try:
+        return smart.run_question(p.q, p.use_model)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 # ---------- 截图 OCR（可选组件；只把图片变成文字，解析和写入仍走原来的预览 → 确认） ----------

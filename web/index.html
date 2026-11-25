@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>论文投稿追踪系统</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
-<link rel="stylesheet" href="style.css?v=0.4.0">
+<link rel="stylesheet" href="style.css?v=0.5.0">
 </head>
 <body>
 <div id="app">
@@ -50,6 +50,37 @@
         <span class="alert-msg">{{ $t(a.message) }}</span>
         <span class="alert-title">《{{ short(a.title, 30) }}》</span>
         <span class="alert-go">{{ $t('查看 →') }}</span>
+      </div>
+    </div>
+
+    <!-- 问问我的投稿（启用智能助手后出现）：问题 → 固定查询模板 → 只读 SQL -->
+    <div class="panel ask-panel" v-if="ai.enabled">
+      <h3>{{ $t('🤖 问问我的投稿') }} <span class="badge-src">{{ $t('本地模型理解问题 → 固定的查询模板 → 只读 SQL') }}</span></h3>
+      <form class="ask-row" @submit.prevent="askRun()">
+        <input v-model="askForm.q" maxlength="300" :placeholder="$t('比如：哪些稿子审了超过三个月？')">
+        <button class="btn primary sm" :disabled="askForm.busy || !askForm.q.trim()">{{ askForm.busy ? $t('思考中…') : $t('提问') }}</button>
+      </form>
+      <div class="ask-examples"><a href="#" v-for="ex in askExamples()" :key="ex" @click.prevent="askRun(ex)">{{ ex }}</a></div>
+      <div v-if="askForm.res" class="ask-res">
+        <p class="ask-explain"><b>{{ askForm.res.explain[lang === 'en' ? 'en' : 'zh'] }}</b>
+          <small>{{ askForm.res.via === 'model' ? $t('本地模型理解') : $t('按规则理解') }}<template v-if="askForm.res.model && askForm.res.model.ms"> · {{ $t('{0} 秒', [(askForm.res.model.ms / 1000).toFixed(1)]) }}</template>
+            · {{ $t('{0} 行', [askForm.res.rows.length]) }}</small></p>
+        <p class="hint small" v-for="(n, i) in askForm.res.notes" :key="i">{{ $t(n) }}</p>
+        <div class="table-wrap" v-if="askForm.res.rows.length">
+          <table class="table slim">
+            <thead><tr><th v-for="c in askForm.res.columns" :key="c">{{ askColLabel(c) }}</th></tr></thead>
+            <tbody><tr v-for="(r, i) in askForm.res.rows" :key="i">
+              <td v-for="(v, j) in r" :key="j">
+                <a v-if="askForm.res.columns[j] === 'id'" href="#" @click.prevent="openDetail(v)">#{{ v }}</a>
+                <span v-else-if="askForm.res.columns[j] === 'stage' && v" class="stage-chip" :style="chipStyle(v)">{{ stageLabel(v) }}</span>
+                <span v-else-if="askForm.res.columns[j] === 'outcome'">{{ askOutcome(v) }}</span>
+                <span v-else-if="askForm.res.columns[j] === 'title'" :title="v">{{ short(v, 60) }}</span>
+                <span v-else>{{ v === null ? '—' : v }}</span>
+              </td></tr></tbody>
+          </table>
+        </div>
+        <p class="empty" v-else>{{ $t('没有符合条件的稿件。') }}</p>
+        <details class="ask-sql"><summary>{{ $t('实际执行的 SQL') }}</summary><pre>{{ askForm.res.sql }}</pre></details>
       </div>
     </div>
 
@@ -502,7 +533,19 @@
                 <td class="mono">{{ it.manuscript_id || '—' }}</td>
                 <td :title="it.title">{{ short(it.title, 70) || $t('（无标题）') }}</td>
                 <td><span v-if="it.stage" class="stage-chip" :style="chipStyle(it.stage)">{{ stageLabel(it.stage) }}</span>
-                    <small class="sys-raw">{{ $t(it.raw_status) }}</small></td>
+                    <small class="sys-raw">{{ $t(it.raw_status) }}</small>
+                    <span v-if="!it.stage && it.raw_status" class="rule-fix">
+                      <button v-if="!it._sug" class="btn mini ghost" :disabled="it._sugBusy" @click="sysSuggest(it)"
+                              :title="$t('这个状态文字还不认识：指定一个阶段，以后就自动识别')">{{ it._sugBusy ? '…' : (ai.enabled ? $t('🤖 归类') : $t('指定阶段')) }}</button>
+                      <template v-else>
+                        <select v-model="it._sugStage" class="sys-venue"><option value="">{{ $t('— 选阶段 —') }}</option>
+                          <option v-for="(st, k) in stageOrder" :key="k" :value="k">{{ $t(st.label) }}</option></select>
+                        <button class="btn mini" :disabled="!it._sugStage" @click="sysSaveRule(it)"
+                                :title="$t('记成规则：以后这个状态文字直接按所选阶段识别')">{{ $t('记住') }}</button>
+                        <small class="sys-raw" v-if="it._sug.source === 'model'">{{ it._sug.stage ? $t('本地模型的建议') : $t('本地模型也拿不准') }}</small>
+                        <small class="sys-raw" v-else-if="it._sug.hint">{{ $t(it._sug.hint) }}</small>
+                      </template>
+                    </span></td>
                 <td class="nowrap">{{ it.status_date || '' }}</td>
                 <td>
                   <template v-if="it.match"><a href="#" @click.prevent="openDetail(it.match.id)">#{{ it.match.id }}</a> {{ sysActionText(it) }}
@@ -571,6 +614,62 @@
         <span v-for="j in journals.slice(0,60)" class="journal-chip"
               :title="j.name">{{ j.acronym }}</span>
       </div>
+    </div>
+    <div class="panel ai-panel">
+      <h3>{{ $t('🤖 智能助手') }} <span class="badge-src">{{ $t('可选 · 默认关闭 · 本地小模型，稿件内容不出电脑') }}</span></h3>
+      <p class="hint">{{ $t('启用后：① 在稿件详情里粘贴编辑来信，自动判断录用 / 返修 / 拒稿和返修截止日；② 投稿系统里认不出的状态文字，自动建议归到哪个阶段，确认后记成规则；③ 在总览页直接用中文或英文提问（如「哪些稿子审了超过三个月？」），答案来自固定的查询模板，并显示实际执行的 SQL。模型只给建议：日期、稿号必须能在原文里找到，写入前都由你确认。') }}</p>
+      <template v-if="aiStatus">
+        <p v-if="!aiStatus.supported" class="acc-warn">{{ $t('当前系统（{0}）没有现成的推理引擎包，暂不支持。', [aiStatus.platform]) }}</p>
+        <template v-else>
+          <div class="ai-state">
+            <span class="ai-dot" :class="aiStateClass()"></span><b>{{ aiStateText() }}</b>
+            <small>{{ aiStatus.model.label }} · {{ aiStatus.model.license }} · llama.cpp {{ aiStatus.runtime.tag }}<template v-if="aiStatus.disk_bytes"> · {{ $t('占用 {0}', [fmtSize(aiStatus.disk_bytes)]) }}</template></small>
+          </div>
+          <div v-if="aiStatus.busy" class="ai-progress">
+            <div class="ai-bar"><i :style="{ width: aiPct() + '%' }"></i></div>
+            <small>{{ $t(aiStatus.progress.step) }} · {{ aiStatus.progress.total ? fmtSize(aiStatus.progress.done) + ' / ' + fmtSize(aiStatus.progress.total) : fmtSize(aiStatus.progress.done) }}</small>
+          </div>
+          <p class="acc-warn" v-if="aiStatus.progress.phase === 'error'">{{ $t('⚠ {0}', [$t(aiStatus.progress.error)]) }}</p>
+          <p class="acc-warn" v-if="aiStatus.start_error">{{ $t('⚠ {0}', [$t(aiStatus.start_error)]) }}</p>
+          <div class="pf-actions">
+            <template v-if="!aiStatus.installed">
+              <label class="ai-src">{{ $t('下载源') }}
+                <select v-model="aiSource" :disabled="aiStatus.busy"><option v-for="so in aiStatus.sources" :key="so.key" :value="so.key">{{ $t(so.label) }}</option></select></label>
+              <button v-if="!aiStatus.busy" class="btn primary sm" @click="aiInstall()">{{ $t('下载并部署（约 {0}）', [aiDownloadSize()]) }}</button>
+              <button v-else class="btn ghost sm" @click="aiCancel()">{{ $t('取消下载') }}</button>
+            </template>
+            <template v-else>
+              <button class="btn sm" :class="aiStatus.enabled ? 'ghost' : 'primary'" @click="aiEnable(!aiStatus.enabled)">{{ aiStatus.enabled ? $t('已启用 · 点击停用') : $t('启用') }}</button>
+              <button v-if="aiStatus.enabled && !aiStatus.running" class="btn ghost sm" :disabled="aiStatus.starting || aiStarting" @click="aiStart()">{{ aiStatus.starting || aiStarting ? $t('启动中…') : $t('预先启动') }}</button>
+              <button v-if="aiStatus.running" class="btn ghost sm" @click="aiStop()">{{ $t('停止（释放内存）') }}</button>
+              <button class="btn ghost sm" :disabled="aiStatus.busy" @click="aiRemove()">{{ $t('删除模型文件') }}</button>
+            </template>
+          </div>
+          <p class="hint small">{{ $t('文件位置：') }}<code class="path" :title="aiStatus.dir">{{ aiStatus.dir }}</code>
+            {{ $t('文件都按固定的 SHA-256 校验。模型闲置 20 分钟自动停止释放内存，下次用到时自动启动。') }}</p>
+        </template>
+      </template>
+      <h4 class="ai-sub">{{ $t('已学会的状态词规则') }}</h4>
+      <p class="hint small">{{ $t('投稿系统里认不出的状态文字，指定一次阶段就记成规则，之后直接识别、不再调用模型。不装模型也可以手动添加。') }}</p>
+      <div class="rule-add">
+        <input v-model="ruleForm.raw" maxlength="200" :placeholder="$t('状态文字，如 Awaiting Final Files')">
+        <button class="btn mini ghost" :disabled="!ruleForm.raw.trim() || ruleForm.busy" @click="ruleSuggest()">{{ ruleForm.busy ? '…' : (ai.enabled ? $t('🤖 建议') : $t('查规则')) }}</button>
+        <select v-model="ruleForm.stage"><option value="">{{ $t('— 选阶段 —') }}</option>
+          <option v-for="(st, k) in stageOrder" :key="k" :value="k">{{ $t(st.label) }}</option></select>
+        <button class="btn mini" :disabled="!ruleForm.raw.trim() || !ruleForm.stage" @click="ruleSave()">{{ $t('保存') }}</button>
+        <small class="rule-note" v-if="ruleForm.note">{{ ruleForm.note }}</small>
+      </div>
+      <table class="table slim" v-if="statusRules.length">
+        <thead><tr><th>{{ $t('状态文字') }}</th><th>{{ $t('阶段') }}</th><th>{{ $t('来源') }}</th><th></th></tr></thead>
+        <tbody>
+          <tr v-for="r in statusRules" :key="r.key">
+            <td>{{ r.raw }}</td><td><span class="stage-chip" :style="chipStyle(r.stage)">{{ stageLabel(r.stage) }}</span></td>
+            <td>{{ r.source === 'model' ? $t('采纳了模型建议') : $t('手动指定') }}</td>
+            <td><button class="btn mini ghost" @click="ruleDelete(r)">{{ $t('删除') }}</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="empty" v-else>{{ $t('还没有自定义规则。') }}</p>
     </div>
     <div class="panel">
       <h3>{{ $t('查询日志（poll_logs）') }}</h3>
@@ -651,6 +750,8 @@
                 @click="togglePaste()">{{ $t('📋 粘贴官方结果') }}</button>
         <button v-if="detail.venue_type==='journal' && detail.venue_tracker==='manual'" class="btn ghost sm"
                 @click="goSysImport()" :title="$t('粘贴 ScholarOne / Editorial Manager / IEEE Author Portal 等作者中心页面')">{{ $t('📋 从投稿系统导入') }}</button>
+        <button class="btn ghost sm" @click="toggleLetter()"
+                :title="$t('粘贴编辑发来的决定信或邮件，自动识别录用 / 返修 / 拒稿和返修截止日')">{{ $t('✉️ 粘贴编辑来信') }}</button>
         <button class="btn ghost sm" @click="openEventForm()">{{ $t('＋ 登记状态变化') }}</button>
         <button class="btn ghost sm" @click="editMode ? saveEdit() : startEdit()">{{ editMode?$t('保存'):$t('编辑信息') }}</button>
         <button class="btn ghost sm" v-if="editMode" @click="cancelEdit()">{{ $t('取消编辑') }}</button>
@@ -767,6 +868,40 @@
         </div>
       </div>
 
+      <!-- 编辑来信（规则 + 可选的本地模型；日期、稿号对照原文核实，确认后才写入） -->
+      <div class="paste-form letter-form" v-if="letterForm.open">
+        <h4>{{ $t('粘贴编辑来信') }} <span class="pf-hint">{{ ai.enabled ? $t('（规则和本地模型一起判断，日期、稿号都会对照原文核实）') : $t('（按规则识别；在「渠道查询 → 智能助手」启用本地模型后更准）') }}</span></h4>
+        <textarea v-model="letterForm.text" rows="7" :placeholder="$t('把决定信或邮件全文粘贴到这里')" @input="letterForm.res = null"></textarea>
+        <div class="pf-actions">
+          <button class="btn primary sm" :disabled="letterForm.loading || !letterForm.text.trim()" @click="parseLetter()">
+            {{ letterForm.loading ? (ai.enabled ? $t('本地模型阅读中…') : $t('识别中…')) : $t('🔍 识别') }}</button>
+          <button class="btn ghost sm" @click="letterForm.open=false">{{ $t('取消') }}</button>
+        </div>
+        <div class="pf-preview" v-if="letterForm.res">
+          <div class="pf-row"><span>{{ $t('判断依据') }}</span><b class="ai-agree" :class="'ag-' + letterForm.res.agreement">{{ letterAgreeText(letterForm.res) }}</b>
+            <em v-if="letterForm.res.model && letterForm.res.model.ms">{{ $t('模型用时 {0} 秒', [(letterForm.res.model.ms / 1000).toFixed(1)]) }}</em>
+            <em v-if="letterForm.res.model && letterForm.res.model.error">{{ $t(letterForm.res.model.error) }}</em></div>
+          <div class="pf-row pf-warn" v-if="letterForm.res.warning"><span>{{ $t('⚠ 注意') }}</span><b>{{ $t(letterForm.res.warning) }}</b></div>
+          <div class="pf-row"><span>{{ $t('决定') }}</span>
+            <select v-model="letterForm.decision" class="letter-sel">
+              <option v-for="o in letterForm.res.options" :key="o.key" :value="o.key">{{ lang === 'en' ? o.label_en : o.label }}</option>
+            </select>
+            <span v-if="letterStage()" class="stage-chip" :style="chipStyle(letterStage())">{{ stageLabel(letterStage()) }}</span></div>
+          <div class="pf-row" v-if="letterForm.res.quote"><span>{{ $t('原文') }}</span><em>“{{ letterForm.res.quote }}”</em></div>
+          <div class="pf-row" v-if="letterStage() === 'revise'"><span>{{ $t('返修截止') }}</span>
+            <input type="date" v-model="letterForm.deadline">
+            <em v-if="letterForm.deadline && letterForm.deadline === letterForm.res.deadline">{{ deadlineHowText(letterForm.res.deadline_how) }}</em></div>
+          <div class="pf-row" v-if="letterForm.res.letter_date"><span>{{ $t('来信日期') }}</span><b>{{ letterForm.res.letter_date }}</b><em>{{ $t('（按这个日期记入时间线）') }}</em></div>
+          <div class="pf-row" v-if="letterForm.res.manuscript_number"><span>{{ $t('稿件编号') }}</span><b>{{ letterForm.res.manuscript_number }}</b></div>
+          <div class="pf-row" v-for="(n, i) in letterForm.res.notes" :key="'n' + i"><span>{{ $t('核对') }}</span><em>{{ $t(n) }}</em></div>
+          <div class="pf-actions">
+            <button class="btn primary sm" :disabled="letterForm.saving || !letterStage()" @click="saveLetter()">
+              {{ letterForm.saving ? $t('写入中…') : $t('✓ 记入时间线') }}</button>
+            <span class="pf-hint" v-if="!letterStage()">{{ $t('不是决定信的不会写入') }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 状态登记 -->
       <div class="event-form" v-if="updateEvent.open">
         <div class="form-grid three">
@@ -873,6 +1008,7 @@
           <span class="tl-src" :class="'src-'+e.source">{{ srcLabel(e.source) }}</span>
           <span class="tl-time" :title="$t('发生于 ') + fmtTs(e.observed_at) + $t(' · 记录于 ') + fmtTs(e.recorded_at)">{{ fmtTs(e.observed_at) }}</span>
           <span class="tl-rec" v-if="recordedLater(e)" :title="$t('这条是事后补录的：发生于 {0}，记录于 {1}', [fmtTs(e.observed_at), fmtTs(e.recorded_at)])">{{ $t('补录于 {0}', [fmtDate(e.recorded_at)]) }}</span>
+          <span class="tl-ocr tl-ai" v-if="evViaModel(e)" :title="$t('本地模型参与了判断（{0}）', [e.payload.model])">AI</span>
           <span class="tl-ocr" v-if="evViaOcr(e)" :title="$t('这条记录的文字来自截图 OCR（最低置信度 {0}）', [e.payload.ocr_min_score != null ? Math.round(e.payload.ocr_min_score * 100) + '%' : '—'])">OCR</span>
           <span class="tl-gap-inline" v-if="timelineDesc[i+1]">{{ $t('距上一条 {0} 天', [gapDays(timelineDesc[i+1].observed_at, e.observed_at)]) }}</span>
           <button v-if="detail.events.length > 1 && !detail.deleted" class="tl-del" :title="$t('删除这条记录（误记/重复；可撤销）')"
@@ -991,7 +1127,7 @@
     {{ $t('独立开源工具，与爱思唯尔（Elsevier）、OpenReview、Clarivate、中国科学院文献情报中心、新锐学术、CCF 均无关联；相关名称与商标归各自所有者。') }}</footer>
 </div>
 <script src="vendor/vue.global.prod.js"></script>
-<script src="i18n.en.js?v=0.4.0"></script>
-<script src="app.js?v=0.4.0"></script>
+<script src="i18n.en.js?v=0.5.0"></script>
+<script src="app.js?v=0.5.0"></script>
 </body>
 </html>

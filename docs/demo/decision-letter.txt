@@ -1,0 +1,13 @@
+Date: 12 Nov 2026
+Ref.: PR-D-25-00000
+Title: A Synthetic Study of Submission Tracking (synthetic demo data)
+
+Dear Dr. Example,
+
+Thank you for submitting your manuscript to the journal. The reviewers have now commented on your paper.
+Based on their reports, your manuscript requires major revision before it can be considered further.
+
+Please submit your revised manuscript, together with a point-by-point response to the reviewers, by 15 January 2027.
+
+Yours sincerely,
+The Editor (fictional)

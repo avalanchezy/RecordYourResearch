@@ -231,6 +231,10 @@ def status_key(raw) -> str:
 _key = status_key      # 兼容旧名
 
 
+# 用户确认过的状态词规则（数据库 status_rules 表，由 app/smart.py 载入）：优先于内置词典
+USER_RULES: dict[str, str] = {}
+
+
 def normalize(raw: str) -> str | None:
     """把原始状态文本归一到阶段 key；认不出返回 None（由调用方决定兜底，不在这里猜）。"""
     if not raw:
@@ -238,6 +242,8 @@ def normalize(raw: str) -> str | None:
     key = status_key(raw)
     if not key:
         return None
+    if key in USER_RULES:
+        return USER_RULES[key]
     if key in RAW_STATUS_MAP:
         return RAW_STATUS_MAP[key]
     # 规则兜底（如 "Submitted to NeurIPS 2026" / "Accepted to ICLR 2026" / "ICLR 2025 Poster"）
