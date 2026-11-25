@@ -78,6 +78,13 @@ def main():
              {"name": "IEEE Transactions on Cybernetics", "type": "journal", "tracker": "manual"}, submitted_at=day(45))
     ev(m1, "editor", "With Editor", 33)
 
+    # 演示里的历史状态都按「当时就记下了」处理：写入时间 = 发生时间；
+    # 只留一条「事后补录」（编辑处理晚了 6 天才登记），用来演示时间线上的来源与补录标记
+    with db.get_db() as conn:
+        conn.execute("UPDATE status_events SET recorded_at = observed_at")
+        conn.execute("UPDATE status_events SET recorded_at = ? WHERE submission_id = ? AND stage = 'editor'",
+                     (ts(64), j1))
+
     # 「自上次查看以来」：一条自动渠道检测到的新变化 + 一篇待建档
     c.post("/api/changes/seen", json={"until": c.get("/api/changes").json()["now"] or ""})
     with db.get_db() as conn:
@@ -88,7 +95,8 @@ def main():
                      ("DemoForum03", '{"forum": "DemoForum03", "title": "A Co-authored Demo Paper on Nothing",'
                       ' "venue_id": "ICML.cc/2026/Conference", "venue_name": "ICML 2026", "venue_base_name": "ICML",'
                       ' "year": "2026", "stage": "review", "raw": "Under review"}'))
-    print(f"演示数据已写入 {data_dir}：", c.get("/api/categories/counts").json())
+    print(f"演示数据已写入 / demo data written to {data_dir}:", c.get("/api/categories/counts").json())
+    print("可以粘贴的演示页面 / pages to paste during the demo: docs/demo/*.txt (see docs/DEMO.md)")
 
 
 if __name__ == "__main__":

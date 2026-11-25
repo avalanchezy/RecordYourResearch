@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """启动入口 / entry point:
-python run.py [--port 8765] [--host 127.0.0.1] [--data-dir PATH] [--no-daily] [--open]"""
+python run.py [--port 8765] [--host 127.0.0.1] [--data-dir PATH] [--no-daily] [--open]
+python run.py --demo [--open]   演示模式 / demo mode: fictional data in demo-data/, port 8766"""
 import argparse
 import json
 import os
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -22,6 +24,9 @@ for _s in (sys.stdout, sys.stderr):      # 非中文系统控制台不会因中�
         pass
 
 LOCAL = ("127.0.0.1", "localhost", "::1")
+ROOT = os.path.dirname(os.path.abspath(__file__))
+DEMO_DIR = os.path.join(ROOT, "demo-data")
+DEMO_PORT = 8766
 
 
 def _url(host: str, port: int) -> str:
@@ -67,13 +72,28 @@ def main():
     ap = argparse.ArgumentParser(description="RecordYourResearch：本地论文投稿追踪 / local paper-submission tracker")
     ap.add_argument("--host", default="127.0.0.1",
                     help="监听地址 / bind address（默认 127.0.0.1；没有登录鉴权，不要对外开放 / no login, keep it local）")
-    ap.add_argument("--port", type=int, default=int(os.environ.get("PAPER_TRACKER_PORT", "8765")),
-                    help="端口 / port（默认 8765，或环境变量 PAPER_TRACKER_PORT）")
+    ap.add_argument("--port", type=int, default=None,
+                    help="端口 / port（默认 8765，演示模式 8766；或环境变量 PAPER_TRACKER_PORT）")
     ap.add_argument("--data-dir", help="数据目录 / data folder（默认项目下 data/，或环境变量 PAPER_TRACKER_DATA_DIR）")
     ap.add_argument("--no-daily", action="store_true",
                     help="不启动每日后台任务：同步 / 备份 / 回收站清理（或环境变量 PAPER_TRACKER_NO_DAILY=1）")
     ap.add_argument("--open", action="store_true", help="启动后自动打开浏览器 / open the browser")
+    ap.add_argument("--demo", action="store_true",
+                    help="演示模式：用项目下 demo-data/ 里的虚构投稿（首次自动生成），不碰真实数据，默认端口 8766 / "
+                         "demo mode: fictional submissions in demo-data/ (generated on first run), real data untouched")
     a = ap.parse_args()
+    if a.port is None:
+        a.port = DEMO_PORT if a.demo else int(os.environ.get("PAPER_TRACKER_PORT", "8765"))
+    if a.demo:
+        if a.data_dir:
+            print("--demo 与 --data-dir 不能同时使用 / --demo cannot be combined with --data-dir")
+            sys.exit(2)
+        a.data_dir, a.no_daily = DEMO_DIR, True
+        os.environ["PAPER_TRACKER_DEMO"] = "1"
+        if not os.path.exists(os.path.join(DEMO_DIR, "tracker.db")):
+            print("正在生成演示数据 / generating demo data …")
+            subprocess.run([sys.executable, os.path.join(ROOT, "tools", "demo_seed.py"), "--data-dir", DEMO_DIR],
+                           check=True)
     if a.data_dir:
         os.environ["PAPER_TRACKER_DATA_DIR"] = os.path.abspath(a.data_dir)
     if a.no_daily:

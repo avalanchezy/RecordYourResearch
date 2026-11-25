@@ -5,28 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>论文投稿追踪系统</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
-<link rel="stylesheet" href="style.css?v=0.2.1">
+<link rel="stylesheet" href="style.css?v=0.3.0">
 </head>
 <body>
 <div id="app">
   <!-- ===== 顶栏 ===== -->
   <header class="topbar">
-    <div class="brand" @click="go('overview')" title="总览">
-      <span class="brand-dot"></span>论文投稿追踪
-      <span class="brand-sub">本地版 · 数据不出本机</span>
+    <div class="brand" @click="go('overview')" :title="$t('总览')">
+      <span class="brand-dot"></span>{{ $t('论文投稿追踪') }}
+      <span class="brand-sub">{{ $t('本地版 · 数据不出本机') }}</span>
+      <span v-if="demoMode" class="demo-badge" :title="$t('python run.py --demo：全部是虚构的投稿，用来演示；你的真实数据不受影响')">{{ $t('演示数据') }}</span>
     </div>
     <nav class="nav">
-      <button :class="{active: page==='overview'}" @click="go('overview')">总览</button>
-      <button :class="{active: page==='list'}" @click="go('list')">投稿列表</button>
-      <button :class="{active: page==='new'}" @click="startWizard()">＋ 新建投稿</button>
-      <button :class="{active: page==='query'}" @click="go('query')">渠道查询</button>
+      <button :class="{active: page==='overview'}" @click="go('overview')">{{ $t('总览') }}</button>
+      <button :class="{active: page==='list'}" @click="go('list')">{{ $t('投稿列表') }}</button>
+      <button :class="{active: page==='new'}" @click="startWizard()">{{ $t('＋ 新建投稿') }}</button>
+      <button :class="{active: page==='query'}" @click="go('query')">{{ $t('渠道查询') }}</button>
     </nav>
     <div class="topbar-right">
       <button class="bell" :class="{on: changes.unread > 0}" @click="goInbox()"
-              :title="changes.unread ? '自上次查看以来有 ' + changes.unread + ' 条新变化' : '自上次查看以来没有新变化'"
-              :aria-label="changes.unread ? changes.unread + ' 条新变化' : '没有新变化'">🔔<span
+              :title="changes.unread ? $t('自上次查看以来有 ') + changes.unread + $t(' 条新变化') : $t('自上次查看以来没有新变化')"
+              :aria-label="changes.unread ? changes.unread + $t(' 条新变化') : $t('没有新变化')">🔔<span
               v-if="changes.unread" class="bell-num">{{ changes.unread > 99 ? '99+' : changes.unread }}</span></button>
-      <button class="btn ghost sm" @click="exportCsv()" title="导出全部投稿（含归档，不含回收站），Excel 可直接打开">导出台账 CSV</button>
+      <button class="btn ghost sm" @click="exportCsv()" :title="$t('导出全部投稿（含归档，不含回收站），Excel 可直接打开')">{{ $t('导出台账 CSV') }}</button>
+      <button class="lang-toggle" @click="toggleLang()" :title="lang === 'en' ? '切换到中文' : 'Switch to English'"
+              :aria-label="lang === 'en' ? '切换到中文' : 'Switch to English'">{{ lang === 'en' ? '中文' : 'EN' }}</button>
       <span class="clock" v-text="clock"></span>
     </div>
   </header>
@@ -35,31 +38,31 @@
   <main v-if="page==='overview'" class="page">
     <!-- 自动同步出问题：放在最上面，不会被变化区挡住 -->
     <div class="sync-problem" v-if="syncProblem" role="alert">
-      <span>⚠ {{ syncProblem.msg }}</span>
-      <button class="btn mini" @click="go('query')">{{ syncProblem.kind === 'rebind' ? '去重新绑定' : '去看看' }}</button>
+      <span>⚠ {{ $t(syncProblem.msg) }}</span>
+      <button class="btn mini" @click="go('query')">{{ syncProblem.kind === 'rebind' ? $t('去重新绑定') : $t('去看看') }}</button>
     </div>
 
     <div class="panel" v-if="(overview.alerts||[]).length">
-      <h3>提醒 <span class="badge-warn">{{ overview.alerts.length }}</span></h3>
+      <h3>{{ $t('提醒') }} <span class="badge-warn">{{ overview.alerts.length }}</span></h3>
       <div v-for="(a,i) in overview.alerts" :key="i" class="alert-row" :class="a.severity"
            @click="openDetail(a.submission_id)">
         <span class="alert-icon">{{ a.severity==='danger' ? '🔴' : '🟠' }}</span>
-        <span class="alert-msg">{{ a.message }}</span>
+        <span class="alert-msg">{{ $t(a.message) }}</span>
         <span class="alert-title">《{{ short(a.title, 30) }}》</span>
-        <span class="alert-go">查看 →</span>
+        <span class="alert-go">{{ $t('查看 →') }}</span>
       </div>
     </div>
 
     <!-- 自上次查看以来（自动渠道检测到的状态变化 + 待建档） -->
     <div class="panel inbox" id="inbox" v-if="inboxHas">
-      <h3>{{ changes.unread ? '自上次查看以来' : '待建档' }}
-        <span class="badge-new" v-if="changes.unread">{{ changes.unread }} 条新</span>
+      <h3>{{ changes.unread ? $t('自上次查看以来') : $t('待建档') }}
+        <span class="badge-new" v-if="changes.unread">{{ $t('{0} 条新', [changes.unread]) }}</span>
         <span class="h-actions">
           <button v-if="notifyPerm==='default'" class="btn mini ghost" @click="enableNotify()"
-                  title="页面开着时（放在后台也行），有新变化弹系统通知">🔔 开启桌面通知</button>
+                  :title="$t('页面开着时（放在后台也行），有新变化弹系统通知')">{{ $t('🔔 开启桌面通知') }}</button>
           <button v-if="changes.pending.length > 1" class="btn mini ghost" @click="dismissAllPending()"
-                  title="这些都不建档，之后同步也不再提示（可撤销）">全部忽略</button>
-          <button v-if="changes.unread" class="btn mini" @click="markAllSeen()">全部标为已读</button>
+                  :title="$t('这些都不建档，之后同步也不再提示（可撤销）')">{{ $t('全部忽略') }}</button>
+          <button v-if="changes.unread" class="btn mini" @click="markAllSeen()">{{ $t('全部标为已读') }}</button>
         </span>
       </h3>
       <div v-for="c in changesShown" :key="c.id" class="chg-row" role="button" tabindex="0"
@@ -70,80 +73,80 @@
             <span class="chg-arrow">→</span>
           </template>
           <span class="stage-chip" :style="chipStyle(c.stage)">{{ stageLabel(c.stage) }}</span>
-          <span v-if="c.prev_stage && c.prev_stage === c.stage" class="chg-same">有更新</span>
+          <span v-if="c.prev_stage && c.prev_stage === c.stage" class="chg-same">{{ $t('有更新') }}</span>
         </span>
         <span class="chg-title" :title="c.title">《{{ short(c.title, 40) }}》<small>{{ c.venue }}</small></span>
-        <span class="chg-raw" :title="c.raw_status">{{ short(rawTail(c.raw_status), 32) }}</span>
-        <span class="chg-time" :title="'发生于 ' + fmtTs(c.observed_at) + ' · 记录于 ' + fmtTs(c.recorded_at)">{{ relTime(c.recorded_at) }}</span>
+        <span class="chg-raw" :title="$t(c.raw_status)">{{ short(rawTail(c.raw_status), 32) }}</span>
+        <span class="chg-time" :title="$t('发生于 ') + fmtTs(c.observed_at) + $t(' · 记录于 ') + fmtTs(c.recorded_at)">{{ relTime(c.recorded_at) }}</span>
       </div>
-      <button v-if="changes.changes.length > 5" class="btn mini ghost more-toggle" @click="changesExpanded = !changesExpanded">{{ changesExpanded ? '收起' : '展开全部 ' + changes.changes.length + ' 条变化' }}</button>
-      <p class="more-hint" v-if="changes.total > changes.changes.length">另有 {{ changes.total - changes.changes.length }} 条更早的变化（标为已读后不再显示）</p>
+      <button v-if="changes.changes.length > 5" class="btn mini ghost more-toggle" @click="changesExpanded = !changesExpanded">{{ changesExpanded ? $t('收起') : $t('展开全部 ') + changes.changes.length + $t(' 条变化') }}</button>
+      <p class="more-hint" v-if="changes.total > changes.changes.length">{{ $t('另有 {0} 条更早的变化（标为已读后不再显示）', [changes.total - changes.changes.length]) }}</p>
       <template v-if="changes.pending.length">
-        <h4 class="inbox-sub" v-if="changes.unread">待建档 · 账号同步发现、库里还没有的 OpenReview 投稿（{{ changes.pending.length }} 篇）</h4>
-        <p class="inbox-note" v-else>账号同步发现、库里还没有的 OpenReview 投稿（{{ changes.pending.length }} 篇），建档后自动跟踪状态。</p>
+        <h4 class="inbox-sub" v-if="changes.unread">{{ $t('待建档 · 账号同步发现、库里还没有的 OpenReview 投稿（{0} 篇）', [changes.pending.length]) }}</h4>
+        <p class="inbox-note" v-else>{{ $t('账号同步发现、库里还没有的 OpenReview 投稿（{0} 篇），建档后自动跟踪状态。', [changes.pending.length]) }}</p>
         <div v-for="p in pendingShown" :key="p.forum" class="pend-row">
-          <span v-if="p.new" class="new-dot" title="自上次查看以来新发现">新</span>
+          <span v-if="p.new" class="new-dot" :title="$t('自上次查看以来新发现')">{{ $t('新') }}</span>
           <span class="stage-chip" :style="chipStyle(p.item.stage)">{{ stageLabel(p.item.stage) }}</span>
           <span class="chg-title" :title="p.item.title">{{ short(p.item.title, 46) }}<small>{{ p.item.venue_name || 'OpenReview' }}</small></span>
           <span v-if="p.item._related" class="rk rk-warn"
-                :title="'库里已有' + (p.item._same_title ? '同标题' : '标题相近') + '的稿件：' + (p.item._related_titles||[]).join('；') + ' → 疑似转投/扩写，建档后可互相关联'">转投/扩写？</span>
-          <button class="btn mini" :disabled="p.item._importing" @click="importPending(p)">＋ 建档</button>
+                :title="$t('库里已有') + (p.item._same_title ? $t('同标题') : $t('标题相近')) + $t('的稿件：') + (p.item._related_titles||[]).join('；') + $t(' → 疑似转投/扩写，建档后可互相关联')">{{ $t('转投/扩写？') }}</span>
+          <button class="btn mini" :disabled="p.item._importing" @click="importPending(p)">{{ $t('＋ 建档') }}</button>
           <button v-if="p.item._related" class="btn mini" :disabled="p.item._importing" @click="importPending(p, true)"
-                  :title="'建档并与 ' + (p.item._related_ids||[]).map(x => '#' + x).join(' ') + ' 建立「转投」关联'">＋ 建档并关联</button>
-          <button class="btn mini ghost" title="不建档，之后同步也不再提示（可撤销）" @click="dismissPending(p)">忽略</button>
+                  :title="$t('建档并与 ') + (p.item._related_ids||[]).map(x => '#' + x).join(' ') + $t(' 建立「转投」关联')">{{ $t('＋ 建档并关联') }}</button>
+          <button class="btn mini ghost" :title="$t('不建档，之后同步也不再提示（可撤销）')" @click="dismissPending(p)">{{ $t('忽略') }}</button>
         </div>
-        <button v-if="changes.pending.length > 3" class="btn mini ghost more-toggle" @click="pendingExpanded = !pendingExpanded">{{ pendingExpanded ? '收起' : '展开全部 ' + changes.pending.length + ' 篇待建档' }}</button>
+        <button v-if="changes.pending.length > 3" class="btn mini ghost more-toggle" @click="pendingExpanded = !pendingExpanded">{{ pendingExpanded ? $t('收起') : $t('展开全部 ') + changes.pending.length + $t(' 篇待建档') }}</button>
       </template>
-      <p class="hint small" v-if="changes.pending_dismissed">已忽略 {{ changes.pending_dismissed }} 篇待建档 · <a href="#" @click.prevent="undismissAll()">恢复显示</a></p>
+      <p class="hint small" v-if="changes.pending_dismissed">{{ $t('已忽略 {0} 篇待建档 ·', [changes.pending_dismissed]) }} <a href="#" @click.prevent="undismissAll()">{{ $t('恢复显示') }}</a></p>
     </div>
     <div class="inbox-empty" id="inbox-empty" v-else>
-      <span>✓ 自上次查看以来没有新变化</span>
-      <span v-if="changes.last_sync" class="ie-meta">· 上次账号同步 {{ relTime(changes.last_sync.created_at) }}{{ changes.last_sync.ok ? '' : '（失败，详见「渠道查询」页的查询日志）' }}</span>
-      <span v-if="notifyPerm==='granted'" class="ie-meta">· 桌面通知已开启</span>
-      <span v-if="changes.pending_dismissed" class="ie-meta">· 已忽略 {{ changes.pending_dismissed }} 篇待建档 <a href="#" @click.prevent="undismissAll()">恢复显示</a></span>
+      <span>{{ $t('✓ 自上次查看以来没有新变化') }}</span>
+      <span v-if="changes.last_sync" class="ie-meta">{{ $t('· 上次账号同步 {0}{1}', [relTime(changes.last_sync.created_at), changes.last_sync.ok ? '' : $t('（失败，详见「渠道查询」页的查询日志）')]) }}</span>
+      <span v-if="notifyPerm==='granted'" class="ie-meta">{{ $t('· 桌面通知已开启') }}</span>
+      <span v-if="changes.pending_dismissed" class="ie-meta">{{ $t('· 已忽略 {0} 篇待建档', [changes.pending_dismissed]) }} <a href="#" @click.prevent="undismissAll()">{{ $t('恢复显示') }}</a></span>
       <button v-if="notifyPerm==='default'" class="btn mini ghost" @click="enableNotify()"
-              title="页面开着时（放在后台也行），有新变化弹系统通知">🔔 开启桌面通知</button>
+              :title="$t('页面开着时（放在后台也行），有新变化弹系统通知')">{{ $t('🔔 开启桌面通知') }}</button>
     </div>
 
     <!-- 统计卡：点击进入对应分类 -->
     <div class="stat-grid">
-      <div class="stat link" role="button" tabindex="0" title="查看在投在审的稿件"
+      <div class="stat link" role="button" tabindex="0" :title="$t('查看在投在审的稿件')"
            @click="goList('invest')" @keydown.enter="goList('invest')" :style="{borderTopColor:'#2563eb'}">
-        <div class="num">{{ overview.active ?? '—' }}</div><div class="label">在审 / 返修中</div>
+        <div class="num">{{ overview.active ?? '—' }}</div><div class="label">{{ $t('在审 / 返修中') }}</div>
       </div>
-      <div class="stat link" role="button" tabindex="0" title="查看已录用的稿件"
+      <div class="stat link" role="button" tabindex="0" :title="$t('查看已录用的稿件')"
            @click="goList('accepted')" @keydown.enter="goList('accepted')" :style="{borderTopColor:'#15803d'}">
-        <div class="num">{{ overview.accepted || 0 }}</div><div class="label">已录用（含制作中）</div>
+        <div class="num">{{ overview.accepted || 0 }}</div><div class="label">{{ $t('已录用（含制作中）') }}</div>
       </div>
-      <div class="stat link" role="button" tabindex="0" title="查看已拒稿的稿件"
+      <div class="stat link" role="button" tabindex="0" :title="$t('查看已拒稿的稿件')"
            @click="goList('rejected')" @keydown.enter="goList('rejected')" :style="{borderTopColor:'#dc2626'}">
-        <div class="num">{{ overview.rejected || 0 }}</div><div class="label">已拒稿</div>
+        <div class="num">{{ overview.rejected || 0 }}</div><div class="label">{{ $t('已拒稿') }}</div>
       </div>
-      <div class="stat link" role="button" tabindex="0" title="查看全部稿件（含归档）"
+      <div class="stat link" role="button" tabindex="0" :title="$t('查看全部稿件（含归档）')"
            @click="goList('')" @keydown.enter="goList('')" :style="{borderTopColor:'#0f766e'}">
         <div class="num">{{ overview.all ?? 0 }}</div>
-        <div class="label">登记总数<span v-if="overview.archived">（含归档 {{ overview.archived }}）</span></div>
+        <div class="label">{{ $t('登记总数') }}<span v-if="overview.archived">{{ $t('（含归档 {0}）', [overview.archived]) }}</span></div>
       </div>
     </div>
 
     <div class="panel">
-      <h3>阶段分布 <span class="badge-src">点一行看对应稿件</span></h3>
+      <h3>{{ $t('阶段分布') }} <span class="badge-src">{{ $t('点一行看对应稿件') }}</span></h3>
       <div class="stage-bars">
         <div v-for="(s,key) in stageOrder" :key="key" class="stage-bar-row link" role="button" tabindex="0"
-             v-show="(overview.counts?.[key]||0) > 0" :title="'查看「' + s.label + '」的稿件'"
+             v-show="(overview.counts?.[key]||0) > 0" :title="$t('查看「') + s.label + $t('」的稿件')"
              @click="goList(catOfStage(key), key)" @keydown.enter="goList(catOfStage(key), key)">
-          <span class="stage-bar-label" :style="{color: s.color}">{{ s.label }}</span>
+          <span class="stage-bar-label" :style="{color: s.color}">{{ $t(s.label) }}</span>
           <div class="stage-bar-track"><div class="stage-bar-fill"
                :style="{width: barWidth(key), background: s.color}"></div></div>
-          <span class="stage-bar-num">{{ overview.counts?.[key] || 0 }} 篇</span>
+          <span class="stage-bar-num">{{ $t('{0} 篇', [overview.counts?.[key] || 0]) }}</span>
         </div>
-        <p class="empty" v-if="overview.all===0">还没有登记投稿 —— 点击「＋ 新建投稿」把第一篇 PDF 丢进来。</p>
-        <p class="empty" v-else-if="overview.total===0">稿件都已归档 —— 到「投稿列表 → 归档」查看。</p>
+        <p class="empty" v-if="overview.all===0">{{ $t('还没有登记投稿 —— 点击「＋ 新建投稿」把第一篇 PDF 丢进来。') }}</p>
+        <p class="empty" v-else-if="overview.total===0">{{ $t('稿件都已归档 —— 到「投稿列表 → 归档」查看。') }}</p>
       </div>
     </div>
 
     <div class="panel">
-      <h3>最近动态</h3>
+      <h3>{{ $t('最近动态') }}</h3>
       <div v-if="recentEvents.length" class="recent-list">
         <div v-for="(e,i) in recentEvents" :key="i" class="recent-row"
              @click="openDetail(e.submission_id)">
@@ -153,7 +156,7 @@
           <span class="recent-time" :title="fmtTs(e.observed_at)">{{ fmtTs(e.observed_at) }}</span>
         </div>
       </div>
-      <p class="empty" v-else>暂无状态事件。</p>
+      <p class="empty" v-else>{{ $t('暂无状态事件。') }}</p>
     </div>
   </main>
 
@@ -164,76 +167,76 @@
       <button v-for="cat in catTabs" :key="cat.key" class="cat-tab"
               :class="{active: listFilter.category===cat.key, archived: cat.key==='archived', trash: cat.key==='trash'}"
               @click="setCategory(cat.key)">
-        {{ cat.label }}<span class="cat-num">{{ catCount(cat.key) }}</span>
+        {{ $t(cat.label) }}<span class="cat-num">{{ catCount(cat.key) }}</span>
       </button>
     </div>
-    <div class="trash-hint" v-if="isTrash">🗑 回收站里的投稿不参与统计、提醒和自动同步，30 天后连同 PDF 原件自动彻底删除，点「恢复」放回原处。彻底删除的 OpenReview 稿件，之后账号同步也不会再当成新投稿提示。</div>
+    <div class="trash-hint" v-if="isTrash">{{ $t('🗑 回收站里的投稿不参与统计、提醒和自动同步，30 天后连同 PDF 原件自动彻底删除，点「恢复」放回原处。彻底删除的 OpenReview 稿件，之后账号同步也不会再当成新投稿提示。') }}</div>
     <!-- 二级：阶段筛选 + 搜索 + 排序 -->
     <div class="toolbar">
-      <input v-model="listFilter.q" placeholder="搜索标题 / 编号 / 会议 / 作者…" @input="debouncedLoadSubs()">
+      <input v-model="listFilter.q" :placeholder="$t('搜索标题 / 编号 / 会议 / 作者…')" @input="debouncedLoadSubs()">
       <div class="stage-filter" v-if="filterStages.length && !isTrash">
         <button v-for="key in filterStages" :key="key" class="filter-chip"
                 :style="listFilter.stage===key ? {background:stageColor(key),color:'#fff',borderColor:stageColor(key)} : {}"
                 @click="toggleStage(key)">{{ stageLabel(key) }}</button>
         <button class="filter-chip" :style="listFilter.stage===''?{'background':'#1e3a5f','color':'#fff','borderColor':'#1e3a5f'}:{}"
-                @click="toggleStage('')">不限阶段</button>
+                @click="toggleStage('')">{{ $t('不限阶段') }}</button>
       </div>
       <div class="sort-box">
         <template v-if="!isTrash">
-          <label>排序</label>
+          <label>{{ $t('排序') }}</label>
           <select v-model="listFilter.sort" @change="loadSubs()">
-            <option value="updated">更新时间 ↓</option>
-            <option value="venue">会议 / 期刊</option>
-            <option value="ddl">会议 DDL ↑</option>
-            <option value="revise">返修截止 ↑</option>
-            <option value="days">投稿日期 ↓</option>
+            <option value="updated">{{ $t('更新时间 ↓') }}</option>
+            <option value="venue">{{ $t('会议 / 期刊') }}</option>
+            <option value="ddl">{{ $t('会议 DDL ↑') }}</option>
+            <option value="revise">{{ $t('返修截止 ↑') }}</option>
+            <option value="days">{{ $t('投稿日期 ↓') }}</option>
           </select>
         </template>
-        <button class="btn mini ghost" title="按当前分类、阶段、搜索与排序导出 CSV（Excel 可直接打开）"
-                @click="exportCsv(true)">导出当前列表</button>
+        <button class="btn mini ghost" :title="$t('按当前分类、阶段、搜索与排序导出 CSV（Excel 可直接打开）')"
+                @click="exportCsv(true)">{{ $t('导出当前列表') }}</button>
       </div>
     </div>
     <div class="panel table-panel">
       <table class="table">
         <thead><tr>
-          <th>标题</th><th>会议/期刊</th><th>编号</th><th>当前状态</th>
-          <template v-if="!isTrash"><th>在审天数</th><th>停留</th><th>更新</th><th>操作</th></template>
-          <template v-else><th>删除于</th><th>自动清除</th><th>操作</th></template>
+          <th>{{ $t('标题') }}</th><th>{{ $t('会议/期刊') }}</th><th>{{ $t('编号') }}</th><th>{{ $t('当前状态') }}</th>
+          <template v-if="!isTrash"><th>{{ $t('在审天数') }}</th><th>{{ $t('停留') }}</th><th>{{ $t('更新') }}</th><th>{{ $t('操作') }}</th></template>
+          <template v-else><th>{{ $t('删除于') }}</th><th>{{ $t('自动清除') }}</th><th>{{ $t('操作') }}</th></template>
         </tr></thead>
         <tbody>
           <tr v-for="s in subs" :key="s.id" @click="openDetail(s.id)" class="row-click"
               :class="{'row-archived': s.archived && !isTrash}">
             <td class="td-title" :title="s.title">{{ short(s.title, 42) }}<span v-if="s.archived && !isTrash"
-                 class="tag-arch sm">归档</span><span v-if="s.current_stage==='revise' && s.revise_due && !isTrash" class="due-mark"
-                 :class="dueClass(s.revise_due)" :title="'返修截止 ' + s.revise_due">返修 {{ dueText(s.revise_due) }}</span><span
+                 class="tag-arch sm">{{ $t('归档') }}</span><span v-if="s.current_stage==='revise' && s.revise_due && !isTrash" class="due-mark"
+                 :class="dueClass(s.revise_due)" :title="$t('返修截止 ') + s.revise_due">{{ $t('返修 {0}', [dueText(s.revise_due)]) }}</span><span
                  v-if="s.related && s.related.length" class="rel-mark"
-                 :title="'相关投稿：' + s.related.map(r => relLabel(r) + ' #' + r.id).join('，')">⇄{{ s.related.length }}</span></td>
+                 :title="$t('相关投稿：') + s.related.map(r => relLabel(r) + ' #' + r.id).join('，')">⇄{{ s.related.length }}</span></td>
             <td class="td-venue"><span class="tracker-chip" :class="'tk-'+s.venue_tracker">{{ trackerLabel(s.venue_tracker) }}</span>{{ s.venue_name }}<span
-                 v-if="s.venue_ddl" class="due-mark ddl" :class="ddlClass(s.venue_ddl)" :title="'会议/期刊 DDL ' + s.venue_ddl">{{ ddlText(s.venue_ddl) }}</span><div class="badge-row" v-if="s.badges && s.badges.length"><span v-for="b in s.badges" :key="b.label" class="rk" :class="badgeClass(b)" :title="b.title">{{ b.label }}</span></div></td>
+                 v-if="s.venue_ddl" class="due-mark ddl" :class="ddlClass(s.venue_ddl)" :title="$t('会议/期刊 DDL ') + s.venue_ddl">{{ ddlText(s.venue_ddl) }}</span><div class="badge-row" v-if="s.badges && s.badges.length"><span v-for="b in s.badges" :key="b.label" class="rk" :class="badgeClass(b)" :title="$t(b.title)">{{ $t(b.label) }}</span></div></td>
             <td class="td-num">{{ s.manuscript_number || '—' }}</td>
-            <td><span class="stage-chip" :style="chipStyle(s.current_stage)" :title="s.current_raw">{{ stageLabel(s.current_stage) }}</span></td>
+            <td><span class="stage-chip" :style="chipStyle(s.current_stage)" :title="$t(s.current_raw)">{{ stageLabel(s.current_stage) }}</span></td>
             <template v-if="!isTrash">
               <td class="td-days">{{ s.days_total ?? '—' }}</td>
-              <td class="td-days" :title="s.stage_since ? '自 ' + fmtTs(s.stage_since) + ' 进入当前阶段' : ''">{{ s.days_in_stage == null ? '—' : s.days_in_stage + '天' }}</td>
+              <td class="td-days" :title="s.stage_since ? $t('自 ') + fmtTs(s.stage_since) + $t(' 进入当前阶段') : ''">{{ s.days_in_stage == null ? '—' : s.days_in_stage + $t('天') }}</td>
               <td class="td-time" :title="fmtTs(s.updated_at)">{{ relTime(s.updated_at) }}</td>
               <td class="td-ops" @click.stop>
-                <button class="btn mini" v-if="s.venue_tracker==='openreview'" title="OpenReview 立即查询" :disabled="s._querying" @click="queryOR(s)">{{ s._querying ? '…' : '查' }}</button>
-                <button class="btn mini" v-if="s.venue_tracker==='elsevier' && features.elsevier_query" title="爱思唯尔一键查稿（实验）" :disabled="s._querying" @click="queryElsevier(s)">{{ s._querying ? '…' : '查' }}</button>
+                <button class="btn mini" v-if="s.venue_tracker==='openreview'" :title="$t('OpenReview 立即查询')" :disabled="s._querying" @click="queryOR(s)">{{ s._querying ? '…' : $t('查') }}</button>
+                <button class="btn mini" v-if="s.venue_tracker==='elsevier' && features.elsevier_query" :title="$t('爱思唯尔一键查稿（实验）')" :disabled="s._querying" @click="queryElsevier(s)">{{ s._querying ? '…' : $t('查') }}</button>
                 <button class="btn mini" :class="s.archived ? 'ghost' : 'muted'"
-                        :title="s.archived ? '取消归档' : '归档：不进任何状态分类（可撤销）'"
-                        @click="toggleArchive(s)">{{ s.archived ? '取消归档' : '归档' }}</button>
+                        :title="s.archived ? $t('取消归档') : $t('归档：不进任何状态分类（可撤销）')"
+                        @click="toggleArchive(s)">{{ s.archived ? $t('取消归档') : $t('归档') }}</button>
               </td>
             </template>
             <template v-else>
               <td class="td-time" :title="fmtTs(s.deleted_at)">{{ relTime(s.deleted_at) }}</td>
               <td class="td-days">{{ trashLeft(s) }}</td>
               <td class="td-ops" @click.stop>
-                <button class="btn mini" @click="restoreSub(s)">恢复</button>
-                <button class="btn mini danger" @click="purgeSub(s)">彻底删除</button>
+                <button class="btn mini" @click="restoreSub(s)">{{ $t('恢复') }}</button>
+                <button class="btn mini danger" @click="purgeSub(s)">{{ $t('彻底删除') }}</button>
               </td>
             </template>
           </tr>
-          <tr v-if="!subs.length"><td :colspan="isTrash ? 7 : 8"><p class="empty">{{ listLoading ? '加载中…' : (listFilter.q || listFilter.stage ? '没有符合筛选条件的稿件。' : (isTrash ? '回收站是空的。' : '该分类下没有稿件。')) }}</p></td></tr>
+          <tr v-if="!subs.length"><td :colspan="isTrash ? 7 : 8"><p class="empty">{{ listLoading ? $t('加载中…') : (listFilter.q || listFilter.stage ? $t('没有符合筛选条件的稿件。') : (isTrash ? $t('回收站是空的。') : $t('该分类下没有稿件。'))) }}</p></td></tr>
         </tbody>
       </table>
     </div>
@@ -243,83 +246,83 @@
   <main v-if="page==='new'" class="page">
     <div class="wizard">
       <div class="wizard-steps">
-        <div :class="['wstep', {on: wizard.step>=1, now: wizard.step===1}]"><b>1</b> 上传 PDF 自动解析</div>
+        <div :class="['wstep', {on: wizard.step>=1, now: wizard.step===1}]"><b>1</b> {{ $t('上传 PDF 自动解析') }}</div>
         <div class="wstep-sep"></div>
-        <div :class="['wstep', {on: wizard.step>=2, now: wizard.step===2}]"><b>2</b> 补录缺失字段建档</div>
+        <div :class="['wstep', {on: wizard.step>=2, now: wizard.step===2}]"><b>2</b> {{ $t('补录缺失字段建档') }}</div>
       </div>
 
       <!-- 步骤 1：先丢 PDF -->
       <div class="panel" v-if="wizard.step===1">
-        <h3>把投稿 PDF 丢进来（本地解析，不上传）</h3>
+        <h3>{{ $t('把投稿 PDF 丢进来（本地解析，不上传）') }}</h3>
         <div class="dropzone" :class="{drag: wizard.dragging}" @dragover.prevent="wizard.dragging=true"
              @dragleave.prevent="wizard.dragging=false" @drop.prevent="onDrop"
              @click="$refs.pdfInput.click()">
           <div v-if="!wizard.parsing && !wizard.draft">
             <div class="dz-icon">📄</div>
-            <p><b>拖入 PDF</b> 或点击选择</p>
-            <p class="sub">自动识别：标题 · 作者 · 摘要 · 关键词 · 期刊/会议与年份（含双盲匿名）· 编号 · DOI/arXiv</p>
+            <p><b>{{ $t('拖入 PDF') }}</b> {{ $t('或点击选择') }}</p>
+            <p class="sub">{{ $t('自动识别：标题 · 作者 · 摘要 · 关键词 · 期刊/会议与年份（含双盲匿名）· 编号 · DOI/arXiv') }}</p>
           </div>
-          <div v-if="wizard.parsing" class="parsing">解析中…（PyMuPDF 规则抽取）</div>
-          <div v-if="wizard.draft" class="dz-done">✓ {{ wizard.draft.file_name }} 已解析
-            <button class="btn mini ghost" @click.stop="$refs.pdfInput.click()">换一个</button></div>
+          <div v-if="wizard.parsing" class="parsing">{{ $t('解析中…（PyMuPDF 规则抽取）') }}</div>
+          <div v-if="wizard.draft" class="dz-done">{{ $t('✓ {0} 已解析', [wizard.draft.file_name]) }}
+            <button class="btn mini ghost" @click.stop="$refs.pdfInput.click()">{{ $t('换一个') }}</button></div>
           <input type="file" accept="application/pdf" ref="pdfInput" style="display:none"
                  @change="onPdfPick">
         </div>
 
         <!-- 解析结果概览 -->
         <div v-if="wizard.draft" class="draft-summary">
-          <div class="ds-row"><span class="ds-label">标题</span><b>{{ short(wizard.draft.title, 72) || '—' }}</b></div>
-          <div class="ds-row" v-if="wizard.draft.conf_name"><span class="ds-label">会议识别</span>
+          <div class="ds-row"><span class="ds-label">{{ $t('标题') }}</span><b>{{ short(wizard.draft.title, 72) || '—' }}</b></div>
+          <div class="ds-row" v-if="wizard.draft.conf_name"><span class="ds-label">{{ $t('会议识别') }}</span>
             <b>{{ wizard.draft.conf_name }} {{ wizard.draft.conf_year }}</b>
-            <span class="rk rk-ccf" v-if="wizard.draft.double_blind" title="双盲评审，评审期匿名">双盲</span></div>
-          <div class="ds-row" v-if="wizard.draft.journal_name"><span class="ds-label">期刊识别</span><b>{{ wizard.draft.journal_name }}</b></div>
-          <div class="ds-row"><span class="ds-label">作者</span>
+            <span class="rk rk-ccf" v-if="wizard.draft.double_blind" :title="$t('双盲评审，评审期匿名')">{{ $t('双盲') }}</span></div>
+          <div class="ds-row" v-if="wizard.draft.journal_name"><span class="ds-label">{{ $t('期刊识别') }}</span><b>{{ wizard.draft.journal_name }}</b></div>
+          <div class="ds-row"><span class="ds-label">{{ $t('作者') }}</span>
             <b v-if="wizard.draft.authors?.length">{{ wizard.draft.authors.join('，') }}</b>
-            <b v-else class="ds-anon">{{ wizard.draft.anonymous_authors ? '匿名（双盲投稿）' : '— 待手填' }}</b></div>
-          <div class="ds-row"><span class="ds-label">编号</span><b>{{ wizard.draft.manuscript_number || '— PDF 内无（投稿后补）' }}</b></div>
+            <b v-else class="ds-anon">{{ wizard.draft.anonymous_authors ? $t('匿名（双盲投稿）') : $t('— 待手填') }}</b></div>
+          <div class="ds-row"><span class="ds-label">{{ $t('编号') }}</span><b>{{ wizard.draft.manuscript_number || $t('— PDF 内无（投稿后补）') }}</b></div>
         </div>
         <div v-if="wizard.draft" class="parse-flags">
           <span v-for="(v,k) in wizard.draft.confidence" class="pflag"
                 :class="v==='auto' ? 'ok' : (v==='anon' ? 'anon' : 'miss')">
-            {{ fieldLabel(k) }} {{ v==='auto' ? '✓自动' : (v==='anon' ? '⊙匿名' : '✗待补') }}</span>
+            {{ fieldLabel(k) }} {{ v==='auto' ? $t('✓自动') : (v==='anon' ? $t('⊙匿名') : $t('✗待补')) }}</span>
         </div>
 
         <div class="wizard-nav">
-          <button class="btn ghost" @click="skipPdf()">{{ wizard.draft ? '不用这份 PDF，直接手填 →' : '没有 PDF，直接手填 →' }}</button>
-          <button class="btn primary" :disabled="!wizard.draft" @click="wizard.step=2">下一步 →</button>
+          <button class="btn ghost" @click="skipPdf()">{{ wizard.draft ? $t('不用这份 PDF，直接手填 →') : $t('没有 PDF，直接手填 →') }}</button>
+          <button class="btn primary" :disabled="!wizard.draft" @click="wizard.step=2">{{ $t('下一步 →') }}</button>
         </div>
       </div>
 
       <!-- 步骤 2：补录确认（缺啥填啥） -->
       <div class="panel" v-if="wizard.step===2">
-        <h3>补录缺失字段（自动抽取的可直接改）</h3>
+        <h3>{{ $t('补录缺失字段（自动抽取的可直接改）') }}</h3>
 
         <!-- 渠道（自动预选可改） -->
-        <div class="field-label">追踪渠道<span class="fl-hint" v-if="wizard.autoTracker">（已按 PDF 自动预选）</span><span
+        <div class="field-label">{{ $t('追踪渠道') }}<span class="fl-hint" v-if="wizard.autoTracker">{{ $t('（已按 PDF 自动预选）') }}</span><span
              class="fl-hint" v-if="wizard.trackerHint">{{ wizard.trackerHint }}</span></div>
         <div class="channel-cards">
           <div class="channel-card" :class="{sel: wizard.tracker==='openreview'}"
                @click="pickTracker('openreview')">
-            <h4>OpenReview 会议</h4>
-            <p>NeurIPS / ICLR / ICML / CVPR / ICCV 等，状态自动同步</p>
+            <h4>{{ $t('OpenReview 会议') }}</h4>
+            <p>{{ $t('NeurIPS / ICLR / ICML / CVPR / ICCV 等，状态自动同步') }}</p>
           </div>
           <div class="channel-card" :class="{sel: wizard.tracker==='elsevier'}"
                @click="pickTracker('elsevier')">
-            <h4>爱思唯尔期刊</h4>
-            <p>粘贴官方查询结果自动解析；读取 EM 封面里的稿件编号</p>
+            <h4>{{ $t('爱思唯尔期刊') }}</h4>
+            <p>{{ $t('粘贴官方查询结果自动解析；读取 EM 封面里的稿件编号') }}</p>
           </div>
           <div class="channel-card" :class="{sel: wizard.tracker==='manual'}"
                @click="pickTracker('manual')">
-            <h4>其他（手动）</h4>
-            <p>IEEE / Springer / ACM 等，手动登记状态</p>
+            <h4>{{ $t('其他（手动）') }}</h4>
+            <p>{{ $t('IEEE / Springer / ACM 等，手动登记状态') }}</p>
           </div>
         </div>
 
         <!-- 会议/期刊（联想补全 + 年份解耦） -->
         <div class="form-grid two">
           <label class="full ac-wrap">
-            {{ wizard.tracker==='openreview' || (wizard.draft && wizard.draft.conf_name) ? '会议名称' : '期刊/会议名称' }}
-            <input v-model="wizard.venue.name" placeholder="输入全称或简称（如 ESWA / Pattern… / NeurIPS），下拉联想自动补全"
+            {{ wizard.tracker==='openreview' || (wizard.draft && wizard.draft.conf_name) ? $t('会议名称') : $t('期刊/会议名称') }}
+            <input v-model="wizard.venue.name" :placeholder="$t('输入全称或简称（如 ESWA / Pattern… / NeurIPS），下拉联想自动补全')"
                    @input="onVenueInput" @focus="wizard.venueFocused = true; onVenueInput()" @blur="onVenueBlur"
                    @keydown.esc="wizard.suggestOpen = false" autocomplete="off">
             <div v-if="wizard.suggestOpen && wizard.suggests.length" class="suggest-list">
@@ -331,25 +334,25 @@
               </div>
             </div>
           </label>
-          <label v-if="wizard.tracker==='manual'">类型
+          <label v-if="wizard.tracker==='manual'">{{ $t('类型') }}
             <select :value="wizard.venue.type" @change="setWizardType($event.target.value)">
-              <option value="journal">期刊</option><option value="conference">会议</option>
+              <option value="journal">{{ $t('期刊') }}</option><option value="conference">{{ $t('会议') }}</option>
             </select>
           </label>
-          <label v-if="wizard.venue.type==='conference' || wizard.tracker==='openreview'">年份
-            <input v-model.trim="wizard.venue.year" inputmode="numeric" maxlength="4" placeholder="如 2027">
+          <label v-if="wizard.venue.type==='conference' || wizard.tracker==='openreview'">{{ $t('年份') }}
+            <input v-model.trim="wizard.venue.year" inputmode="numeric" maxlength="4" :placeholder="$t('如 2027')">
           </label>
-          <label v-if="wizard.tracker==='openreview'">OpenReview venue id（按会议+年份自动组装，可改）
-            <input v-model.trim="wizard.venue.venue_id" placeholder="如 NeurIPS.cc/2025/Conference"
+          <label v-if="wizard.tracker==='openreview'">{{ $t('OpenReview venue id（按会议+年份自动组装，可改）') }}
+            <input v-model.trim="wizard.venue.venue_id" :placeholder="$t('如 NeurIPS.cc/2025/Conference')"
                    @input="wizard.venueIdTouched = true">
           </label>
-          <label v-if="wizard.venue.type==='conference'">会议 DDL（可选，用于排序/提醒）
+          <label v-if="wizard.venue.type==='conference'">{{ $t('会议 DDL（可选，用于排序/提醒）') }}
             <input type="date" v-model="wizard.venue.ddl">
           </label>
-          <label v-if="wizard.tracker==='elsevier'">期刊缩写（可选，编号前缀；只给「一键查稿」实验功能用）
-            <input v-model="wizard.venue.journal_acronym" placeholder="如 ESWA，编号前缀">
+          <label v-if="wizard.tracker==='elsevier'">{{ $t('期刊缩写（可选，编号前缀；只给「一键查稿」实验功能用）') }}
+            <input v-model="wizard.venue.journal_acronym" :placeholder="$t('如 ESWA，编号前缀')">
           </label>
-          <label v-if="wizard.tracker==='manual'">出版社（可选）
+          <label v-if="wizard.tracker==='manual'">{{ $t('出版社（可选）') }}
             <input v-model="wizard.venue.publisher" placeholder="IEEE / Springer …">
           </label>
         </div>
@@ -357,53 +360,53 @@
         <!-- 分级徽章预览 -->
         <div class="rank-preview" v-if="wizard.rankShown">
           <template v-if="wizard.rankCard && (wizard.rankCard.ccf || wizard.rankCard.journal)">
-            <span class="rp-label">学术分级（本地匹配）：</span>
+            <span class="rp-label">{{ $t('学术分级（本地匹配）：') }}</span>
             <span v-if="wizard.rankCard.ccf" class="rk rk-ccf" :class="'ccf-'+wizard.rankCard.ccf.rank">CCF-{{ wizard.rankCard.ccf.rank }}</span>
             <template v-if="wizard.rankCard.journal">
-              <span v-if="wizard.rankCard.journal.cas" class="rk rk-cas" :class="{top: wizard.rankCard.journal.cas.top}">中科院{{ wizard.rankCard.journal.cas.part }}区{{ wizard.rankCard.journal.cas.top ? ' Top' : '' }}</span>
-              <span v-if="wizard.rankCard.journal.xr" class="rk rk-xr" :class="{top: wizard.rankCard.journal.xr.top}">新锐{{ wizard.rankCard.journal.xr.part }}区{{ wizard.rankCard.journal.xr.top ? ' Top' : '' }}</span>
+              <span v-if="wizard.rankCard.journal.cas" class="rk rk-cas" :class="{top: wizard.rankCard.journal.cas.top}">{{ $t('中科院{0}区{1}', [wizard.rankCard.journal.cas.part, wizard.rankCard.journal.cas.top ? ' Top' : '']) }}</span>
+              <span v-if="wizard.rankCard.journal.xr" class="rk rk-xr" :class="{top: wizard.rankCard.journal.xr.top}">{{ $t('新锐{0}区{1}', [wizard.rankCard.journal.xr.part, wizard.rankCard.journal.xr.top ? ' Top' : '']) }}</span>
               <span v-if="wizard.rankCard.journal.jcr" class="rk rk-jcr">{{ jcrLabel(wizard.rankCard.journal.jcr) }}</span>
               <span v-if="wizard.rankCard.journal.xr && wizard.rankCard.journal.xr.warning" class="rk rk-warn">{{ xrWarnLabel(wizard.rankCard.journal.xr.warning) }}</span>
-              <span v-if="wizard.rankCard.journal.warn2025 || wizard.rankCard.journal.warn2024" class="rk rk-warn">⚠ 预警{{ wizard.rankCard.journal.warn2025 ? '2025' : '2024' }}</span>
+              <span v-if="wizard.rankCard.journal.warn2025 || wizard.rankCard.journal.warn2024" class="rk rk-warn">{{ $t('⚠ 预警{0}', [wizard.rankCard.journal.warn2025 ? '2025' : '2024']) }}</span>
             </template>
-            <span class="rp-field" v-if="wizard.rankCard.ccf">{{ wizard.rankCard.ccf.field }}</span>
+            <span class="rp-field" v-if="wizard.rankCard.ccf">{{ $t(wizard.rankCard.ccf.field) }}</span>
           </template>
-          <span v-else class="rp-miss">本地库未匹配到「{{ wizard.rankProbeName }}」的分级 —— 不影响建档。{{ rankMissingHint() }}</span>
+          <span v-else class="rp-miss">{{ $t('本地库未匹配到「{0}」的分级 —— 不影响建档。{1}', [wizard.rankProbeName, rankMissingHint()]) }}</span>
         </div>
 
         <!-- 稿件字段（自动抽取的已预填） -->
         <div class="form-grid two" style="margin-top:14px">
-          <label class="full">标题<input v-model="wizard.form.title"></label>
-          <label class="full">作者（逗号分隔）<input v-model="wizard.form.authorsText"
-            placeholder="Xiaoming Wang, Lei Li（双盲匿名可留空）"></label>
-          <label class="full">摘要<textarea v-model="wizard.form.abstract" rows="4"></textarea></label>
-          <label class="full">关键词（逗号分隔）<input v-model="wizard.form.keywordsText"></label>
-          <label>投稿日期<span class="fl-hint" v-if="wizard.draft && wizard.draft.submitted_hint_source==='cover_letter'
-                 && wizard.form.submitted_at===wizard.draft.submitted_hint">（取自 cover letter 落款日期，请核对）</span>
+          <label class="full">{{ $t('标题') }}<input v-model="wizard.form.title"></label>
+          <label class="full">{{ $t('作者（逗号分隔）') }}<input v-model="wizard.form.authorsText"
+            :placeholder="$t('Xiaoming Wang, Lei Li（双盲匿名可留空）')"></label>
+          <label class="full">{{ $t('摘要') }}<textarea v-model="wizard.form.abstract" rows="4"></textarea></label>
+          <label class="full">{{ $t('关键词（逗号分隔）') }}<input v-model="wizard.form.keywordsText"></label>
+          <label>{{ $t('投稿日期') }}<span class="fl-hint" v-if="wizard.draft && wizard.draft.submitted_hint_source==='cover_letter'
+                 && wizard.form.submitted_at===wizard.draft.submitted_hint">{{ $t('（取自 cover letter 落款日期，请核对）') }}</span>
             <input type="date" v-model="wizard.form.submitted_at" :max="todayStr()"></label>
-          <label>初始状态
+          <label>{{ $t('初始状态') }}
             <select v-model="wizard.form.initial_stage">
-              <option v-for="(s,k) in stageOrder" :value="k">{{ s.label }}</option>
+              <option v-for="(s,k) in stageOrder" :value="k">{{ $t(s.label) }}</option>
             </select>
           </label>
           <template v-if="wizard.tracker==='elsevier'">
-            <label>稿件编号<input v-model="wizard.form.manuscript_number"
-              placeholder="如 ESWA-D-25-00000（爱思唯尔查询凭据）"></label>
-            <label>通讯作者拼音<input v-model="wizard.form.corresponding_pinyin"
-              placeholder="XIAOMING WANG（查询凭据）"></label>
+            <label>{{ $t('稿件编号') }}<input v-model="wizard.form.manuscript_number"
+              :placeholder="$t('如 ESWA-D-25-00000（爱思唯尔查询凭据）')"></label>
+            <label>{{ $t('通讯作者拼音') }}<input v-model="wizard.form.corresponding_pinyin"
+              :placeholder="$t('XIAOMING WANG（查询凭据）')"></label>
           </template>
           <template v-if="wizard.tracker==='openreview'">
-            <label>OpenReview ID（可选，留空自动按标题匹配）<input
-              v-model="wizard.form.openreview_forum" placeholder="自动匹配"></label>
+            <label>{{ $t('OpenReview ID（可选，留空自动按标题匹配）') }}<input
+              v-model="wizard.form.openreview_forum" :placeholder="$t('自动匹配')"></label>
           </template>
-          <label v-if="wizard.form.initial_stage==='revise'">返修截止日<input type="date"
+          <label v-if="wizard.form.initial_stage==='revise'">{{ $t('返修截止日') }}<input type="date"
             v-model="wizard.form.revise_due"></label>
-          <label>备注<input v-model="wizard.form.notes"></label>
+          <label>{{ $t('备注') }}<input v-model="wizard.form.notes"></label>
         </div>
 
         <div class="wizard-nav">
-          <button class="btn ghost" @click="wizard.step=1">← 重新解析 PDF</button>
-          <button class="btn primary big" :disabled="wizard.creating" @click="createSub()">{{ wizard.creating ? '建档中…' : '建 档 ✓' }}</button>
+          <button class="btn ghost" @click="wizard.step=1">{{ $t('← 重新解析 PDF') }}</button>
+          <button class="btn primary big" :disabled="wizard.creating" @click="createSub()">{{ wizard.creating ? $t('建档中…') : $t('建 档 ✓') }}</button>
         </div>
       </div>
     </div>
@@ -413,96 +416,92 @@
   <!-- ===== 渠道查询 ===== -->
   <main v-if="page==='query'" class="page">
     <div class="panel">
-      <h3>OpenReview 账号 <span class="badge-src">{{ orAccount && orAccount.encrypted === false ? '凭据仅存本机 · ⚠ 密码未加密' : '凭据仅存本机、密码加密' }} · 一键同步我的全部投稿</span></h3>
+      <h3>{{ $t('OpenReview 账号') }} <span class="badge-src">{{ $t('{0} · 一键同步我的全部投稿', [orAccount && orAccount.encrypted === false ? $t('凭据仅存本机 · ⚠ 密码未加密') : $t('凭据仅存本机、密码加密')]) }}</span></h3>
       <div v-if="orAccount" class="acc-bound">
         <div class="acc-info">
           <span class="acc-avatar">{{ (orAccount.display_name || orAccount.email || '?')[0].toUpperCase() }}</span>
           <div>
-            <div class="acc-name">{{ orAccount.display_name || 'OpenReview 用户' }}
+            <div class="acc-name">{{ orAccount.display_name || $t('OpenReview 用户') }}
               <span class="acc-id">{{ orAccount.profile_id }}</span></div>
-            <div class="acc-email">{{ orAccount.email }} · 绑定于 {{ orAccount.created_at }}</div>
-            <div class="acc-note" v-if="orAccount.encrypted && !orAccount.needs_rebind">🔒 密码已安全保存（{{ secretStorageText(orAccount.storage) }}）</div>
+            <div class="acc-email">{{ $t('{0} · 绑定于 {1}', [orAccount.email, orAccount.created_at]) }}</div>
+            <div class="acc-note" v-if="orAccount.encrypted && !orAccount.needs_rebind">{{ $t('🔒 密码已安全保存（{0}）', [secretStorageText(orAccount.storage)]) }}</div>
           </div>
         </div>
         <div class="acc-ops">
           <button class="btn primary sm" :disabled="syncing || orAccount.needs_rebind" @click="syncMySubmissions()"
-                  :title="orAccount.needs_rebind ? '本机解不开保存的密码：先解除绑定再重新绑定' : ''">
-            {{ syncing ? '同步中…' : '⇄ 同步我的投稿' }}</button>
-          <button class="btn danger sm" @click="removeORAccount()">解除绑定</button>
+                  :title="orAccount.needs_rebind ? $t('本机解不开保存的密码：先解除绑定再重新绑定') : ''">
+            {{ syncing ? $t('同步中…') : $t('⇄ 同步我的投稿') }}</button>
+          <button class="btn danger sm" @click="removeORAccount()">{{ $t('解除绑定') }}</button>
         </div>
       </div>
       <div v-else class="acc-form">
-        <div class="acc-hint">绑定后自动拉取你名下全部 OpenReview 投稿（跨会议），已登记的自动更新状态，新投稿一键建档。
-          <b>OpenReview 已不再允许匿名读取 API，单篇查询、全量轮询与同步都需要先绑定账号。</b>
-          密码只保存在本机的安全存储里（Windows 凭据保护 / macOS 钥匙串 / Linux Secret Service），不会明文写进数据库，只用于请求 OpenReview 官方 API，可随时解除绑定删除；没有可用的安全存储时不会保存。开启了多因素认证（MFA）的账号暂不支持。</div>
-        <p class="acc-warn" v-if="secretStorage === 'none'">⚠ 这台电脑上没有可用的系统钥匙串（keyring），暂时无法安全保存密码，所以不能绑定账号。macOS / Linux 请先 pip install keyring 并确保钥匙串服务在运行。</p>
+        <div class="acc-hint">{{ $t('绑定后自动拉取你名下全部 OpenReview 投稿（跨会议），已登记的自动更新状态，新投稿一键建档。') }}
+          <b>{{ $t('OpenReview 已不再允许匿名读取 API，单篇查询、全量轮询与同步都需要先绑定账号。') }}</b>
+          {{ $t('密码只保存在本机的安全存储里（Windows 凭据保护 / macOS 钥匙串 / Linux Secret Service），不会明文写进数据库，只用于请求 OpenReview 官方 API，可随时解除绑定删除；没有可用的安全存储时不会保存。开启了多因素认证（MFA）的账号暂不支持。') }}</div>
+        <p class="acc-warn" v-if="secretStorage === 'none'">{{ $t('⚠ 这台电脑上没有可用的系统钥匙串（keyring），暂时无法安全保存密码，所以不能绑定账号。macOS / Linux 请先 pip install keyring 并确保钥匙串服务在运行。') }}</p>
         <div class="form-grid two">
-          <label>邮箱<input v-model="orForm.email" placeholder="OpenReview 登录邮箱" autocomplete="username"></label>
-          <label>密码<input type="password" v-model="orForm.secret" placeholder="OpenReview 密码"
+          <label>{{ $t('邮箱') }}<input v-model="orForm.email" :placeholder="$t('OpenReview 登录邮箱')" autocomplete="username"></label>
+          <label>{{ $t('密码') }}<input type="password" v-model="orForm.secret" :placeholder="$t('OpenReview 密码')"
             autocomplete="current-password" @keyup.enter="bindORAccount()"></label>
         </div>
         <button class="btn primary sm" :disabled="binding" @click="bindORAccount()">
-          {{ binding ? '验证中…' : '绑定账号' }}</button>
+          {{ binding ? $t('验证中…') : $t('绑定账号') }}</button>
       </div>
-      <div v-if="orAccount && orAccount.needs_rebind" class="acc-warn">⚠ 本机无法解开已保存的密码（数据库可能是从别的电脑或别的 Windows 用户复制来的）。请点上面的「解除绑定」，再用 OpenReview 账号重新绑定，自动同步才会恢复。</div>
-      <div v-else-if="orAccount && orAccount.encrypted === false" class="acc-warn">⚠ 密码目前没有放进安全存储（这台电脑上的 Windows 凭据保护 / 系统钥匙串暂时不可用）。系统每次启动会自动重试；也可以解除绑定后重新绑定。</div>
+      <div v-if="orAccount && orAccount.needs_rebind" class="acc-warn">{{ $t('⚠ 本机无法解开已保存的密码（数据库可能是从别的电脑或别的 Windows 用户复制来的）。请点上面的「解除绑定」，再用 OpenReview 账号重新绑定，自动同步才会恢复。') }}</div>
+      <div v-else-if="orAccount && orAccount.encrypted === false" class="acc-warn">{{ $t('⚠ 密码目前没有放进安全存储（这台电脑上的 Windows 凭据保护 / 系统钥匙串暂时不可用）。系统每次启动会自动重试；也可以解除绑定后重新绑定。') }}</div>
 
       <!-- 同步结果 -->
       <div v-if="syncResult" class="sync-result">
         <p class="sync-head" v-if="syncResult.ok">
-          同步完成：拉到 {{ syncResult.total }} 篇 · 状态有变化 {{ (syncResult.updated||[]).length }} 篇 ·
-          无变化 {{ (syncResult.unchanged||[]).length }} 篇 ·
-          新发现 {{ syncDiscovered.length }} 篇<span v-if="syncDismissedCount">（另有 {{ syncDismissedCount }} 篇已忽略）</span>（{{ syncResult.latency_ms }}ms）</p>
-        <p class="sync-head bad" v-else>{{ syncResult.error }}</p>
+          {{ $t('同步完成：拉到 {0} 篇 · 状态有变化 {1} 篇 · 无变化 {2} 篇 · 新发现 {3} 篇', [syncResult.total, (syncResult.updated||[]).length, (syncResult.unchanged||[]).length, syncDiscovered.length]) }}<span v-if="syncDismissedCount">{{ $t('（另有 {0} 篇已忽略）', [syncDismissedCount]) }}</span>（{{ syncResult.latency_ms }}ms）</p>
+        <p class="sync-head bad" v-else>{{ $t(syncResult.error) }}</p>
         <div v-for="(u,i) in syncResult.updated" :key="'u'+i" class="sync-row ok"
              @click="openDetail(u.id)">
           <span class="stage-chip" :style="chipStyle(u.stage)">{{ stageLabel(u.stage) }}</span>
           <span class="pr-title">{{ short(u.title, 56) }}</span>
-          <span class="pr-msg">{{ u.raw || '' }}</span><span class="alert-go">查看 →</span>
+          <span class="pr-msg">{{ u.raw || '' }}</span><span class="alert-go">{{ $t('查看 →') }}</span>
         </div>
         <div v-for="(d,i) in syncDiscovered" :key="'d'+d.forum" class="sync-row new">
           <span class="stage-chip" :style="chipStyle(d.stage)">{{ stageLabel(d.stage) }}</span>
           <span class="pr-title" :title="d.title">{{ short(d.title, 56) }}</span>
           <span class="pr-msg">{{ d.venue_name || 'OpenReview' }}</span>
           <span v-if="d._related" class="rk rk-warn"
-                :title="'库里已有' + (d._same_title ? '同标题' : '标题相近') + '的稿件：' + (d._related_titles||[]).join('；') + ' → 疑似转投/扩写，建档后可互相关联'">转投/扩写？</span>
-          <button class="btn mini" :disabled="d._importing" @click="importDiscovered(d)">＋ 建档</button>
+                :title="$t('库里已有') + (d._same_title ? $t('同标题') : $t('标题相近')) + $t('的稿件：') + (d._related_titles||[]).join('；') + $t(' → 疑似转投/扩写，建档后可互相关联')">{{ $t('转投/扩写？') }}</span>
+          <button class="btn mini" :disabled="d._importing" @click="importDiscovered(d)">{{ $t('＋ 建档') }}</button>
           <button v-if="d._related" class="btn mini" :disabled="d._importing" @click="importDiscovered(d, true)"
-                  :title="'建档并与 ' + (d._related_ids||[]).map(x => '#' + x).join(' ') + ' 建立「转投」关联'">＋ 建档并关联</button>
-          <button class="btn mini ghost" title="不建档，之后同步也不再提示（可撤销）" @click="dismissDiscovered(d)">忽略</button>
+                  :title="$t('建档并与 ') + (d._related_ids||[]).map(x => '#' + x).join(' ') + $t(' 建立「转投」关联')">{{ $t('＋ 建档并关联') }}</button>
+          <button class="btn mini ghost" :title="$t('不建档，之后同步也不再提示（可撤销）')" @click="dismissDiscovered(d)">{{ $t('忽略') }}</button>
         </div>
       </div>
     </div>
     <div class="panel" id="sys-import">
-      <h3>从投稿系统导入 <span class="badge-src">ScholarOne · Editorial Manager · IEEE Author Portal · Snapp · MDPI · 中文期刊…</span></h3>
-      <p class="hint small">IEEE、Taylor &amp; Francis、Springer、Wiley、Elsevier、MDPI 等都没有给作者用的接口，也不允许程序替你登录。
-        所以请你自己在浏览器里登录投稿系统，打开作者中心里列出稿件的那一页，<b>Ctrl+A 全选、Ctrl+C 复制</b>，粘贴到下面：
-        程序会认出每篇稿件的编号、标题、状态和日期，库里已有的记进时间线，没有的可以新建。本程序不会登录或访问这些网站。</p>
+      <h3>{{ $t('从投稿系统导入') }} <span class="badge-src">{{ $t('ScholarOne · Editorial Manager · IEEE Author Portal · Snapp · MDPI · 中文期刊…') }}</span></h3>
+      <p class="hint small">{{ $t('IEEE、Taylor & Francis、Springer、Wiley、Elsevier、MDPI 等都没有给作者用的接口，也不允许程序替你登录。 所以请你自己在浏览器里登录投稿系统，打开作者中心里列出稿件的那一页，') }}<b>{{ $t('Ctrl+A 全选、Ctrl+C 复制') }}</b>{{ $t('，粘贴到下面： 程序会认出每篇稿件的编号、标题、状态和日期，库里已有的记进时间线，没有的可以新建。本程序不会登录或访问这些网站。') }}</p>
       <textarea v-model="sysImport.text" rows="6" class="sys-text" @input="sysImport.parsed = null" @paste="onSysPaste()"
-        placeholder="把列出稿件的那一页整页粘贴到这里：ScholarOne 的 Author Dashboard、Editorial Manager 里的某个文件夹（如 Submissions Being Processed）、IEEE / Wiley 的 My Submissions、中文期刊的作者中心稿件列表…"></textarea>
+        :placeholder="$t('把列出稿件的那一页整页粘贴到这里：ScholarOne 的 Author Dashboard、Editorial Manager 里的某个文件夹（如 Submissions Being Processed）、IEEE / Wiley 的 My Submissions、中文期刊的作者中心稿件列表…')"></textarea>
       <div class="pf-actions">
-        <button class="btn primary sm" :disabled="sysImport.loading" @click="parseSysImport()">{{ sysImport.loading ? '解析中…' : '🔍 解析预览' }}</button>
+        <button class="btn primary sm" :disabled="sysImport.loading" @click="parseSysImport()">{{ sysImport.loading ? $t('解析中…') : $t('🔍 解析预览') }}</button>
         <button class="btn ghost sm" v-if="sysImport.parsed && sysPicks().length" :disabled="sysImport.saving"
-                @click="confirmSysImport()">{{ sysImport.saving ? '导入中…' : '✓ 导入选中（' + sysPicks().length + '）' }}</button>
+                @click="confirmSysImport()">{{ sysImport.saving ? $t('导入中…') : $t('✓ 导入选中（') + sysPicks().length + '）' }}</button>
       </div>
       <div v-if="sysImport.parsed" class="sys-result">
-        <p class="small">识别为：<b>{{ sysImport.parsed.system_label || '未知系统' }}</b><span v-if="sysImport.parsed.journal"> · {{ sysImport.parsed.journal }}</span>
-          · 共 {{ sysImport.parsed.items.length }} 篇</p>
+        <p class="small">{{ $t('识别为：') }}<b>{{ $t(sysImport.parsed.system_label || '未知系统') }}</b><span v-if="sysImport.parsed.journal"> · {{ sysImport.parsed.journal }}</span>
+          {{ $t('· 共 {0} 篇', [sysImport.parsed.items.length]) }}</p>
         <div class="table-wrap" v-if="sysImport.parsed.items.length">
           <table class="sys-table">
-            <thead><tr><th></th><th>稿件编号</th><th>标题</th><th>官方状态</th><th>日期</th><th>处理</th></tr></thead>
+            <thead><tr><th></th><th>{{ $t('稿件编号') }}</th><th>{{ $t('标题') }}</th><th>{{ $t('官方状态') }}</th><th>{{ $t('日期') }}</th><th>{{ $t('处理') }}</th></tr></thead>
             <tbody>
               <tr v-for="(it, i) in sysImport.parsed.items" :key="i" :class="'sys-' + it.action">
                 <td><input type="checkbox" v-model="it._pick" :disabled="it.action !== 'update' && it.action !== 'create'"></td>
                 <td class="mono">{{ it.manuscript_id || '—' }}</td>
-                <td :title="it.title">{{ short(it.title, 70) || '（无标题）' }}</td>
+                <td :title="it.title">{{ short(it.title, 70) || $t('（无标题）') }}</td>
                 <td><span v-if="it.stage" class="stage-chip" :style="chipStyle(it.stage)">{{ stageLabel(it.stage) }}</span>
-                    <small class="sys-raw">{{ it.raw_status }}</small></td>
+                    <small class="sys-raw">{{ $t(it.raw_status) }}</small></td>
                 <td class="nowrap">{{ it.status_date || '' }}</td>
                 <td>
                   <template v-if="it.match"><a href="#" @click.prevent="openDetail(it.match.id)">#{{ it.match.id }}</a> {{ sysActionText(it) }}
                     <small class="sys-raw">{{ sysMatchText(it) }}</small></template>
-                  <template v-else-if="it.action === 'create'">新建 · <input v-model="it._venue" class="sys-venue" placeholder="期刊名"></template>
+                  <template v-else-if="it.action === 'create'">{{ $t('新建 ·') }} <input v-model="it._venue" class="sys-venue" :placeholder="$t('期刊名')"></template>
                   <template v-else>{{ sysActionText(it) }}
                     <small class="sys-raw" v-if="it.candidates && it.candidates.length">
                       <template v-for="(m, k) in it.candidates" :key="m.id"><a href="#" @click.prevent="openDetail(m.id)">#{{ m.id }}</a>{{ k + 1 < it.candidates.length ? '、' : '' }}</template></small></template>
@@ -514,55 +513,53 @@
       </div>
     </div>
     <div class="panel">
-      <h3>期刊 / 会议分级速查 <span class="badge-src">{{ rankSourcesText() }}</span></h3>
+      <h3>{{ $t('期刊 / 会议分级速查') }} <span class="badge-src">{{ rankSourcesText() }}</span></h3>
       <p class="hint small" v-if="rankMissingHint()">{{ rankMissingHint() }}</p>
       <div class="rank-search">
-        <input v-model="rankQ" placeholder="输入期刊名或会议简称，如 Pattern Recognition / NeurIPS / ESWA…"
+        <input v-model="rankQ" :placeholder="$t('输入期刊名或会议简称，如 Pattern Recognition / NeurIPS / ESWA…')"
                @keyup.enter="doRankSearch()">
-        <button class="btn primary" @click="doRankSearch()">查分级</button>
+        <button class="btn primary" @click="doRankSearch()">{{ $t('查分级') }}</button>
       </div>
       <div v-if="rankResult" class="rank-results">
         <div v-for="(j,i) in rankResult.journals" :key="'j'+i" class="rank-card">
           <div class="rank-card-name">{{ j.journal }}</div>
           <div class="rank-badges">
-            <span v-if="j.cas" class="rk rk-cas" :class="{top: j.cas.top}">中科院{{ j.cas.part }}区{{ j.cas.top ? ' Top' : '' }}</span>
-            <span v-if="j.xr" class="rk rk-xr" :class="{top: j.xr.top}">新锐{{ j.xr.part }}区{{ j.xr.top ? ' Top' : '' }}</span>
+            <span v-if="j.cas" class="rk rk-cas" :class="{top: j.cas.top}">{{ $t('中科院{0}区{1}', [j.cas.part, j.cas.top ? ' Top' : '']) }}</span>
+            <span v-if="j.xr" class="rk rk-xr" :class="{top: j.xr.top}">{{ $t('新锐{0}区{1}', [j.xr.part, j.xr.top ? ' Top' : '']) }}</span>
             <span v-if="j.jcr" class="rk rk-jcr">{{ jcrLabel(j.jcr) }}</span>
-            <span v-if="j.warn2025 || j.warn2024" class="rk rk-warn">⚠ 预警{{ j.warn2025 ? '2025' : '2024' }}</span>
+            <span v-if="j.warn2025 || j.warn2024" class="rk rk-warn">{{ $t('⚠ 预警{0}', [j.warn2025 ? '2025' : '2024']) }}</span>
             <span v-if="j.xr && j.xr.warning" class="rk rk-warn">{{ xrWarnLabel(j.xr.warning) }}</span>
           </div>
-          <div class="rank-card-meta">{{ j.cas?.field }} · {{ j.cas?.wos }} · ISSN {{ j.issn }}</div>
+          <div class="rank-card-meta">{{ $t(j.cas?.field) }} · {{ j.cas?.wos }} · ISSN {{ j.issn }}</div>
         </div>
         <div v-for="(c,i) in rankResult.ccf" :key="'c'+i" class="rank-card conf">
           <div class="rank-card-name"><span class="rk rk-ccf" :class="'ccf-'+c.rank">CCF-{{ c.rank }}</span>{{ c.abbr ? c.abbr + ' · ' : '' }}{{ c.name }}</div>
-          <div class="rank-card-meta">{{ c.field }} · {{ c.type==='conference' ? '会议' : '期刊' }} · {{ c.publisher }}</div>
+          <div class="rank-card-meta">{{ $t(c.field) }} · {{ c.type==='conference' ? $t('会议') : $t('期刊') }} · {{ c.publisher }}</div>
         </div>
-        <p class="empty" v-if="!rankResult.journals.length && !rankResult.ccf.length">未收录：{{ rankResult.hint || '换个关键词试试（支持简称与前缀）' }}</p>
+        <p class="empty" v-if="!rankResult.journals.length && !rankResult.ccf.length">{{ $t('未收录：{0}', [$t(rankResult.hint || '换个关键词试试（支持简称与前缀）')]) }}</p>
       </div>
     </div>
     <div class="panel">
-      <h3>OpenReview · 全自动轮询</h3>
-      <p class="hint">遍历 OpenReview 通道稿件（跳过归档与已拒/已撤/制作中），拉取最新状态，状态有变化才记入时间线；后台线程每日也会自动执行一次。已绑定账号时自动带登录凭据（私有投稿如 CVPR 在审稿件也能查）。</p>
-      <button class="btn primary" :disabled="pollingOR" @click="pollAll()">{{ pollingOR ? '轮询中…' : '立即全量轮询' }}</button>
+      <h3>{{ $t('OpenReview · 全自动轮询') }}</h3>
+      <p class="hint">{{ $t('遍历 OpenReview 通道稿件（跳过归档与已拒/已撤/制作中），拉取最新状态，状态有变化才记入时间线；后台线程每日也会自动执行一次。已绑定账号时自动带登录凭据（私有投稿如 CVPR 在审稿件也能查）。') }}</p>
+      <button class="btn primary" :disabled="pollingOR" @click="pollAll()">{{ pollingOR ? $t('轮询中…') : $t('立即全量轮询') }}</button>
       <div v-if="pollResults.length" class="poll-results">
         <div v-for="(r,i) in pollResults" :key="i" class="poll-row" :class="r.ok?'ok':'bad'">
           <span class="stage-chip" v-if="r.stage" :style="chipStyle(r.stage)">{{ stageLabel(r.stage) }}</span>
           <span class="pr-title">{{ r.title }}</span>
-          <span class="pr-msg">{{ r.ok ? (r.raw||'ok') : (r.error||'失败') }}</span>
+          <span class="pr-msg">{{ r.ok ? (r.raw||'ok') : $t(r.error||'失败') }}</span>
         </div>
       </div>
     </div>
     <div class="panel">
-      <h3>爱思唯尔期刊 <span class="badge-src">非官方工具 · 与爱思唯尔无关</span></h3>
-      <p class="hint">推荐用法：在官方页面（Editorial Manager 作者中心、Track your submission 或爱思唯尔中国的稿件查询）查到状态后，
-        整页复制，到投稿详情里点「📋 粘贴官方结果」，系统自动解析状态、审稿人统计和日期并记进时间线。</p>
+      <h3>{{ $t('爱思唯尔期刊') }} <span class="badge-src">{{ $t('非官方工具 · 与爱思唯尔无关') }}</span></h3>
+      <p class="hint">{{ $t('推荐用法：在官方页面（Editorial Manager 作者中心、Track your submission 或爱思唯尔中国的稿件查询）查到状态后， 整页复制，到投稿详情里点「📋 粘贴官方结果」，系统自动解析状态、审稿人统计和日期并记进时间线。') }}</p>
       <div class="exp-box">
-        <b>实验功能：爱思唯尔一键查稿</b>（默认关闭）
-        <p class="hint small">开启后，详情页和列表里会出现「一键查稿」按钮：用稿件编号 + 通讯作者拼音 + 期刊缩写向爱思唯尔中国的稿件查询服务请求状态。
-          非官方、可能随时失效，是否符合爱思唯尔网站使用条款请自行判断；每篇稿件 24 小时最多查一次，遇到验证码就停下转人工（绝不绕过）。</p>
-        <button class="btn sm" :class="features.elsevier_query ? 'ghost' : 'primary'" @click="toggleElsevierQuery()">{{ features.elsevier_query ? '已开启 · 点击关闭' : '开启实验功能…' }}</button>
+        <b>{{ $t('实验功能：爱思唯尔一键查稿') }}</b>{{ $t('（默认关闭）') }}
+        <p class="hint small">{{ $t('开启后，详情页和列表里会出现「一键查稿」按钮：用稿件编号 + 通讯作者拼音 + 期刊缩写向爱思唯尔中国的稿件查询服务请求状态。 非官方、可能随时失效，是否符合爱思唯尔网站使用条款请自行判断；每篇稿件 24 小时最多查一次，遇到验证码就停下转人工（绝不绕过）。') }}</p>
+        <button class="btn sm" :class="features.elsevier_query ? 'ghost' : 'primary'" @click="toggleElsevierQuery()">{{ features.elsevier_query ? $t('已开启 · 点击关闭') : $t('开启实验功能…') }}</button>
         <button v-if="features.elsevier_query" class="btn ghost sm" :disabled="journalsLoading" @click="loadJournals()">
-          {{ journalsLoading ? '加载中…' : '拉取期刊缩写字典' }}</button>
+          {{ journalsLoading ? $t('加载中…') : $t('拉取期刊缩写字典') }}</button>
       </div>
       <div v-if="journals.length" class="journal-list">
         <span v-for="j in journals.slice(0,60)" class="journal-chip"
@@ -570,36 +567,36 @@
       </div>
     </div>
     <div class="panel">
-      <h3>查询日志（poll_logs）</h3>
+      <h3>{{ $t('查询日志（poll_logs）') }}</h3>
       <table class="table slim" v-if="pollLogs.length">
-        <thead><tr><th>时间</th><th>通道</th><th>对象</th><th>结果</th><th>耗时</th></tr></thead>
+        <thead><tr><th>{{ $t('时间') }}</th><th>{{ $t('通道') }}</th><th>{{ $t('对象') }}</th><th>{{ $t('结果') }}</th><th>{{ $t('耗时') }}</th></tr></thead>
         <tbody>
           <tr v-for="l in pollLogs" :key="l.id">
             <td class="td-time">{{ l.created_at }}</td><td>{{ l.channel }}</td><td>#{{ l.target }}</td>
-            <td>{{ l.ok ? '✓' : '✗ ' + (l.error||'') }}</td><td>{{ l.latency_ms }}ms</td>
+            <td>{{ l.ok ? '✓' : '✗ ' + $t(l.error||'') }}</td><td>{{ l.latency_ms }}ms</td>
           </tr>
         </tbody>
       </table>
-      <p class="empty" v-else>还没有查询记录。</p>
+      <p class="empty" v-else>{{ $t('还没有查询记录。') }}</p>
     </div>
     <div class="panel">
-      <h3>数据备份 <span class="badge-src">每天自动备份数据库 · 保留最近 {{ (backups && backups.keep) || 14 }} 份 · 不含 PDF 原件</span></h3>
-      <p class="hint">上次自动备份：{{ backups && backups.last_auto ? fmtTs(backups.last_auto) : '还没有（服务启动约 90 秒后会自动备份一次）' }}
-        <template v-if="backups && backups.dir"><br>备份文件夹：<code class="path" :title="backups.dir">{{ backups.dir_display || backups.dir }}</code>
-          <button class="btn mini ghost" @click="copyText(backups.dir)">复制路径</button></template></p>
-      <p class="acc-warn" v-if="backups && backups.last_error">⚠ 最近一次自动备份失败：{{ backups.last_error }}（2 小时后会自动重试，也可以点「立即备份」）</p>
-      <button class="btn primary sm" :disabled="backingUp" @click="backupNow()">{{ backingUp ? '备份中…' : '立即备份' }}</button>
+      <h3>{{ $t('数据备份') }} <span class="badge-src">{{ $t('每天自动备份数据库 · 保留最近 {0} 份 · 不含 PDF 原件', [(backups && backups.keep) || 14]) }}</span></h3>
+      <p class="hint">{{ $t('上次自动备份：{0}', [backups && backups.last_auto ? fmtTs(backups.last_auto) : $t('还没有（服务启动约 90 秒后会自动备份一次）')]) }}
+        <template v-if="backups && backups.dir"><br>{{ $t('备份文件夹：') }}<code class="path" :title="backups.dir">{{ backups.dir_display || backups.dir }}</code>
+          <button class="btn mini ghost" @click="copyText(backups.dir)">{{ $t('复制路径') }}</button></template></p>
+      <p class="acc-warn" v-if="backups && backups.last_error">{{ $t('⚠ 最近一次自动备份失败：{0}（2 小时后会自动重试，也可以点「立即备份」）', [backups.last_error]) }}</p>
+      <button class="btn primary sm" :disabled="backingUp" @click="backupNow()">{{ backingUp ? $t('备份中…') : $t('立即备份') }}</button>
       <table class="table slim backup-table" v-if="backups && backups.items && backups.items.length">
-        <thead><tr><th>备份文件</th><th>时间</th><th>大小</th></tr></thead>
+        <thead><tr><th>{{ $t('备份文件') }}</th><th>{{ $t('时间') }}</th><th>{{ $t('大小') }}</th></tr></thead>
         <tbody>
           <tr v-for="b in backups.items" :key="b.file">
             <td class="td-num">{{ b.file }}</td><td class="td-time">{{ b.created_at }}</td><td class="td-days">{{ fmtSize(b.size) }}</td>
           </tr>
         </tbody>
       </table>
-      <p class="hint small" v-if="backups && backups.upgrade_items && backups.upgrade_items.length">另有升级前自动留的备份：
+      <p class="hint small" v-if="backups && backups.upgrade_items && backups.upgrade_items.length">{{ $t('另有升级前自动留的备份：') }}
         <span v-for="b in backups.upgrade_items" :key="b.file" class="path-chip">{{ b.file }}（{{ b.created_at }}）</span></p>
-      <p class="hint small">需要恢复时：先关掉本系统（结束 run.py 进程），把要恢复的备份文件复制到 data 文件夹、改名为 tracker.db（覆盖前可先把现在的 tracker.db 另存一份），再重新启动。</p>
+      <p class="hint small">{{ $t('需要恢复时：先关掉本系统（结束 run.py 进程），把要恢复的备份文件复制到 data 文件夹、改名为 tracker.db（覆盖前可先把现在的 tracker.db 另存一份），再重新启动。') }}</p>
     </div>
   </main>
 
@@ -611,78 +608,78 @@
         <div class="dh-left">
           <span class="stage-chip big" :style="chipStyle(detail.current_stage)">{{ stageLabel(detail.current_stage) }}</span>
           <span class="tracker-chip" :class="'tk-'+detail.venue_tracker">{{ trackerLabel(detail.venue_tracker) }}</span>
-          <span v-if="detail.archived" class="tag-arch">已归档</span>
-          <span v-if="detail.deleted" class="tag-trash">回收站</span>
+          <span v-if="detail.archived" class="tag-arch">{{ $t('已归档') }}</span>
+          <span v-if="detail.deleted" class="tag-trash">{{ $t('回收站') }}</span>
         </div>
         <div class="dh-right">
           <span class="dh-id">#{{ detail.id }}</span>
-          <button class="btn mini ghost" ref="drawerClose" title="关闭（Esc）" @click="closeDetail()">关闭 ✕</button>
+          <button class="btn mini ghost" ref="drawerClose" :title="$t('关闭（Esc）')" @click="closeDetail()">{{ $t('关闭 ✕') }}</button>
         </div>
       </div>
       <h2 class="drawer-title">{{ detail.title }}</h2>
       <p class="drawer-venue">{{ detail.venue_name }}<span v-if="detail.manuscript_number"> · {{ detail.manuscript_number }}</span>
         <span v-if="detail.venue_ddl"> · DDL {{ detail.venue_ddl }}</span></p>
       <div class="badge-row big" v-if="detail.badges && detail.badges.length">
-        <span v-for="b in detail.badges" :key="b.label" class="rk" :class="badgeClass(b)" :title="b.title">{{ b.label }}</span>
+        <span v-for="b in detail.badges" :key="b.label" class="rk" :class="badgeClass(b)" :title="$t(b.title)">{{ $t(b.label) }}</span>
       </div>
 
       <!-- 回收站 / 被拒横幅 -->
       <div class="banner trash" v-if="detail.deleted">
-        <span>🗑 这篇在回收站里，{{ trashLeft(detail) }}。</span>
-        <button class="btn sm" @click="restoreSub(detail)">恢复</button>
-        <button class="btn sm danger" @click="purgeSub(detail)">彻底删除</button>
+        <span>{{ $t('🗑 这篇在回收站里，{0}。', [trashLeft(detail)]) }}</span>
+        <button class="btn sm" @click="restoreSub(detail)">{{ $t('恢复') }}</button>
+        <button class="btn sm danger" @click="purgeSub(detail)">{{ $t('彻底删除') }}</button>
       </div>
       <div class="banner rejected" v-else-if="['rejected','withdrawn'].includes(detail.current_stage) && !resubForm.open">
-        <span>{{ detail.current_stage==='rejected' ? '这篇被拒了' : '这篇已撤稿' }}，下一步：</span>
-        <button class="btn sm" @click="openResubmit()">↪ 转投到…</button>
-        <button class="btn sm ghost" v-if="!detail.archived" @click="toggleArchive(detail)">归档</button>
+        <span>{{ $t('{0}，下一步：', [detail.current_stage==='rejected' ? $t('这篇被拒了') : $t('这篇已撤稿')]) }}</span>
+        <button class="btn sm" @click="openResubmit()">{{ $t('↪ 转投到…') }}</button>
+        <button class="btn sm ghost" v-if="!detail.archived" @click="toggleArchive(detail)">{{ $t('归档') }}</button>
       </div>
 
       <!-- 主操作（低频操作收进「更多」） -->
       <div class="drawer-actions" v-if="!detail.deleted">
         <button v-if="detail.venue_tracker==='openreview'" class="btn primary sm"
-                :disabled="detail._querying" @click="queryOR(detail)">{{ detail._querying?'查询中…':'OpenReview 立即查询' }}</button>
+                :disabled="detail._querying" @click="queryOR(detail)">{{ detail._querying?$t('查询中…'):$t('OpenReview 立即查询') }}</button>
         <button v-if="detail.venue_tracker==='elsevier' && features.elsevier_query" class="btn ghost sm"
-                :disabled="detail._querying" @click="queryElsevier(detail)">{{ detail._querying?'查询中…':'一键查稿（实验）' }}</button>
+                :disabled="detail._querying" @click="queryElsevier(detail)">{{ detail._querying?$t('查询中…'):$t('一键查稿（实验）') }}</button>
         <button v-if="detail.venue_tracker==='elsevier'" class="btn primary sm paste-btn"
-                @click="togglePaste()">📋 粘贴官方结果</button>
+                @click="togglePaste()">{{ $t('📋 粘贴官方结果') }}</button>
         <button v-if="detail.venue_type==='journal' && detail.venue_tracker==='manual'" class="btn ghost sm"
-                @click="goSysImport()" title="粘贴 ScholarOne / Editorial Manager / IEEE Author Portal 等作者中心页面">📋 从投稿系统导入</button>
-        <button class="btn ghost sm" @click="openEventForm()">＋ 登记状态变化</button>
-        <button class="btn ghost sm" @click="editMode ? saveEdit() : startEdit()">{{ editMode?'保存':'编辑信息' }}</button>
-        <button class="btn ghost sm" v-if="editMode" @click="cancelEdit()">取消编辑</button>
+                @click="goSysImport()" :title="$t('粘贴 ScholarOne / Editorial Manager / IEEE Author Portal 等作者中心页面')">{{ $t('📋 从投稿系统导入') }}</button>
+        <button class="btn ghost sm" @click="openEventForm()">{{ $t('＋ 登记状态变化') }}</button>
+        <button class="btn ghost sm" @click="editMode ? saveEdit() : startEdit()">{{ editMode?$t('保存'):$t('编辑信息') }}</button>
+        <button class="btn ghost sm" v-if="editMode" @click="cancelEdit()">{{ $t('取消编辑') }}</button>
         <a v-if="officialUrl(detail)" class="btn ghost sm" :href="officialUrl(detail)" target="_blank"
            rel="noopener noreferrer" :title="officialUrl(detail)">↗ {{ officialLabel(detail) }}</a>
         <div class="more-wrap" @focusout="onMoreFocusOut($event)">
           <button class="btn ghost sm" ref="moreBtn" :aria-expanded="moreOpen ? 'true' : 'false'" aria-controls="more-menu"
-                  @click.stop="toggleMore($event)">⋯ 更多</button>
+                  @click.stop="toggleMore($event)">{{ $t('⋯ 更多') }}</button>
           <div class="more-menu" id="more-menu" v-if="moreOpen" @click="moreOpen=false">
-            <button v-if="detail.documents.length" @click="openPdf(detail)">📄 打开 PDF 原件</button>
+            <button v-if="detail.documents.length" @click="openPdf(detail)">{{ $t('📄 打开 PDF 原件') }}</button>
             <a v-if="safeUrl(detail.openreview_url)" :href="safeUrl(detail.openreview_url)"
-               target="_blank" rel="noopener noreferrer">↗ OpenReview 稿件页</a>
+               target="_blank" rel="noopener noreferrer">{{ $t('↗ OpenReview 稿件页') }}</a>
             <a v-if="safeUrl(detail.venue_submit_url)" :href="safeUrl(detail.venue_submit_url)"
-               target="_blank" rel="noopener noreferrer">↗ 投稿系统{{ detail.venue_submit_url_stored ? '' : '（自动推断）' }}</a>
-            <button @click="openResubmit()">↪ 转投 / 扩写为新投稿…</button>
-            <button @click="toggleArchive(detail)">{{ detail.archived ? '取消归档' : '🗄 归档' }}</button>
-            <button class="danger" @click="trashSub(detail)">🗑 移到回收站</button>
+               target="_blank" rel="noopener noreferrer">{{ $t('↗ 投稿系统{0}', [detail.venue_submit_url_stored ? '' : $t('（自动推断）')]) }}</a>
+            <button @click="openResubmit()">{{ $t('↪ 转投 / 扩写为新投稿…') }}</button>
+            <button @click="toggleArchive(detail)">{{ detail.archived ? $t('取消归档') : $t('🗄 归档') }}</button>
+            <button class="danger" @click="trashSub(detail)">{{ $t('🗑 移到回收站') }}</button>
           </div>
         </div>
       </div>
 
       <!-- 改投 / 扩写为新投稿 -->
       <div class="resub-form" v-if="resubForm.open && !detail.deleted">
-        <h4>建立新投稿（与本稿关系：{{ resubForm.relation }}） <span class="pf-hint">（复制本稿的标题、作者、摘要、关键词{{ detail.documents.length ? '与 PDF' : '' }}，新稿与本稿自动关联）</span></h4>
+        <h4>{{ $t('建立新投稿（与本稿关系：{0}）', [resubForm.relation]) }} <span class="pf-hint">{{ $t('（复制本稿的标题、作者、摘要、关键词{0}，新稿与本稿自动关联）', [detail.documents.length ? $t('与 PDF') : '']) }}</span></h4>
         <div v-if="resubForm.similar.length" class="sim-box">
-          <div class="pf-hint">同领域、同级或低一级的候选（本地 CCF 目录{{ resubForm.similarBase ? '；原投 ' + (resubForm.similarBase.abbr || resubForm.similarBase.name) + ' 为 CCF-' + resubForm.similarBase.rank : '' }}），点一下填入：</div>
+          <div class="pf-hint">{{ $t('同领域、同级或低一级的候选（本地 CCF 目录{0}），点一下填入：', [resubForm.similarBase ? $t('；原投 ') + (resubForm.similarBase.abbr || resubForm.similarBase.name) + $t(' 为 CCF-') + resubForm.similarBase.rank : '']) }}</div>
           <div class="sim-list">
             <button v-for="s in resubForm.similar" :key="s.abbr + '|' + s.name" class="sim-chip" type="button"
-                    :title="s.name + ' · ' + s.field + ' · ' + (s.type==='conference' ? '会议' : '期刊')"
+                    :title="s.name + ' · ' + $t(s.field) + ' · ' + (s.type==='conference' ? $t('会议') : $t('期刊'))"
                     @click="pickSimilar(s)"><b>CCF-{{ s.rank }}</b>{{ s.abbr || short(s.name, 28) }}</button>
           </div>
         </div>
         <div class="form-grid two">
-          <label class="full ac-wrap">转投到（会议 / 期刊）
-            <input v-model="resubForm.venue.name" placeholder="输入全称或简称，下拉联想；也可点上面的候选"
+          <label class="full ac-wrap">{{ $t('转投到（会议 / 期刊）') }}
+            <input v-model="resubForm.venue.name" :placeholder="$t('输入全称或简称，下拉联想；也可点上面的候选')"
                    @input="onResubVenueInput" @focus="resubForm.focused = true"
                    @blur="resubForm.focused = false; resubForm.suggestOpen = false"
                    @keydown.esc="escSuggest($event, 'resub')" autocomplete="off">
@@ -695,122 +692,102 @@
               </div>
             </div>
           </label>
-          <label>类型
+          <label>{{ $t('类型') }}
             <select v-model="resubForm.venue.type">
-              <option value="journal">期刊</option><option value="conference">会议</option>
+              <option value="journal">{{ $t('期刊') }}</option><option value="conference">{{ $t('会议') }}</option>
             </select>
           </label>
-          <label>追踪渠道
+          <label>{{ $t('追踪渠道') }}
             <select v-model="resubForm.venue.tracker">
-              <option value="manual">手动</option><option value="openreview">OpenReview（自动）</option>
-              <option value="elsevier">爱思唯尔（粘贴官方结果）</option>
+              <option value="manual">{{ $t('手动') }}</option><option value="openreview">{{ $t('OpenReview（自动）') }}</option>
+              <option value="elsevier">{{ $t('爱思唯尔（粘贴官方结果）') }}</option>
             </select>
           </label>
-          <label v-if="resubForm.venue.type==='conference' || resubForm.venue.tracker==='openreview'">年份
-            <input v-model.trim="resubForm.venue.year" inputmode="numeric" maxlength="4" placeholder="如 2027"></label>
-          <label v-if="resubForm.venue.tracker==='elsevier'">期刊缩写（可选）
-            <input v-model="resubForm.venue.journal_acronym" placeholder="如 ESWA（编号前缀）"></label>
-          <label>关系
+          <label v-if="resubForm.venue.type==='conference' || resubForm.venue.tracker==='openreview'">{{ $t('年份') }}
+            <input v-model.trim="resubForm.venue.year" inputmode="numeric" maxlength="4" :placeholder="$t('如 2027')"></label>
+          <label v-if="resubForm.venue.tracker==='elsevier'">{{ $t('期刊缩写（可选）') }}
+            <input v-model="resubForm.venue.journal_acronym" :placeholder="$t('如 ESWA（编号前缀）')"></label>
+          <label>{{ $t('关系') }}
             <select v-model="resubForm.relation">
-              <option>转投</option><option>扩写</option><option>会议版·期刊版</option>
+              <option value="转投">{{ $t('转投') }}</option><option value="扩写">{{ $t('扩写') }}</option><option value="会议版·期刊版">{{ $t('会议版·期刊版') }}</option>
             </select>
           </label>
-          <label>投稿日期<input type="date" v-model="resubForm.submitted_at" :max="todayStr()"></label>
-          <label>新稿件编号（可选）<input v-model="resubForm.manuscript_number" placeholder="投稿后再补也行"></label>
-          <label class="full">新标题（可选，留空沿用原标题）<input v-model="resubForm.title" :placeholder="short(detail.title, 60)"></label>
-          <label class="chk full" v-if="detail.documents.length"><input type="checkbox" v-model="resubForm.copy_pdf"> 同时复制 PDF 原件到新投稿</label>
+          <label>{{ $t('投稿日期') }}<input type="date" v-model="resubForm.submitted_at" :max="todayStr()"></label>
+          <label>{{ $t('新稿件编号（可选）') }}<input v-model="resubForm.manuscript_number" :placeholder="$t('投稿后再补也行')"></label>
+          <label class="full">{{ $t('新标题（可选，留空沿用原标题）') }}<input v-model="resubForm.title" :placeholder="short(detail.title, 60)"></label>
+          <label class="chk full" v-if="detail.documents.length"><input type="checkbox" v-model="resubForm.copy_pdf"> {{ $t('同时复制 PDF 原件到新投稿') }}</label>
         </div>
         <div class="pf-actions">
-          <button class="btn primary sm" :disabled="resubForm.saving" @click="submitResubmit()">{{ resubForm.saving ? '建档中…' : '建立新投稿 ✓' }}</button>
-          <button class="btn ghost sm" @click="resubForm.open=false">取消</button>
+          <button class="btn primary sm" :disabled="resubForm.saving" @click="submitResubmit()">{{ resubForm.saving ? $t('建档中…') : $t('建立新投稿 ✓') }}</button>
+          <button class="btn ghost sm" @click="resubForm.open=false">{{ $t('取消') }}</button>
         </div>
       </div>
 
       <!-- 粘贴官方结果（人工过码后 → 自适应解析 → 自动入档） -->
       <div class="paste-form" v-if="pasteForm.open">
-        <h4>粘贴官方查询页结果 <span class="pf-hint">（官方页滑块过码后全选复制，粘到下面即可自动解析）</span></h4>
+        <h4>{{ $t('粘贴官方查询页结果') }} <span class="pf-hint">{{ $t('（官方页滑块过码后全选复制，粘到下面即可自动解析）') }}</span></h4>
         <textarea v-model="pasteForm.text" rows="7" @input="onPasteInput"
-          placeholder="把官方页整段复制进来，例如：
-
-Review Status
-同行评审进行中
-更新时间：2025年1月20日
-当前进度：
-Under Review
-评审完成：
-1
-接受评审邀请：
-2
-发出评审邀请*：
-3
-Manuscript Number
-ESWA-D-25-00000
-期刊
-Expert Systems with Applications
-提交日期
-2025年1月6日"></textarea>
+          :placeholder="$t('把官方页整段复制进来，例如：\n\nReview Status\n同行评审进行中\n更新时间：2025年1月20日\n当前进度：\nUnder Review\n评审完成：\n1\n接受评审邀请：\n2\n发出评审邀请*：\n3\nManuscript Number\nESWA-D-25-00000\n期刊\nExpert Systems with Applications\n提交日期\n2025年1月6日')"></textarea>
         <div class="pf-actions">
           <button class="btn primary sm" :disabled="pasteForm.loading" @click="parsePaste()">
-            {{ pasteForm.loading ? '解析中…' : '🔍 解析预览' }}</button>
+            {{ pasteForm.loading ? $t('解析中…') : $t('🔍 解析预览') }}</button>
           <button class="btn ghost sm" v-if="pasteForm.parsed"
                   :disabled="pasteForm.saving || !!pasteForm.parsed.warning || !pasteForm.parsed.recognized"
-                  @click="confirmPaste()">{{ pasteForm.saving ? '写入中…' : '✓ 记入时间线' }}</button>
+                  @click="confirmPaste()">{{ pasteForm.saving ? $t('写入中…') : $t('✓ 记入时间线') }}</button>
         </div>
         <div v-if="pasteForm.parsed" class="pf-result">
-          <div class="pf-row pf-warn" v-if="pasteForm.parsed.warning"><span>⚠ 注意</span><b>{{ pasteForm.parsed.warning }}</b></div>
-          <div class="pf-row"><span>解析出状态</span>
+          <div class="pf-row pf-warn" v-if="pasteForm.parsed.warning"><span>{{ $t('⚠ 注意') }}</span><b>{{ $t(pasteForm.parsed.warning) }}</b></div>
+          <div class="pf-row"><span>{{ $t('解析出状态') }}</span>
             <span v-if="pasteForm.parsed.stage" class="stage-chip" :style="chipStyle(pasteForm.parsed.stage)">{{ stageLabel(pasteForm.parsed.stage) }}</span>
-            <b v-else-if="pasteForm.parsed.recognized">未识别状态行（有审稿人统计，按「外审中」记）</b>
-            <b v-else class="pf-none">未识别到任何状态信息，不会写入</b>
+            <b v-else-if="pasteForm.parsed.recognized">{{ $t('未识别状态行（有审稿人统计，按「外审中」记）') }}</b>
+            <b v-else class="pf-none">{{ $t('未识别到任何状态信息，不会写入') }}</b>
             <em>{{ pasteForm.parsed.raw }}</em></div>
           <div class="pf-row" v-if="pasteForm.parsed.reviewers && Object.keys(pasteForm.parsed.reviewers).length">
-            <span>审稿人</span><b>发出邀请 {{ rvNum(pasteForm.parsed, 'invited') }} ·
-            接受 {{ rvNum(pasteForm.parsed, 'accepted') }} ·
-            完成 {{ rvNum(pasteForm.parsed, 'completed') }}</b></div>
+            <span>{{ $t('审稿人') }}</span><b>{{ $t('发出邀请 {0} · 接受 {1} · 完成 {2}', [rvNum(pasteForm.parsed, 'invited'), rvNum(pasteForm.parsed, 'accepted'), rvNum(pasteForm.parsed, 'completed')]) }}</b></div>
           <div class="pf-row" :class="{ 'pf-amb': pasteForm.parsed.reviewers_ambiguous }" v-if="pasteForm.parsed.reviewers_note">
-            <span>{{ pasteForm.parsed.reviewers_ambiguous ? '⚠ 核对' : '人数变化' }}</span><em>{{ pasteForm.parsed.reviewers_note }}</em></div>
-          <div class="pf-row" v-if="pasteForm.parsed.observed_at"><span>更新时间</span><b>{{ pasteForm.parsed.observed_at }}</b>
-            <em v-if="pasteForm.parsed._future">官方日期晚于本机日期（北京时间与本地时区差），将按现在记录</em></div>
-          <div class="pf-row" v-if="pasteForm.parsed.submitted_at"><span>提交日期</span><b>{{ pasteForm.parsed.submitted_at }}{{ pasteForm.parsed.submitted_note }}</b></div>
-          <div class="pf-row" v-if="pasteForm.parsed.revise_due"><span>返修截止</span><b>{{ pasteForm.parsed.revise_due }}{{ pasteForm.parsed.stage==='revise' ? '（将写入返修截止日）' : '' }}</b></div>
-          <div class="pf-row" v-if="pasteForm.parsed.manuscript_number"><span>稿件编号</span><b>{{ pasteForm.parsed.manuscript_number }}</b></div>
-          <div class="pf-row" v-if="pasteForm.parsed.journal"><span>期刊</span><b>{{ pasteForm.parsed.journal }}</b></div>
+            <span>{{ pasteForm.parsed.reviewers_ambiguous ? $t('⚠ 核对') : $t('人数变化') }}</span><em>{{ $t(pasteForm.parsed.reviewers_note) }}</em></div>
+          <div class="pf-row" v-if="pasteForm.parsed.observed_at"><span>{{ $t('更新时间') }}</span><b>{{ pasteForm.parsed.observed_at }}</b>
+            <em v-if="pasteForm.parsed._future">{{ $t('官方日期晚于本机日期（北京时间与本地时区差），将按现在记录') }}</em></div>
+          <div class="pf-row" v-if="pasteForm.parsed.submitted_at"><span>{{ $t('提交日期') }}</span><b>{{ pasteForm.parsed.submitted_at }}{{ pasteForm.parsed.submitted_note }}</b></div>
+          <div class="pf-row" v-if="pasteForm.parsed.revise_due"><span>{{ $t('返修截止') }}</span><b>{{ pasteForm.parsed.revise_due }}{{ pasteForm.parsed.stage==='revise' ? $t('（将写入返修截止日）') : '' }}</b></div>
+          <div class="pf-row" v-if="pasteForm.parsed.manuscript_number"><span>{{ $t('稿件编号') }}</span><b>{{ pasteForm.parsed.manuscript_number }}</b></div>
+          <div class="pf-row" v-if="pasteForm.parsed.journal"><span>{{ $t('期刊') }}</span><b>{{ pasteForm.parsed.journal }}</b></div>
         </div>
       </div>
 
       <!-- 状态登记 -->
       <div class="event-form" v-if="updateEvent.open">
         <div class="form-grid three">
-          <label>归一阶段
+          <label>{{ $t('归一阶段') }}
             <select v-model="updateEvent.stage">
-              <option v-for="(s,k) in stageOrder" :value="k">{{ s.label }}</option>
+              <option v-for="(s,k) in stageOrder" :value="k">{{ $t(s.label) }}</option>
             </select>
           </label>
-          <label>原始状态（可选）
+          <label>{{ $t('原始状态（可选）') }}
             <select v-model="updateEvent.raw">
-              <option value="">— 自定义/留空 —</option>
+              <option value="">{{ $t('— 自定义/留空 —') }}</option>
               <option v-for="o in rawStatusOptions" :value="o">{{ o }}</option>
             </select>
           </label>
-          <label>发生时间（留空 = 现在；可补录历史）
+          <label>{{ $t('发生时间（留空 = 现在；可补录历史）') }}
             <input type="datetime-local" v-model="updateEvent.observed_at" :max="nowLocal()">
           </label>
         </div>
         <div class="form-grid two" v-if="updateEvent.stage==='revise'">
-          <label>返修截止日<input type="date" v-model="updateEvent.revise_due"></label>
+          <label>{{ $t('返修截止日') }}<input type="date" v-model="updateEvent.revise_due"></label>
         </div>
         <div class="pf-actions">
-          <button class="btn primary sm" @click="addEvent()">记入时间线</button>
-          <button class="btn ghost sm" @click="updateEvent.open=false">取消</button>
+          <button class="btn primary sm" @click="addEvent()">{{ $t('记入时间线') }}</button>
+          <button class="btn ghost sm" @click="updateEvent.open=false">{{ $t('取消') }}</button>
         </div>
       </div>
 
       <!-- 编辑模式 -->
       <div class="form-grid two edit-form" v-if="editMode">
-        <label class="full">标题<input v-model="editForm.title"></label>
-        <label class="full">作者（逗号分隔）<input v-model="editForm.authorsText"></label>
-        <label class="full ac-wrap">会议/期刊名称（改名后徽章自动重匹配）
-          <input v-model="editForm.venue_name" placeholder="如 Pattern Recognition / NeurIPS"
+        <label class="full">{{ $t('标题') }}<input v-model="editForm.title"></label>
+        <label class="full">{{ $t('作者（逗号分隔）') }}<input v-model="editForm.authorsText"></label>
+        <label class="full ac-wrap">{{ $t('会议/期刊名称（改名后徽章自动重匹配）') }}
+          <input v-model="editForm.venue_name" :placeholder="$t('如 Pattern Recognition / NeurIPS')"
                  @input="onEditVenueInput" @focus="setEditFocus(true)" @blur="setEditFocus(false)"
                  @keydown.esc="escSuggest($event, 'edit')" autocomplete="off">
           <div v-if="editSuggestOpen && editSuggests.length" class="suggest-list">
@@ -822,124 +799,124 @@ Expert Systems with Applications
             </div>
           </div>
         </label>
-        <label>类型
+        <label>{{ $t('类型') }}
           <select v-model="editForm.venue_type">
-            <option value="journal">期刊</option><option value="conference">会议</option>
+            <option value="journal">{{ $t('期刊') }}</option><option value="conference">{{ $t('会议') }}</option>
           </select>
         </label>
-        <label>追踪渠道
+        <label>{{ $t('追踪渠道') }}
           <select v-model="editForm.tracker">
-            <option value="manual">手动</option><option value="openreview">OpenReview（自动）</option>
-            <option value="elsevier">爱思唯尔（粘贴官方结果）</option>
+            <option value="manual">{{ $t('手动') }}</option><option value="openreview">{{ $t('OpenReview（自动）') }}</option>
+            <option value="elsevier">{{ $t('爱思唯尔（粘贴官方结果）') }}</option>
           </select>
         </label>
-        <label v-if="editForm.venue_type==='conference' || editForm.tracker==='openreview'">年份
-          <input v-model.trim="editForm.venue_year" inputmode="numeric" maxlength="4" placeholder="如 2027">
+        <label v-if="editForm.venue_type==='conference' || editForm.tracker==='openreview'">{{ $t('年份') }}
+          <input v-model.trim="editForm.venue_year" inputmode="numeric" maxlength="4" :placeholder="$t('如 2027')">
         </label>
-        <label>DDL（可选）<input type="date" v-model="editForm.ddl"></label>
-        <label v-if="editForm.tracker==='elsevier'">期刊缩写（可选，只给「一键查稿」用）
-          <input v-model="editForm.journal_acronym" placeholder="如 ESWA（编号前缀）"></label>
-        <label v-if="editForm.tracker==='openreview'">OpenReview venue id（留空按会议+年份自动组装）
-          <input v-model="editForm.openreview_venue_id" placeholder="如 NeurIPS.cc/2025/Conference"></label>
-        <label v-if="editForm.tracker==='openreview'">OpenReview 稿件 ID（forum，留空自动匹配）
+        <label>{{ $t('DDL（可选）') }}<input type="date" v-model="editForm.ddl"></label>
+        <label v-if="editForm.tracker==='elsevier'">{{ $t('期刊缩写（可选，只给「一键查稿」用）') }}
+          <input v-model="editForm.journal_acronym" :placeholder="$t('如 ESWA（编号前缀）')"></label>
+        <label v-if="editForm.tracker==='openreview'">{{ $t('OpenReview venue id（留空按会议+年份自动组装）') }}
+          <input v-model="editForm.openreview_venue_id" :placeholder="$t('如 NeurIPS.cc/2025/Conference')"></label>
+        <label v-if="editForm.tracker==='openreview'">{{ $t('OpenReview 稿件 ID（forum，留空自动匹配）') }}
           <input v-model="editForm.openreview_forum"></label>
-        <label v-if="editForm.tracker==='manual'">出版社（可选）<input v-model="editForm.publisher"></label>
-        <label>稿件编号<input v-model="editForm.manuscript_number"></label>
-        <label>通讯作者拼音<input v-model="editForm.corresponding_pinyin" placeholder="FIRST LAST"></label>
-        <label>投稿日期<input type="date" v-model="editForm.submitted_at" :max="todayStr()"></label>
-        <label>返修截止日<input type="date" v-model="editForm.revise_due"></label>
-        <label class="full">投稿系统链接（可选：EM / ScholarOne / CMT 等的登录页；留空则按编号或渠道自动推断）
+        <label v-if="editForm.tracker==='manual'">{{ $t('出版社（可选）') }}<input v-model="editForm.publisher"></label>
+        <label>{{ $t('稿件编号') }}<input v-model="editForm.manuscript_number"></label>
+        <label>{{ $t('通讯作者拼音') }}<input v-model="editForm.corresponding_pinyin" placeholder="FIRST LAST"></label>
+        <label>{{ $t('投稿日期') }}<input type="date" v-model="editForm.submitted_at" :max="todayStr()"></label>
+        <label>{{ $t('返修截止日') }}<input type="date" v-model="editForm.revise_due"></label>
+        <label class="full">{{ $t('投稿系统链接（可选：EM / ScholarOne / CMT 等的登录页；留空则按编号或渠道自动推断）') }}
           <input v-model.trim="editForm.submit_url" placeholder="https://…" inputmode="url"></label>
-        <label class="full">关键词（逗号分隔）<input v-model="editForm.keywordsText"></label>
-        <label class="full">摘要<textarea v-model="editForm.abstract" rows="4"></textarea></label>
-        <label class="full">备注<input v-model="editForm.notes"></label>
+        <label class="full">{{ $t('关键词（逗号分隔）') }}<input v-model="editForm.keywordsText"></label>
+        <label class="full">{{ $t('摘要') }}<textarea v-model="editForm.abstract" rows="4"></textarea></label>
+        <label class="full">{{ $t('备注') }}<input v-model="editForm.notes"></label>
         <div class="wizard-nav full">
-          <button class="btn ghost sm" @click="cancelEdit()">取消</button>
-          <button class="btn primary sm" @click="saveEdit()">保存</button>
+          <button class="btn ghost sm" @click="cancelEdit()">{{ $t('取消') }}</button>
+          <button class="btn primary sm" @click="saveEdit()">{{ $t('保存') }}</button>
         </div>
       </div>
 
       <!-- 最新进展 -->
       <div class="latest" v-if="!editMode && latestEvent">
         <div class="latest-main">
-          <span class="lt-label">最新进展</span>
+          <span class="lt-label">{{ $t('最新进展') }}</span>
           <b :style="{color: stageColor(detail.current_stage)}">{{ stageLabel(detail.current_stage) }}</b>
-          <span class="lt-raw" v-if="detail.current_raw">{{ detail.current_raw }}</span>
+          <span class="lt-raw" v-if="detail.current_raw">{{ $t(detail.current_raw) }}</span>
         </div>
         <div class="latest-facts">
-          <span v-if="detail.stage_since">{{ fmtDate(detail.stage_since) }} 起<template v-if="detail.days_in_stage != null"> · 已 {{ detail.days_in_stage }} 天</template></span>
-          <span v-if="detail.days_total != null">{{ detail.result_at ? '审稿用时' : '投稿至今' }} {{ detail.days_total }} 天</span>
-          <span v-if="detail.current_stage==='revise' && detail.revise_due" :class="dueClass(detail.revise_due)">返修截止 {{ detail.revise_due }}（{{ dueText(detail.revise_due) }}）</span>
-          <span v-if="latestEvent.payload && latestEvent.payload.reviewers">审稿人：邀请 {{ rvNum(latestEvent.payload, 'invited') }} · 接受 {{ rvNum(latestEvent.payload, 'accepted') }} · 完成 {{ rvNum(latestEvent.payload, 'completed') }}</span>
-          <span v-if="latestEvent.payload && latestEvent.payload.decision">决策：{{ latestEvent.payload.decision }}</span>
-          <span v-if="detail.last_synced_at" :title="fmtTs(detail.last_synced_at)">上次自动查询 {{ relTime(detail.last_synced_at) }}</span>
+          <span v-if="detail.stage_since">{{ $t('{0} 起', [fmtDate(detail.stage_since)]) }}<template v-if="detail.days_in_stage != null"> {{ $t('· 已 {0} 天', [detail.days_in_stage]) }}</template></span>
+          <span v-if="detail.days_total != null">{{ $t('{0} {1} 天', [detail.result_at ? $t('审稿用时') : $t('投稿至今'), detail.days_total]) }}</span>
+          <span v-if="detail.current_stage==='revise' && detail.revise_due" :class="dueClass(detail.revise_due)">{{ $t('返修截止 {0}（{1}）', [detail.revise_due, dueText(detail.revise_due)]) }}</span>
+          <span v-if="latestEvent.payload && latestEvent.payload.reviewers">{{ $t('审稿人：邀请 {0} · 接受 {1} · 完成 {2}', [rvNum(latestEvent.payload, 'invited'), rvNum(latestEvent.payload, 'accepted'), rvNum(latestEvent.payload, 'completed')]) }}</span>
+          <span v-if="latestEvent.payload && latestEvent.payload.decision">{{ $t('决策：{0}', [latestEvent.payload.decision]) }}</span>
+          <span v-if="detail.last_synced_at" :title="fmtTs(detail.last_synced_at)">{{ $t('上次自动查询 {0}', [relTime(detail.last_synced_at)]) }}</span>
         </div>
       </div>
 
       <!-- 时间线（最新在上） -->
-      <h3 class="tl-title">状态时间线 <small>（{{ detail.events.length }} 条，最新在上）</small></h3>
+      <h3 class="tl-title">{{ $t('状态时间线') }} <small>{{ $t('（{0} 条，最新在上）', [detail.events.length]) }}</small></h3>
       <ul class="timeline">
         <li v-for="(e,i) in timelineShown" :key="e.id" :class="{latest: i===0}">
           <strong :style="{color: stageColor(e.stage)}">{{ stageLabel(e.stage) }}</strong>
           <span class="tl-src" :class="'src-'+e.source">{{ srcLabel(e.source) }}</span>
-          <span class="tl-time">{{ fmtTs(e.observed_at) }}</span>
-          <span class="tl-gap-inline" v-if="timelineDesc[i+1]">距上一条 {{ gapDays(timelineDesc[i+1].observed_at, e.observed_at) }} 天</span>
-          <button v-if="detail.events.length > 1 && !detail.deleted" class="tl-del" title="删除这条记录（误记/重复；可撤销）"
+          <span class="tl-time" :title="$t('发生于 ') + fmtTs(e.observed_at) + $t(' · 记录于 ') + fmtTs(e.recorded_at)">{{ fmtTs(e.observed_at) }}</span>
+          <span class="tl-rec" v-if="recordedLater(e)" :title="$t('这条是事后补录的：发生于 {0}，记录于 {1}', [fmtTs(e.observed_at), fmtTs(e.recorded_at)])">{{ $t('补录于 {0}', [fmtDate(e.recorded_at)]) }}</span>
+          <span class="tl-gap-inline" v-if="timelineDesc[i+1]">{{ $t('距上一条 {0} 天', [gapDays(timelineDesc[i+1].observed_at, e.observed_at)]) }}</span>
+          <button v-if="detail.events.length > 1 && !detail.deleted" class="tl-del" :title="$t('删除这条记录（误记/重复；可撤销）')"
                   @click="deleteEvent(e)">✕</button>
-          <p v-if="e.raw_status">{{ e.raw_status }}</p>
+          <p v-if="e.raw_status">{{ $t(e.raw_status) }}</p>
           <p v-if="e.payload?.reviewers" class="tl-reviewers">
-            审稿人：发出邀请 {{ rvNum(e.payload, 'invited') }} ·
-            接受 {{ rvNum(e.payload, 'accepted') }} ·
-            完成 {{ rvNum(e.payload, 'completed') }}</p>
-          <p v-if="e.payload?.decision" class="tl-decision">决策：{{ e.payload.decision }}</p>
+            {{ $t('审稿人：发出邀请 {0} · 接受 {1} · 完成 {2}', [rvNum(e.payload, 'invited'), rvNum(e.payload, 'accepted'), rvNum(e.payload, 'completed')]) }}<span
+              v-if="rvDelta(e.payload)" class="tl-delta">{{ $t('（较上次：{0}）', [rvDelta(e.payload)]) }}</span></p>
+          <p v-if="e.payload?.decision" class="tl-decision">{{ $t('决策：{0}', [e.payload.decision]) }}</p>
         </li>
       </ul>
-      <button v-if="detail.events.length > 5" class="btn mini ghost tl-more" @click="tlExpanded = !tlExpanded">{{ tlExpanded ? '收起' : '展开全部 ' + detail.events.length + ' 条' }}</button>
+      <button v-if="detail.events.length > 5" class="btn mini ghost tl-more" @click="tlExpanded = !tlExpanded">{{ tlExpanded ? $t('收起') : $t('展开全部 ') + detail.events.length + $t(' 条') }}</button>
 
       <!-- 相关投稿（转投/扩写等关系；双向可见） -->
       <div class="related-box" v-if="!editMode">
-        <h4>相关投稿 <span class="pf-hint">（同一篇文章的转投 / 扩写 / 会议版·期刊版，双向关联）</span></h4>
+        <h4>{{ $t('相关投稿') }} <span class="pf-hint">{{ $t('（同一篇文章的转投 / 扩写 / 会议版·期刊版，双向关联）') }}</span></h4>
         <div v-if="detail.related && detail.related.length" class="related-list">
           <div v-for="r in detail.related" :key="r.link_id" class="related-row"
                @click="openDetail(r.id)" :title="r.note || ''">
             <span class="rk rk-rel">{{ relLabel(r) }}</span>
             <span class="stage-chip" :style="chipStyle(r.stage)">{{ stageLabel(r.stage) }}</span>
             <span class="rel-title">#{{ r.id }} {{ short(r.title, 40) }}</span>
-            <span class="si-meta">{{ r.venue }}{{ r.archived ? ' · 已归档' : '' }}</span>
-            <button v-if="!detail.deleted" class="btn mini danger" title="解除关联（可撤销）" @click.stop="removeRelated(r)">✕</button>
+            <span class="si-meta">{{ r.venue }}{{ r.archived ? $t(' · 已归档') : '' }}</span>
+            <button v-if="!detail.deleted" class="btn mini danger" :title="$t('解除关联（可撤销）')" @click.stop="removeRelated(r)">✕</button>
           </div>
         </div>
         <div class="rel-add" v-if="!relForm.open && !detail.deleted">
-          <button class="btn ghost sm" @click="openRelForm()">＋ 关联转投/扩写稿</button>
+          <button class="btn ghost sm" @click="openRelForm()">{{ $t('＋ 关联转投/扩写稿') }}</button>
         </div>
         <div class="rel-add-form" v-else-if="relForm.open">
           <div class="form-grid three">
-            <label class="full ac-wrap">搜索库内稿件（标题 / 编号 / 会议）——选中的稿件 = 本稿的转投稿/扩写稿
-              <input v-model="relForm.q" placeholder="如 DemoNet"
+            <label class="full ac-wrap">{{ $t('搜索库内稿件（标题 / 编号 / 会议）——选中的稿件 = 本稿的转投稿/扩写稿') }}
+              <input v-model="relForm.q" :placeholder="$t('如 DemoNet')"
                      @input="searchRelated" @blur="relForm.results = []"
                      @keydown.esc="escSuggest($event, 'rel')" autocomplete="off">
               <div v-if="relForm.results.length" class="suggest-list">
                 <div v-for="t in relForm.results" :key="t.id" class="suggest-item"
                      @mousedown.prevent="pickRelTarget(t)">
                   <span class="si-name">#{{ t.id }} {{ short(t.title, 48) }}</span>
-                  <span class="si-meta">{{ t.venue }}{{ t.linked ? ' · 已关联（再选将覆盖关系）' : '' }}</span>
+                  <span class="si-meta">{{ t.venue }}{{ t.linked ? $t(' · 已关联（再选将覆盖关系）') : '' }}</span>
                   <span class="stage-chip" :style="chipStyle(t.stage)">{{ stageLabel(t.stage) }}</span>
                 </div>
               </div>
             </label>
-            <label>关系
+            <label>{{ $t('关系') }}
               <select v-model="relForm.relation">
-                <option>转投</option><option>扩写</option><option>会议版·期刊版</option>
-                <option>同数据集</option><option>同方法</option>
+                <option value="转投">{{ $t('转投') }}</option><option value="扩写">{{ $t('扩写') }}</option><option value="会议版·期刊版">{{ $t('会议版·期刊版') }}</option>
+                <option value="同数据集">{{ $t('同数据集') }}</option><option value="同方法">{{ $t('同方法') }}</option>
               </select>
             </label>
-            <label>备注（可选）<input v-model="relForm.note"></label>
+            <label>{{ $t('备注（可选）') }}<input v-model="relForm.note"></label>
           </div>
-          <div v-if="relForm.target" class="rel-target">将建立：本稿 <b>{{ relForm.relation }}</b> →
+          <div v-if="relForm.target" class="rel-target">{{ $t('将建立：本稿') }} <b>{{ relForm.relation }}</b> →
             <b>#{{ relForm.target.id }}</b> {{ short(relForm.target.title, 40) }}（{{ relForm.target.venue || '—' }}）</div>
           <div class="pf-actions">
-            <button class="btn primary sm" :disabled="!relForm.target" @click="addRelated()">建立关联</button>
-            <button class="btn ghost sm" @click="relForm.open=false">取消</button>
+            <button class="btn primary sm" :disabled="!relForm.target" @click="addRelated()">{{ $t('建立关联') }}</button>
+            <button class="btn ghost sm" @click="relForm.open=false">{{ $t('取消') }}</button>
           </div>
         </div>
       </div>
@@ -947,22 +924,22 @@ Expert Systems with Applications
       <!-- 稿件信息 / 摘要（可折叠） -->
       <div class="sect" v-if="!editMode">
         <button class="sect-head" type="button" :aria-expanded="infoOpen ? 'true' : 'false'"
-                @click="infoOpen = !infoOpen">{{ infoOpen ? '▾' : '▸' }} 稿件信息</button>
+                @click="infoOpen = !infoOpen">{{ $t('{0} 稿件信息', [infoOpen ? '▾' : '▸']) }}</button>
         <div class="meta-grid" v-show="infoOpen">
-          <div class="meta"><label>作者</label><p>{{ detail.authors.join('，') || '—' }}</p></div>
-          <div class="meta"><label>通讯作者拼音</label><p>{{ detail.corresponding_pinyin || '—' }}</p></div>
-          <div class="meta"><label>投稿日期</label><p>{{ detail.submitted_at || '—' }}</p></div>
-          <div class="meta" v-if="detail.result_at"><label>出结果</label><p>{{ fmtDate(detail.result_at) }}</p></div>
-          <div class="meta"><label>返修截止</label><p :class="detail.current_stage==='revise' ? dueClass(detail.revise_due) : ''">{{ detail.revise_due || '—' }}
+          <div class="meta"><label>{{ $t('作者') }}</label><p>{{ detail.authors.join('，') || '—' }}</p></div>
+          <div class="meta"><label>{{ $t('通讯作者拼音') }}</label><p>{{ detail.corresponding_pinyin || '—' }}</p></div>
+          <div class="meta"><label>{{ $t('投稿日期') }}</label><p>{{ detail.submitted_at || '—' }}</p></div>
+          <div class="meta" v-if="detail.result_at"><label>{{ $t('出结果') }}</label><p>{{ fmtDate(detail.result_at) }}</p></div>
+          <div class="meta"><label>{{ $t('返修截止') }}</label><p :class="detail.current_stage==='revise' ? dueClass(detail.revise_due) : ''">{{ detail.revise_due || '—' }}
             <b v-if="detail.current_stage==='revise' && detail.revise_due">（{{ dueText(detail.revise_due) }}）</b></p></div>
-          <div class="meta"><label>关键词</label><p>{{ detail.keywords.join('；') || '—' }}</p></div>
-          <div class="meta"><label>备注</label><p>{{ detail.notes || '—' }}</p></div>
-          <div class="meta"><label>投稿系统</label><p><a v-if="safeUrl(detail.venue_submit_url)" :href="safeUrl(detail.venue_submit_url)"
-               target="_blank" rel="noopener noreferrer">{{ short(detail.venue_submit_url, 46) }}</a><span v-else>—（可在「编辑信息」里填）</span>
-            <small v-if="safeUrl(detail.venue_submit_url) && !detail.venue_submit_url_stored" class="fl-hint">自动推断</small></p></div>
+          <div class="meta"><label>{{ $t('关键词') }}</label><p>{{ detail.keywords.join('；') || '—' }}</p></div>
+          <div class="meta"><label>{{ $t('备注') }}</label><p>{{ $t(detail.notes) || '—' }}</p></div>
+          <div class="meta"><label>{{ $t('投稿系统') }}</label><p><a v-if="safeUrl(detail.venue_submit_url)" :href="safeUrl(detail.venue_submit_url)"
+               target="_blank" rel="noopener noreferrer">{{ short(detail.venue_submit_url, 46) }}</a><span v-else>{{ $t('—（可在「编辑信息」里填）') }}</span>
+            <small v-if="safeUrl(detail.venue_submit_url) && !detail.venue_submit_url_stored" class="fl-hint">{{ $t('自动推断') }}</small></p></div>
         </div>
         <button class="sect-head" type="button" :aria-expanded="abstractOpen ? 'true' : 'false'"
-                @click="abstractOpen = !abstractOpen">{{ abstractOpen ? '▾' : '▸' }} 摘要<span
+                @click="abstractOpen = !abstractOpen">{{ $t('{0} 摘要', [abstractOpen ? '▾' : '▸']) }}<span
                 v-if="!abstractOpen && detail.abstract" class="sect-peek">{{ short(detail.abstract, 70) }}</span></button>
         <p class="abstract" v-show="abstractOpen">{{ detail.abstract || '—' }}</p>
       </div>
@@ -972,14 +949,14 @@ Expert Systems with Applications
 
   <!-- ===== 应用内确认框（代替浏览器弹窗） ===== -->
   <div v-if="dialog" class="dlg-mask" @click.self="closeDialog(false)">
-    <div class="dlg" role="alertdialog" aria-modal="true" :aria-label="dialog.title" aria-describedby="dlg-msg"
+    <div class="dlg" role="alertdialog" aria-modal="true" :aria-label="$t(dialog.title)" aria-describedby="dlg-msg"
          @keydown="dialogKey($event)">
-      <h3>{{ dialog.title }}</h3>
-      <p class="dlg-msg" id="dlg-msg" v-if="dialog.message">{{ dialog.message }}</p>
+      <h3>{{ $t(dialog.title) }}</h3>
+      <p class="dlg-msg" id="dlg-msg" v-if="dialog.message">{{ $t(dialog.message) }}</p>
       <div class="dlg-actions">
-        <button v-if="dialog.cancelText" ref="dialogCancel" class="btn ghost sm" @click="closeDialog(false)">{{ dialog.cancelText }}</button>
+        <button v-if="dialog.cancelText" ref="dialogCancel" class="btn ghost sm" @click="closeDialog(false)">{{ $t(dialog.cancelText) }}</button>
         <button ref="dialogOk" class="btn sm" :class="dialog.danger ? 'danger-solid' : 'primary'"
-                @click="closeDialog(true)">{{ dialog.okText }}</button>
+                @click="closeDialog(true)">{{ $t(dialog.okText) }}</button>
       </div>
     </div>
   </div>
@@ -989,18 +966,19 @@ Expert Systems with Applications
     <transition-group name="toast">
       <div v-for="t in toasts" :key="t.id" class="toast" :class="t.type"
            @mouseenter="holdToast(t)" @mouseleave="releaseToast(t)" @focusin="holdToast(t)" @focusout="releaseToast(t)">
-        <span class="toast-msg">{{ t.msg }}</span>
-        <button v-if="t.action" class="toast-act" @click="runToastAction(t)">{{ t.action.label }}</button>
-        <button class="toast-x" title="关闭" aria-label="关闭提示" @click="dismissToast(t.id)">✕</button>
+        <span class="toast-msg">{{ $t(t.msg) }}</span>
+        <button v-if="t.action" class="toast-act" @click="runToastAction(t)">{{ $t(t.action.label) }}</button>
+        <button class="toast-x" :title="$t('关闭')" :aria-label="$t('关闭提示')" @click="dismissToast(t.id)">✕</button>
       </div>
     </transition-group>
   </div>
 
-  <footer class="foot">RecordYourResearch {{ appVersion }} · 数据只存在你的电脑上 ·
+  <footer class="foot">{{ $t('RecordYourResearch {0} · 数据只存在你的电脑上 ·', [appVersion]) }}
     <a :href="repoUrl || 'https://github.com/avalanchezy/RecordYourResearch'" target="_blank" rel="noopener noreferrer">GitHub</a> · AGPL-3.0<br>
-    独立开源工具，与爱思唯尔（Elsevier）、OpenReview、Clarivate、中国科学院文献情报中心、新锐学术、CCF 均无关联；相关名称与商标归各自所有者。</footer>
+    {{ $t('独立开源工具，与爱思唯尔（Elsevier）、OpenReview、Clarivate、中国科学院文献情报中心、新锐学术、CCF 均无关联；相关名称与商标归各自所有者。') }}</footer>
 </div>
 <script src="vendor/vue.global.prod.js"></script>
-<script src="app.js?v=0.2.1"></script>
+<script src="i18n.en.js?v=0.3.0"></script>
+<script src="app.js?v=0.3.0"></script>
 </body>
 </html>

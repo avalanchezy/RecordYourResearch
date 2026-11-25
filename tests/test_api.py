@@ -135,6 +135,17 @@ def test_export_csv_is_formula_safe_and_filtered(client):
     assert all(x[hdr.index("当前状态")] in ("已录用", "制作中") for x in acc[1:])
 
 
+def test_export_csv_in_english(client):
+    sid = _new(client, "English Export Paper")
+    client.patch(f"/api/submissions/{sid}", json={"notes": "笔记保持原样"})
+    rows = list(csv.reader(io.StringIO(client.get("/api/export.csv?lang=en").content.decode("utf-8-sig"))))
+    hdr = rows[0]
+    assert hdr[:4] == ["ID", "Title", "Authors", "Venue"] and "Status" in hdr and "Days in review" in hdr
+    row = [x for x in rows[1:] if x[0] == str(sid)][0]
+    assert row[hdr.index("Status")] in ("Submitted", "With editor", "Under review")
+    assert row[hdr.index("Notes")] == "笔记保持原样"          # 用户数据不翻译
+
+
 def test_backup(client):
     b = client.post("/api/backup").json()
     assert b["ok"] and os.path.exists(os.path.join(db.BACKUP_DIR, b["file"]))
