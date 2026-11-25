@@ -151,6 +151,9 @@ def test_suggest_stage(fake_model, monkeypatch):
     ("返修截止日快到了的", "deadlines", {}),
     ("哪些在外审", "list_stage", {"stage": "review"}),
     ("find diffusion", "search", {"text": "diffusion"}),
+    ("Show the decisions I received in the last 30 days", "outcomes_recent", {"days": 30, "outcome": "any"}),
+    ("How many papers did I submit to each venue?", "count_by", {"dim": "venue"}),
+    ("find my paper about graph neural networks", "search", {"text": "graph neural networks"}),
 ])
 def test_rule_planning(q, intent, params):
     p = smart.plan_question(q, use_model=False)
@@ -171,18 +174,39 @@ def test_every_template_runs():
         smart.build_query("drop_tables", {})
 
 
-def test_model_numbers_need_evidence(fake_model):
-    fake_model({"intent": "stuck", "stage": "", "days": 45, "year": 0, "month": 0, "dim": "", "outcome": "", "text": ""})
+def test_model_only_classifies_cue_less_questions(fake_model):
+    calls = fake_model({"intent": "outcomes_recent"})
     p = smart.plan_question("哪些稿子审了超过三个月？")
-    assert p["intent"] == "stuck" and p["params"]["days"] == 90 and p["via"] == "model" and p["notes"]
-    fake_model({"intent": "search", "stage": "", "days": 0, "year": 0, "month": 0, "dim": "", "outcome": "",
-                "text": "graph neural"})
-    p = smart.plan_question("find my graph neural paper")
-    assert p["params"]["text"] == "graph neural"
-    fake_model({"intent": "search", "stage": "", "days": 0, "year": 0, "month": 0, "dim": "", "outcome": "",
-                "text": "made up words"})
-    p = smart.plan_question("find my diffusion paper")
-    assert p["params"]["text"] != "made up words" and any("关键词" in n for n in p["notes"])
+    assert p["intent"] == "stuck" and p["via"] == "rules" and not calls     # 规则有把握：不调模型
+    p = smart.plan_question("Any news lately?")
+    assert p["intent"] == "outcomes_recent" and p["via"] == "model" and len(calls) == 1
+    fake_model({"intent": "list_stage"})                    # 模型选了 list_stage 但问题里没有阶段
+    p = smart.plan_question("what is going on with my stuff")
+    assert p["intent"] == "search" and p["notes"]
+    fake_model(ai.AiError("本地模型没有响应（timeout）"))
+    p = smart.plan_question("Any news lately?")
+    assert p["intent"] == "search" and p["model"]["error"]
+
+
+def test_letter_model_only_needs_supporting_quote(fake_model):
+    ack = ("Dear Author, this message confirms that we have received your files. You can track the progress "
+           "of your submission in the author centre.")
+    fake_model({"decision": "desk_reject", "deadline": "", "manuscript_number": "",
+                "quote": "this message confirms that we have received your files."})
+    r = smart.analyze_letter(ack)
+    assert r["decision"] == "other" and r["stage"] is None and any("依据" in n for n in r["notes"])
+    hard = ("The reviewers feel substantial changes are needed. You may submit a revised version that "
+            "addresses all of their comments.")
+    fake_model({"decision": "major_revision", "deadline": "", "manuscript_number": "",
+                "quote": "You may submit a revised version that addresses all of their comments."})
+    r = smart.analyze_letter(hard)
+    assert r["decision"] == "major_revision" and r["agreement"] == "model_only"
+
+
+def test_status_examples_are_retrieved_from_the_dictionary():
+    ex = smart.similar_statuses("Under Evaluation by Editor")
+    assert ex[0] == ("under editor evaluation", "editor")
+    assert {st for _k, st in ex} >= {"submitted", "review", "production"}     # 每个阶段都有锚点
 
 
 # ---------------------------------------------------------------- 接口

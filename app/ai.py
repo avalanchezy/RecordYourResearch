@@ -51,10 +51,11 @@ MODELS = {
     MODEL_KEY: {
         "label": "Qwen3.5-0.8B (Q8_0)", "license": "Apache-2.0",
         "repo": "unsloth/Qwen3.5-0.8B-GGUF",
-        "revision": "main",          # 固定为某个提交后改成提交哈希
+        "revision": "6ab461498e2023f6e3c1baea90a8f0fe38ab64d0",   # 固定到这个提交（不会被悄悄换掉）
         "file": "Qwen3.5-0.8B-Q8_0.gguf",
-        "size": 0,                   # 字节；0 = 未固定（只用于进度条估计）
-        "sha256": "",                # 空 = 未固定：改用 Hugging Face 返回的 X-Linked-Etag 校验
+        "size": 811843840,
+        "sha256": "0ad885ffd4bb022fc4f0d33a3308fa108ef8613159d3b3a67e23abca056b7a6c",
+        # 升级：python tools/ai_probe.py 列出文件和哈希；sha256 留空时改用 Hugging Face 的 X-Linked-Etag 校验
     },
 }
 SOURCES = {                          # 模型下载源（文件按 SHA-256 校验，镜像与官方等价）

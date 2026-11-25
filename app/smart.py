@@ -120,6 +120,18 @@ def _affirmed(rx, t: str) -> bool:
     return any(not _NEGATION.search(t[max(0, m.start() - 30):m.start()]) for m in rx.finditer(t))
 
 
+# 模型引文里必须出现的、与其结论相符的字眼（只在规则一无所获时用来核对模型）
+_SUPPORT = {
+    "accept": re.compile(r"accept|录用|接收", re.I),
+    "minor_revision": re.compile(r"revis|resubmi|minor|修改|修订|返修|小修", re.I),
+    "major_revision": re.compile(r"revis|resubmi|major|substantial|修改|修订|返修|大修", re.I),
+    "revise_resubmit": re.compile(r"revis|resubmi|修改|重投|重新投稿", re.I),
+    "reject": re.compile(r"reject|unable|regret|cannot|not\s+(?:be\s+)?(?:accepted|considered|suitable)|decline|拒|退稿|不予|不能", re.I),
+    "desk_reject": re.compile(r"reject|review|scope|regret|unable|拒|退稿|送审|范围", re.I),
+    "withdrawn": re.compile(r"withdr|撤", re.I),
+}
+
+
 def rule_decisions(text: str) -> list[str]:
     """规则能认出的全部决定类型（去掉被更具体的说法包含的那些）。"""
     t = _norm(text)
@@ -281,6 +293,11 @@ def analyze_letter(text: str, sub: dict | None = None, use_model: bool = True) -
 
     rd = rules["decisions"]
     md = (model or {}).get("decision") if model and not model.get("error") else None
+    if md and md != "other" and not rd and not _SUPPORT[md].search(model.get("quote") or ""):
+        # 规则一个决定词都没找到时，模型的结论必须有原文支撑：引文在来信里、且引文本身说的是这个决定
+        notes.append("模型的判断在原文里找不到依据，已忽略")
+        model["decision_unsupported"] = md
+        md = "other"
     if len(rd) == 1 and md:
         decision, agreement = rd[0], ("agree" if md == rd[0] else "disagree")
     elif len(rd) == 1:
@@ -377,13 +394,48 @@ _STATUS_PROMPT = """Stages of a paper submission, from the author's point of vie
 - accepted: accepted
 - rejected: rejected
 - withdrawn: withdrawn by the authors
-- production: in production, proofs, published
+- production: accepted paper being copyedited, typeset, proofread or published
 - unknown: cannot tell
+
+Known statuses and their stages:
+{examples}
 
 Status shown by the system: "{raw}"
 Which stage is it?"""
 _STATUS_SCHEMA = {"type": "object", "properties": {"stage": {"type": "string", "enum": list(STAGES) + ["unknown"]}},
                   "required": ["stage"]}
+
+
+_STOP = {"the", "a", "an", "of", "to", "by", "for", "in", "on", "with", "and", "or", "is", "be", "your", "paper",
+         "manuscript", "submission"}
+_ANCHORS = (("technical check in progress", "submitted"), ("with editor", "editor"), ("under review", "review"),
+            ("required reviews completed", "reviews_done"), ("decision in process", "decision"),
+            ("minor revision", "revise"), ("accepted", "accepted"), ("rejected", "rejected"),
+            ("withdrawn by author", "withdrawn"), ("in production", "production"))
+
+
+def _toks(s: str) -> set:
+    return {w for w in re.findall(r"[a-z]+", s.lower()) if w not in _STOP and len(w) > 1}
+
+
+def similar_statuses(raw: str, k: int = 8) -> list[tuple[str, str]]:
+    """词典里和这个状态字面最接近的已知状态（含用户规则），给模型当例子；再补每个阶段一个锚点。"""
+    q = _toks(raw)
+    scored = []
+    for key, st in list(stages_mod.RAW_STATUS_MAP.items()) + list(stages_mod.USER_RULES.items()):
+        kt = _toks(key)
+        ov = len(q & kt)
+        if ov and st in STAGES:
+            scored.append((ov / len(q | kt), key, st))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    out, seen = [], set()
+    for _sc, key, st in scored[:k]:
+        out.append((key, st))
+        seen.add(key)
+    for key, st in _ANCHORS:
+        if key not in seen:
+            out.append((key, st))
+    return out
 
 
 def suggest_stage(raw: str) -> dict:
@@ -401,8 +453,9 @@ def suggest_stage(raw: str) -> dict:
         return {"raw": raw, "key": key, "stage": None, "source": "none",
                 "hint": "本地模型没有启用，可以手动选一个阶段"}
     try:
-        out = ai.chat_json(_STATUS_SYS, _STATUS_PROMPT.format(raw=raw[:200].replace('"', "'")), _STATUS_SCHEMA,
-                           max_tokens=24)
+        ex = "\n".join(f'"{k}" -> {st}' for k, st in similar_statuses(raw))
+        out = ai.chat_json(_STATUS_SYS, _STATUS_PROMPT.format(raw=raw[:200].replace('"', "'"), examples=ex),
+                           _STATUS_SCHEMA, max_tokens=24)
     except ai.AiError as e:
         return {"raw": raw, "key": key, "stage": None, "source": "error", "hint": str(e)}
     st = out.get("stage")
@@ -577,11 +630,13 @@ def rule_params(q: str) -> dict:
             break
     if re.search(r"录用|接收|accept", t):
         out["outcome"] = "accepted"
+    elif re.search(r"决定|decisions?\b", t) and not re.search(r"拒|reject|返修|修改|revis", t):
+        out["outcome"] = "any"
     elif re.search(r"拒|reject", t):
         out["outcome"] = "rejected"
     elif re.search(r"返修|修改|revis", t):
         out["outcome"] = "revise"
-    if re.search(r"按期刊|按会议|by venue|per venue|每个期刊|哪个期刊", t):
+    if re.search(r"按期刊|按会议|各期刊|每个期刊|哪个期刊|by venue|per venue|each venue|every venue|per journal|each journal", t):
         out["dim"] = "venue"
     elif re.search(r"按年|每年|by year|per year", t):
         out["dim"] = "year"
@@ -590,53 +645,43 @@ def rule_params(q: str) -> dict:
     return out
 
 
-def rule_intent(q: str, p: dict) -> str:
+def rule_intent(q: str, p: dict) -> tuple[str, bool]:
+    """(意图, 规则是否有把握)。有明确的提示词才算有把握；什么都没认出时默认 search，交给模型再看。"""
     t = _norm(q).lower()
     if re.search(r"截止|deadline|\bdue\b|到期", t):
-        return "deadlines"
-    if re.search(r"多久|多长时间|平均|周期|how long|average|turnaround", t):
-        return "review_time"
+        return "deadlines", True
+    if re.search(r"多久|多长时间|平均|周期|how long|average|turnaround|how fast|how quickly", t):
+        return "review_time", True
     if re.search(r"超过|以上|一直|卡|longer than|more than|over \d|stuck|still", t) and p.get("days"):
-        return "stuck"
+        return "stuck", True
     if re.search(r"多少|几篇|统计|分布|how many|count|number of", t):
-        return "count_by"
-    if re.search(r"最近|近\d|recent|last \d|past \d", t) and p.get("outcome"):
-        return "outcomes_recent"
-    if re.search(r"投了|投的|投出|submitted in|submitted during", t) and p.get("year"):
-        return "submitted_in"
+        return "count_by", True
+    if re.search(r"最近|近\s*\d|recent|last \d|past \d|this (?:week|month)", t) and (
+            p.get("outcome") or re.search(r"决定|结果|decision|outcome|received|came in|收到", t)):
+        return "outcomes_recent", True
+    if re.search(r"投了|投的|投出|submitted in|submitted during|did i submit", t) and p.get("year"):
+        return "submitted_in", True
+    if re.search(r"\bfind\b|\bsearch\b|look for|look up|找|搜", t):
+        return "search", True
     if p.get("stage"):
-        return "list_stage"
-    return "search"
+        return "list_stage", True
+    return "search", False
 
 
-_ASK_SYS = "You turn a researcher's question about their own paper submissions into one query intent with parameters. Reply only with JSON."
-_ASK_PROMPT = """Intents:
-- list_stage: papers currently in a stage (set stage)
-- stuck: papers that have stayed in their current stage for more than N days (set days; set stage if one is named)
-- count_by: count papers grouped by stage, venue, year or outcome (set dim)
-- submitted_in: papers submitted in a year, optionally a month (set year, month)
-- outcomes_recent: decisions received in the last N days (set outcome accepted / rejected / revise / any, and days)
-- review_time: average time from submission to the first decision, per venue (set text to a venue name if one is named)
-- deadlines: revision deadlines in the next N days (set days)
-- search: find papers whose title, venue or manuscript number contains some text (set text)
-Stages: {stages}.
-Leave unused fields as "" or 0. Convert months to days (1 month = 30 days). Today is {today}.
+_ASK_SYS = "You classify a researcher's question about their own paper submissions. Reply only with JSON."
+_ASK_PROMPT = """Pick the one intent that fits the question.
+- list_stage: which papers are in some stage now. e.g. "Which papers are under review?" / "哪些稿子在返修"
+- stuck: papers waiting too long in their stage. e.g. "Anything waiting forever?" / "哪些稿子一直没动静"
+- count_by: counting papers by group. e.g. "How many papers per venue?" / "每年投了几篇"
+- submitted_in: papers submitted in some period. e.g. "What did I submit in 2025?"
+- outcomes_recent: decisions that arrived recently. e.g. "Any news lately?" / "最近有结果了吗"
+- review_time: how long venues take to decide. e.g. "Which journal is slowest?" / "哪个期刊审得最慢"
+- deadlines: revision deadlines. e.g. "When are my revisions due?"
+- search: find a paper by words in its title, venue or number. e.g. "the transformer paper"
 
 Question: {q}"""
-_ASK_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "intent": {"type": "string", "enum": list(INTENTS)},
-        "stage": {"type": "string", "enum": list(STAGES) + [""]},
-        "days": {"type": "integer"},
-        "year": {"type": "integer"},
-        "month": {"type": "integer"},
-        "dim": {"type": "string", "enum": list(DIMS) + [""]},
-        "outcome": {"type": "string", "enum": list(OUTCOMES) + [""]},
-        "text": {"type": "string"},
-    },
-    "required": ["intent", "stage", "days", "year", "month", "dim", "outcome", "text"],
-}
+_ASK_SCHEMA = {"type": "object", "properties": {"intent": {"type": "string", "enum": list(INTENTS)}},
+               "required": ["intent"]}
 
 
 def _strip_question(q: str) -> str:
@@ -662,45 +707,29 @@ def _venue_in(q: str) -> str:
 
 
 def plan_question(q: str, use_model: bool = True) -> dict:
-    """问题 → {intent, params, via, model, notes}。模型给的数字必须在问题里出现过（或由月/周换算）。"""
+    """问题 → {intent, params, via, model, notes}。
+
+    参数（天数、年份、阶段、关键词）一律由规则从问题里抽取，保证都有出处；意图先看规则有没有明确的
+    提示词，有就按规则；没有才请本地模型从 8 个模板里选一个（只选意图，不让它编参数）。"""
     q = (q or "").strip()
     if not q:
         raise ValueError("问题是空的")
     if len(q) > 300:
         raise ValueError("问题太长了（300 字以内）")
-    rp = rule_params(q)
-    notes, model = [], None
-    intent, params, via = None, dict(rp), "rules"
-    if use_model and ai.enabled():
+    params = rule_params(q)
+    intent, sure = rule_intent(q, params)
+    notes, model, via = [], None, "rules"
+    if not sure and use_model and ai.enabled():
         try:
-            stages_txt = ", ".join(f"{k} ({v['label_en']})" for k, v in STAGES.items())
-            out = ai.chat_json(_ASK_SYS, _ASK_PROMPT.format(stages=stages_txt, today=date.today().isoformat(), q=q),
-                               _ASK_SCHEMA, max_tokens=120)
-            model = {k: out.get(k) for k in _ASK_SCHEMA["properties"]}
-            model["ms"], model["model"] = out.get("_ms"), ai.model_tag()
-            intent, via = out.get("intent"), "model"
-            for k in ("stage", "dim", "outcome"):         # 类别型参数：模型比关键词更懂上下文
-                if out.get(k):
-                    params[k] = out[k]
-            for k in ("days", "year", "month"):            # 数字要有出处
-                v = out.get(k) or 0
-                if v and rp.get(k) and v != rp[k]:
-                    notes.append(f"模型给的 {k}={v} 与问题里的不一致，按问题里的 {rp[k]}")
-                elif v and not rp.get(k):
-                    nums = {int(x) for x in re.findall(r"\d+", q)}
-                    if v in nums or (k == "days" and (v // 30 in nums or v // 7 in nums)):
-                        params[k] = v
-                    else:
-                        notes.append(f"模型给的 {k}={v} 在问题里找不到依据，已忽略")
-            txt = (out.get("text") or "").strip()
-            if txt and _in_text(txt, q):
-                params["text"] = txt
-            elif txt:
-                notes.append("模型给的关键词不在问题里，已忽略")
+            out = ai.chat_json(_ASK_SYS, _ASK_PROMPT.format(q=q), _ASK_SCHEMA, max_tokens=16)
+            model = {"intent": out.get("intent"), "ms": out.get("_ms"), "model": ai.model_tag()}
+            if out.get("intent") in INTENTS:
+                intent, via = out["intent"], "model"
         except ai.AiError as e:
             model = {"error": str(e)}
-    if not intent:
-        intent = rule_intent(q, rp)
+    if intent == "list_stage" and not params.get("stage"):
+        intent = "search"
+        notes.append("没听出是哪个阶段，改为按关键词查找")
     if intent == "review_time" and not params.get("text"):
         params["text"] = _venue_in(q)                  # 问题里提到了库里已有的期刊/会议名
     if intent == "search" and not params.get("text"):

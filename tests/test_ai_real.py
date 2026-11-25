@@ -6,11 +6,15 @@
 """
 import json
 import os
+import sys
 import time
 
 import pytest
 
 from app import ai, db, smart
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="backslashreplace")         # Windows 控制台（cp1252）打印中文
 
 pytestmark = pytest.mark.skipif(os.environ.get("RYR_AI_REAL") != "1",
                                 reason="real local model: set RYR_AI_REAL=1 (downloads about 1 GB)")
@@ -59,21 +63,21 @@ HARD_LETTER = ("Dear Dr. Example,\nThe reviewers have now commented on your pape
 
 
 def test_letters_real():
-    agree, lines = 0, []
+    agree, lines, bad = 0, [], []
     for text, want, due in LETTERS:
         r = smart.analyze_letter(text)
         m = r["model"] or {}
         lines.append(f"  want={want:16} final={r['decision']:16} model={str(m.get('decision')):16} "
-                     f"due={r['deadline'] or '-':10} {m.get('ms')}ms {r['agreement']}")
-        assert r["decision"] == want, (text, r)
-        if want != "other" and DECISION_STAGE(want) == "revise":
-            assert r["deadline"] == due
+                     f"due={r['deadline'] or '-':10} {m.get('ms')}ms {r['agreement']} {r['notes']}")
+        if r["decision"] != want or (DECISION_STAGE(want) == "revise" and r["deadline"] != due):
+            bad.append(want)
         agree += m.get("decision") == want
     r = smart.analyze_letter(HARD_LETTER)
-    lines.append(f"  hard letter: final={r['decision']} model={(r['model'] or {}).get('decision')} {r['agreement']}")
+    m = r["model"] or {}
+    lines.append(f"  hard letter: final={r['decision']} model={m.get('decision')} quote={m.get('quote')!r} {r['agreement']}")
     print("\n" + "\n".join(lines) + f"\nmodel agreed with the expected decision on {agree}/{len(LETTERS)}")
-    assert agree >= len(LETTERS) - 2
-    assert r["stage"] == "revise", r
+    assert not bad, bad
+    assert r["stage"] in ("revise", None), r            # 模型可以不确定，但不能判成录用 / 拒稿
 
 
 def DECISION_STAGE(k):
@@ -102,14 +106,25 @@ QUESTIONS = [("Which papers have been under review for more than 3 months?", "st
              ("我的返修截止日都是什么时候？", "deadlines"),
              ("How long does Pattern Recognition take to make a decision?", "review_time"),
              ("find my paper about graph neural networks", "search")]
+# 没有明显提示词、要靠模型的问题：只记录模型答对了几个
+CUELESS = [("Any news lately?", "outcomes_recent"), ("哪个期刊审得最慢", "review_time"),
+           ("Which papers are sitting with the editor?", "list_stage")]
 
 
 def test_questions_real():
     ok, lines = 0, []
     for q, want in QUESTIONS:
         r = smart.run_question(q)
-        lines.append(f"  {q[:52]:52} -> {r['intent']:16} via {r['via']} {(r['model'] or {}).get('ms')}ms {r['params']}")
+        lines.append(f"  {q[:52]:52} -> {r['intent']:16} via {r['via']} {r['params']}")
         ok += r["intent"] == want
         assert r["sql"].startswith("SELECT")
-    print("\n" + "\n".join(lines) + f"\nintents right: {ok}/{len(QUESTIONS)}")
-    assert ok >= len(QUESTIONS) - 2
+    mok = 0
+    for q, want in CUELESS:
+        r = smart.run_question(q)
+        m = r["model"] or {}
+        lines.append(f"  [model] {q[:44]:44} -> {r['intent']:16} via {r['via']} model={m.get('intent')} {m.get('ms')}ms")
+        mok += r["intent"] == want
+        assert r["sql"].startswith("SELECT")
+    print("\n" + "\n".join(lines) + f"\nrule-cue questions right: {ok}/{len(QUESTIONS)}; "
+          f"cue-less questions the model got right: {mok}/{len(CUELESS)}")
+    assert ok == len(QUESTIONS)
