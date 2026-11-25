@@ -18,8 +18,10 @@ def _page(name):
 
 def test_demo_seed_builds_a_fresh_demo_folder(tmp_path):
     env = {k: v for k, v in os.environ.items() if not k.startswith("PAPER_TRACKER_")}
+    env["PYTHONIOENCODING"] = "cp1252"          # 模拟英文 Windows 的管道编码：脚本输出中文也不能崩
     r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "demo_seed.py"), "--data-dir", str(tmp_path)],
-                       cwd=ROOT, env=env, capture_output=True, text=True, timeout=300)
+                       cwd=ROOT, env=env, capture_output=True, text=True, encoding="cp1252",
+                       errors="replace", timeout=300)
     assert r.returncode == 0, r.stderr[-2000:]
     con = sqlite3.connect(os.path.join(str(tmp_path), "tracker.db"))
     try:
@@ -32,7 +34,8 @@ def test_demo_seed_builds_a_fresh_demo_folder(tmp_path):
     assert n_subs >= 7 and pending == 1
     assert backfilled == 1            # 只有一条「事后补录」，用来演示补录标记
     again = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "demo_seed.py"), "--data-dir", str(tmp_path)],
-                           cwd=ROOT, env=env, capture_output=True, text=True, timeout=120)
+                           cwd=ROOT, env=env, capture_output=True, text=True, encoding="cp1252",
+                           errors="replace", timeout=120)
     assert again.returncode != 0      # 不会往已有数据库里再灌一遍
 
 
