@@ -29,9 +29,12 @@ def test_demo_seed_builds_a_fresh_demo_folder(tmp_path):
         backfilled = con.execute("SELECT COUNT(*) FROM status_events WHERE recorded_at > observed_at"
                                  " AND julianday(recorded_at) - julianday(observed_at) > 1").fetchone()[0]
         pending = con.execute("SELECT COUNT(*) FROM pending_imports WHERE dismissed = 0").fetchone()[0]
+        stuck = con.execute("SELECT title FROM submissions WHERE current_stage = 'review'"
+                            " AND manuscript_number = 'TKDE-2026-00-0000'").fetchall()
     finally:
         con.close()
-    assert n_subs >= 7 and pending == 1
+    assert n_subs >= 8 and pending == 1
+    assert stuck                      # 「哪些稿子审了超过三个月？」有一篇可答
     assert backfilled == 1            # 只有一条「事后补录」，用来演示补录标记
     again = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "demo_seed.py"), "--data-dir", str(tmp_path)],
                            cwd=ROOT, env=env, capture_output=True, text=True, encoding="cp1252",
@@ -49,3 +52,12 @@ def test_demo_pages_parse_as_the_demo_guide_says():
     assert r["reviewers"] == {"invited": 5, "accepted": 3, "completed": 2}
     assert r["reviewers_prev"] == {"invited": 4, "accepted": 2, "completed": 1}
     assert not r["reviewers_ambiguous"]
+    unk = syspaste.parse(_page("scholarone-unknown-status.txt"))       # 演示「🤖 归类」：规则不认得这个状态
+    assert unk["system"] == "scholarone" and [(i["stage"], i["raw_status"]) for i in unk["items"]] == [("", "Out for Refereeing")]
+
+
+def test_demo_letter_reads_as_the_demo_guide_says():
+    from app import smart
+    r = smart.analyze_letter(_page("decision-letter.txt"), {"id": 0, "manuscript_number": "PR-D-25-00000"},
+                             use_model=False)
+    assert (r["decision"], r["deadline"], r["letter_date"], r["warning"]) == ("major_revision", "2027-01-15", "2026-11-12", "")

@@ -68,8 +68,11 @@ IDLE_STOP_SECS = 20 * 60             # 闲置多久自动停
 START_TIMEOUT = 120                  # 启动（加载模型）最长等待
 REQUEST_TIMEOUT = 180                # 单次推理最长等待（CPU 慢机器也留够）
 
-# 可用环境变量 PAPER_TRACKER_AI_DIR 把模型放到别的盘（CI 也用它缓存下载）
-AI_DIR = os.path.abspath(os.environ.get("PAPER_TRACKER_AI_DIR") or os.path.join(config.DATA_DIR, "ai"))
+# 可用环境变量 PAPER_TRACKER_AI_DIR 把模型放到别的盘（CI 也用它缓存下载）。
+# 演示模式（--demo）和正常模式共用项目 data/ai/：模型不是个人数据，不必为演示再下一遍 0.84 GB。
+_DEFAULT_AI_DIR = (os.path.join(config.BASE_DIR, "data", "ai") if config.DEMO
+                   else os.path.join(config.DATA_DIR, "ai"))
+AI_DIR = os.path.abspath(os.environ.get("PAPER_TRACKER_AI_DIR") or _DEFAULT_AI_DIR)
 _STATE_FILE = os.path.join(AI_DIR, "installed.json")
 
 
