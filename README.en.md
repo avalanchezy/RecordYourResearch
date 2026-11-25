@@ -6,7 +6,7 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.3.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
+This is v0.4.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
 
 ## Overview
 
@@ -22,7 +22,7 @@ The project is not affiliated with Elsevier, OpenReview, Clarivate, the National
 - Single user, single machine: no login, no sharing, no multi-device sync, no mobile app.
 - Only OpenReview is fully automatic. For Elsevier and other submission systems you log in to the official page yourself (solving any captcha there) and paste the page. Anything you can't paste, or that isn't recognised, has to be logged by hand.
 - 「从投稿系统导入」 is a beta. Parsing is rule-based and was tested against synthetic sample pages built from each system's public documentation, not real accounts. A redesigned system may not be recognised, or a status may land in the wrong stage, so check the preview before importing.
-- PDF parsing is rule-based, not OCR. Scanned or encrypted PDFs cannot be parsed, and extracted data must be checked before you save it.
+- PDF parsing is rule-based, and extracted data must be checked before you save it. Encrypted PDFs cannot be parsed; scanned PDFs (no text layer) need the optional OCR add-on.
 - OpenReview accounts with multi-factor authentication (MFA) are not supported for automatic sync.
 - OpenReview account sync covers venues on API v2 (api2, most venues since 2023). For older venues that exist only on the old API, fill in the forum id under 「编辑信息」 and use the single-paper query.
 - JCR (impact factors and quartiles) is not bundled, because Clarivate forbids redistribution. If you have a licence, you can import it yourself.
@@ -85,6 +85,19 @@ python run.py --demo --open
 ```
 
 [docs/DEMO.md](docs/DEMO.md) is a demo script (a five-minute storyboard and booth scenarios) with sample pages to paste in [docs/demo/](docs/demo/). To fill a folder of your choice instead, run `python tools/demo_seed.py --data-dir PATH` and then `python run.py --data-dir PATH --no-daily --open`.
+
+**Optional: read screenshots (OCR)**. Everything works without it. With it installed you can press `Ctrl+V` in a paste box with a **screenshot** of a submission-system page (or click "📷 识别截图" / "📷 Read screenshot" to pick an image). The screenshot is turned into text first and then goes through the usual parse preview → your confirmation → timeline. Scanned PDFs (no text layer) are read with OCR in the new-submission wizard too.
+
+```bash
+python -m pip install -r requirements-ocr.txt      # one-click start users: .venv\Scripts\python -m pip install -r requirements-ocr.txt
+```
+
+Restart the app afterwards. The engine is [RapidOCR](https://github.com/RapidAI/RapidOCR) (PaddleOCR models on ONNX Runtime): CPU only and offline, with Chinese and English models inside the package (about 27 MB). Screenshots never leave your computer.
+
+- OCR only turns the image into text. Status, counts and dates are still extracted by the rule-based parsers and previewed before anything is saved. The recognised text stays in the box, so you can fix a misread character there.
+- The preview shows how many lines were read and the lowest confidence; below 85 % it is highlighted so you check the numbers against the screenshot.
+- Records written from a screenshot carry an "OCR" tag in the timeline, with the confidence on hover.
+- Why not bundle a 1B-parameter vision model: it is large (1–2 GB), slow on a CPU, and a generative model can invent digits. For fields like reviewer counts and dates, rule-based parsing with consistency checks is more reliable.
 
 **Tests**:
 
@@ -159,7 +172,7 @@ The OpenReview API no longer allows anonymous reads (they get 403 ChallengeRequi
 
 ### Elsevier journals (semi-automatic)
 
-**Recommended: paste the official result.** Open an official Elsevier status page yourself, such as the Editorial Manager author centre, Track your submission or Elsevier China's manuscript query page (Chinese and English pages are both supported), and solve any captcha. Copy the whole page, then in the drawer click "📋 粘贴官方结果" → "🔍 解析预览" (preview) → "✓ 记入时间线" (record). The adaptive parser extracts the status, reviewer counts (invited / accepted / completed), dates, the revision due date, the manuscript number and the journal name. It refuses to write if the pasted manuscript number does not match the paper (ignoring revision suffixes such as R1), and it skips results identical to the previous one. When a reviewer count has changed, the official page shows "old → new" with an arrow icon, so the copied text glues the two numbers together (for example "02" for 0 → 2, "23" for 2 → 3); the parser splits them using the counts recorded last time and the rule completed ≤ accepted ≤ invited, shows the change in the preview, and highlights the rare case where two readings remain plausible. Counts the official page hides are shown as "5+". With a revision status it also saves the revision due date, and the official submission date replaces the one you entered. If nothing is recognised (for example, you pasted a captcha page), nothing is written.
+**Recommended: paste the official result.** Open an official Elsevier status page yourself, such as the Editorial Manager author centre, Track your submission or Elsevier China's manuscript query page (Chinese and English pages are both supported), and solve any captcha. Copy the whole page, then in the drawer click "📋 粘贴官方结果" → "🔍 解析预览" (preview) → "✓ 记入时间线" (record). The adaptive parser extracts the status, reviewer counts (invited / accepted / completed), dates, the revision due date, the manuscript number and the journal name. It refuses to write if the pasted manuscript number does not match the paper (ignoring revision suffixes such as R1), and it skips results identical to the previous one. When a reviewer count has changed, the official page shows "old → new" with an arrow icon, so the copied text glues the two numbers together (for example "02" for 0 → 2, "23" for 2 → 3); the parser splits them using the counts recorded last time and the rule completed ≤ accepted ≤ invited, shows the change in the preview, and highlights the rare case where two readings remain plausible. If copying is awkward (say you looked it up in WeChat on your phone), paste a screenshot instead; this needs the optional OCR add-on. Counts the official page hides are shown as "5+". With a revision status it also saves the revision due date, and the official submission date replaces the one you entered. If nothing is recognised (for example, you pasted a captcha page), nothing is written.
 
 **Experimental: Elsevier one-click query ("爱思唯尔一键查稿"), off by default.** Turn it on explicitly with "开启实验功能…" in the "爱思唯尔期刊" panel of the "渠道查询" page. Elsevier papers then get a "一键查稿（实验）" button ("查" in the list). It queries Elsevier China's manuscript-query service with the manuscript number, the corresponding author's pinyin (e.g. `XIAOMING WANG`) and the journal acronym (usually the prefix of a number like `ABC-D-25-00000`). It runs only when you click, at most once per manuscript per 24 hours. On any captcha or risk-control response it stops and asks you to look the status up manually, then paste it. If the service returns a status the app does not recognise, nothing is written; log it manually instead. While the feature is on, the 「拉取期刊缩写字典」 button in the same panel fetches the journal-acronym list from the same service, sending only the random device id.
 

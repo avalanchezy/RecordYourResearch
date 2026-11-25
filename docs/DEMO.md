@@ -43,6 +43,7 @@ Let visitors drive. Good prompts:
 2. *Try to confuse the counter parser.* Edit the numbers in `elsevier-query-changed-counts.txt` (for example `12` → `112`) and watch the preview's reading and its ambiguity warning.
 3. *Log a status change in the past.* Use **＋ Log a status change** with an earlier time: the entry is placed in the timeline, and the current status only changes if nothing later exists.
 4. *Look up a venue* under **Channels → Journal / conference ranking lookup**.
+5. *Paste a screenshot instead of text* (needs `requirements-ocr.txt`). Take a screenshot of one of the sample pages opened in a browser and press `Ctrl+V` in the paste box: the image is recognised on the CPU, the text appears in the box for correction, and the same parser preview follows. The confirmed event carries an **OCR** tag with the lowest line confidence.
 
 ## Technical points worth stressing
 
@@ -50,6 +51,7 @@ Let visitors drive. Good prompts:
 - **Extraction from copy-paste, no scraping.** Publishers offer no author API and forbid automated logins, so the user copies the page and the app parses plain text: no DOM, no credentials, no network access. Parsing is tested against 56 synthetic pages (179 manuscripts) from 6 system families.
 - **Constraint-based disambiguation.** Glued `old new` counters are split by ranking all readings with domain constraints (completed ≤ accepted ≤ invited, counts rarely decrease, hidden counts show the threshold) and the history of the same manuscript; residual ambiguity is shown to the user instead of being guessed away.
 - **Provenance-aware event log.** Every status change is an event with source, observed time and recorded time; late information is back-filled without overwriting newer state, and repeated imports are idempotent.
+- **Rules first, models only for perception.** An optional on-device OCR stage (PaddleOCR models on ONNX Runtime, about 27 MB) turns screenshots and scanned PDFs into text with layout-aware line and column reconstruction; extraction itself stays rule-based and constraint-checked, and each event records whether its text came from OCR and with what confidence.
 - **Entity resolution across venues.** The same work resubmitted or extended elsewhere is detected by title similarity during sync and linked as a resubmission chain instead of being merged or duplicated.
 - **Local-first by design.** A single-user SQLite store with daily backups, credentials in the OS keyring, and an interface in Chinese or English.
 

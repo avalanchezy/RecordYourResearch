@@ -921,6 +921,27 @@ def parse_pdf(path: str) -> dict:
         doc.close()
 
 
+_OCR_ZOOM = 2.0          # 渲染扫描页：2 倍 ≈ 144 dpi，正文字高 20–30 像素，识别足够
+
+
+def _ocr_lines(page) -> tuple[list, dict | None]:
+    """扫描版首页走 OCR（装了可选组件才会）。返回 (行, OCR 信息)；没装或失败返回 ([], 说明)。"""
+    from app import ocr
+    if not ocr.available():
+        return [], {"used": False, "reason": "not_installed", "install": ocr.INSTALL_HINT}
+    try:
+        png = page.get_pixmap(matrix=pymupdf.Matrix(_OCR_ZOOM, _OCR_ZOOM)).tobytes("png")
+        lines = ocr.page_lines(png, _OCR_ZOOM)
+    except Exception as e:
+        return [], {"used": False, "reason": f"{type(e).__name__}: {e}"}
+    scores = [l.pop("score") for l in lines]
+    for l in lines:
+        l["text"] = l["nosup"] = l["core"] = _clean_line(l["text"])
+    lines = [l for l in lines if l["text"] and not ARXIV_STAMP_RE.match(l["text"])]
+    return lines, {"used": True, "engine": ocr.status()["engine"], "lines": len(lines),
+                   "min_score": round(min(scores), 3) if scores else None}
+
+
 def _parse_doc(doc) -> dict:
     pages = doc.page_count
     try:
@@ -930,6 +951,11 @@ def _parse_doc(doc) -> dict:
         full_text = page.get_text()
     except Exception as e:
         raise ValueError(f"PDF 首页无法读取，无法解析（{type(e).__name__}: {e}）") from None
+    ocr_info = None
+    if not lines:                                   # 扫描版 / 图片 PDF：没有文字层
+        lines, ocr_info = _ocr_lines(page)
+        if lines:
+            full_text = "\n".join(l["text"] for l in lines)
     rows = _rows(lines)
 
     draft = {"layout": "generic", "title": "", "authors": [], "abstract": "", "keywords": [],
@@ -937,7 +963,7 @@ def _parse_doc(doc) -> dict:
              "corresponding_author": "", "corresponding_pinyin": "", "doi": "", "arxiv": "",
              "conf_name": "", "conf_year": None, "double_blind": False, "conf_known": False,
              "anonymous_authors": False, "submitted_hint": "", "submitted_hint_source": "",
-             "pages": pages}
+             "pages": pages, "ocr": ocr_info}
     em = _parse_em_rows(rows)
     if em:
         draft.update(

@@ -13,7 +13,7 @@ window.RYR_I18N_EN = {
 "完成": "completed",
 "演示数据": "Demo data",
 "python run.py --demo：全部是虚构的投稿，用来演示；你的真实数据不受影响": "python run.py --demo: every submission here is fictional, for demonstration; your real data is untouched",
-"计数不满足「完成 ≤ 接受 ≤ 邀请」，请对照官方页核对": "The counts violate completed \u2264 accepted \u2264 invited \u2014 please check against the official page",
+"计数不满足「完成 ≤ 接受 ≤ 邀请」，请对照官方页核对": "The counts violate completed ≤ accepted ≤ invited — please check against the official page",
 " · 已关联（再选将覆盖关系）": " · already linked (picking it again replaces the relation)",
 " · 已归档": " · archived",
 " · 按标题对上，请核对": " · matched by title, please check",
@@ -699,7 +699,23 @@ window.RYR_I18N_EN = {
 "🗄 归档": "🗄 Archive",
 "🗑 回收站里的投稿不参与统计、提醒和自动同步，30 天后连同 PDF 原件自动彻底删除，点「恢复」放回原处。彻底删除的 OpenReview 稿件，之后账号同步也不会再当成新投稿提示。": "🗑 Submissions in the trash are excluded from statistics, alerts and automatic sync, and are permanently deleted together with their PDF after 30 days; click “Restore” to put one back. A permanently deleted OpenReview submission will not be suggested again by account sync.",
 "🗑 移到回收站": "🗑 Move to trash",
-"🗑 这篇在回收站里，{0}。": "🗑 This submission is in the trash; {0}."
+"🗑 这篇在回收站里，{0}。": "🗑 This submission is in the trash; {0}.",
+"要识别截图，需要先安装 OCR 组件：在项目目录运行 {0}，然后重启": "To read screenshots, install the OCR add-on first: run {0} in the project folder, then restart",
+"文字由截图识别（{0} 行，最低置信度 {1}，用时 {2} 秒），数字请对照截图核对；识别错的可以直接在框里改": "Text read from the screenshot ({0} lines, lowest confidence {1}, {2} s). Check the numbers against the screenshot; fix any misread text right in the box",
+"这是扫描版 PDF，首页文字由 OCR 识别：标题、作者请逐字核对": "This is a scanned PDF; the first page was read by OCR. Check the title and authors word by word",
+"这是扫描版 PDF（没有文字层），读不出标题作者：可以手动填写，或安装 OCR 组件（{0}）后重新上传": "This is a scanned PDF (no text layer), so the title and authors cannot be read. Fill them in by hand, or install the OCR add-on ({0}) and upload again",
+"选一张投稿系统页面的截图；也可以直接在框里 Ctrl+V 粘贴截图": "Pick a screenshot of the submission system page; you can also paste a screenshot into the box with Ctrl+V",
+"需要先安装 OCR 组件：{0}": "Install the OCR add-on first: {0}",
+"识别中…": "Reading…",
+"📷 识别截图": "📷 Read screenshot",
+"选一张官方查询页的截图；也可以直接在框里 Ctrl+V 粘贴截图": "Pick a screenshot of the official status page; you can also paste a screenshot into the box with Ctrl+V",
+"这条记录的文字来自截图 OCR（最低置信度 {0}）": "The text of this record came from screenshot OCR (lowest confidence {0})",
+"截图里没有认出文字：请截取投稿系统页面上有状态、编号的那一块": "No text found in the screenshot: capture the part of the page that shows the status and manuscript number",
+"图片太大（超过 15 MB），请截取需要的部分": "The image is too large (over 15 MB); capture just the part you need",
+"图片太大（超过 6000 万像素），请截取需要的部分": "The image is too large (over 60 megapixels); capture just the part you need",
+"不是图片（支持 PNG / JPEG / WebP / BMP / GIF）": "Not an image (PNG / JPEG / WebP / BMP / GIF are supported)",
+"图片为空": "The image is empty",
+"via 只能是空或 ocr": "via must be empty or ocr"
 },
 "patterns": [
 ["^该 OpenReview 稿件 ID 已绑定在另一篇投稿上（#(.*?)，在回收站里）$", "This OpenReview submission ID is already bound to another submission (#$1, in the trash)"],
@@ -762,6 +778,10 @@ window.RYR_I18N_EN = {
 ["^也可能是：(.*?)，请对照官方页核对$", "It could also read: $1 — please check against the official page"],
 ["^评审完成 (.*?)$", "completed $1"],
 ["^接受评审邀请 (.*?)$", "accepted $1"],
-["^发出评审邀请 (.*?)$", "invited $1"]
+["^发出评审邀请 (.*?)$", "invited $1"],
+["^OCR 组件没有安装。在项目目录运行：(.*?)，然后重启$", "The OCR add-on is not installed. Run $1 in the project folder, then restart"],
+["^OCR 组件没有安装：(.*?)$", "The OCR add-on is not installed: $1"],
+["^OCR 组件加载失败（(.*?)）。请重新安装：(.*?)$", "The OCR add-on failed to load ($1). Reinstall it: $2"],
+["^图片无法解码（(.*?)）$", "The image cannot be decoded ($1)"]
 ]
 };

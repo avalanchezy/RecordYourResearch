@@ -69,7 +69,9 @@ const emptyResub = () => ({
   venue: { name: '', type: 'journal', year: '', tracker: 'manual', journal_acronym: '', acronym: '' },
 });
 const emptyRelForm = () => ({ open: false, q: '', results: [], target: null, relation: '转投', note: '' });
-const emptyPasteForm = () => ({ open: false, text: '', parsed: null, loading: false, saving: false });
+const emptyPasteForm = () => ({ open: false, text: '', parsed: null, loading: false, saving: false,
+                                 via: '', ocr: null, ocring: false });
+const emptySysImport = () => ({ text: '', parsed: null, loading: false, saving: false, via: '', ocr: null, ocring: false });
 const newWizard = () => ({
   step: 1, tracker: 'manual', autoTracker: false, trackerHint: '', venueIdTouched: false,
   venueFocused: false, creating: false,
@@ -118,7 +120,7 @@ const app = createApp({
       editSuggests: [], editSuggestOpen: false,
       updateEvent: { open: false, stage: 'review', raw: '', observed_at: '', revise_due: '' },
       pasteForm: emptyPasteForm(),
-      sysImport: { text: '', parsed: null, loading: false, saving: false },
+      sysImport: emptySysImport(),
       rawStatusOptions: ['Submitted to Journal', 'Technical Check in Progress', 'With Editor',
         'Reviewer Invited', 'Under Review', 'Required Reviews Complete',
         'Decision in Process', 'Revise - Major', 'Revise - Minor', 'Revision Submitted to Journal',
@@ -137,6 +139,7 @@ const app = createApp({
       // 实验功能开关 / 分级数据集 / 版本信息（来自 /api/stages）
       features: { elsevier_query: false },
       demoMode: false,          // python run.py --demo：虚构数据
+      ocrInfo: { available: false, install: '' },   // 可选 OCR 组件（截图识别）
       rankDatasets: {},
       rankEditions: {},
       rankOutdated: false,
@@ -240,6 +243,7 @@ const app = createApp({
       this.secretStorage = r.secret_storage || '';
       this.appVersion = r.version || '';
       this.demoMode = !!r.demo;
+      this.ocrInfo = r.ocr || { available: false, install: '' };
       this.repoUrl = r.repo || '';
     } catch {}
     this.applyLang();
@@ -289,7 +293,7 @@ const app = createApp({
         }
         return await r.json();
       } catch (e) {
-        if (!opts.silent) this.$toast(tt('请求失败：{0}', [e.message]), 'bad');
+        if (!opts.silent) this.$toast(tt('请求失败：{0}', [tt(e.message)]), 'bad');   // 服务端的中文提示也跟着切英文
         throw e;
       }
     },
@@ -1048,14 +1052,17 @@ const app = createApp({
         }
       } catch {} finally { form.loading = false; }
     },
-    onPasteInput() { this.pasteForm.parsed = null; },   // 文本改了，旧预览作废，需重新解析
+    onPasteInput() {                    // 文本改了，旧预览作废，需重新解析；清空了就不再算 OCR 来的
+      this.pasteForm.parsed = null;
+      if (!this.pasteForm.text.trim()) { this.pasteForm.via = ''; this.pasteForm.ocr = null; }
+    },
     async confirmPaste() {
       const p = this.pasteForm.parsed;
       if (!p || !p.recognized || p.warning) return;
       this.pasteForm.saving = true;
       try {
         const r = await this.api(`/api/submissions/${this.detail.id}/elsevier-paste/confirm`,
-          this.jsonOpts('POST', { text: p._text }));
+          this.jsonOpts('POST', { text: p._text, ...this._viaBody(this.pasteForm) }));
         if (r.written && r.backdated) {
           this.$toast(tt('已记入时间线：{0}（当前状态仍为「{1}」，时间线上有更晚的记录）', [this.stageLabel(r.stage), this.stageLabel(r.current_stage)]), 'warn');
         } else if (r.written) this.$toast(tt('已记入时间线：{0} ✓', [this.stageLabel(r.stage)]));
@@ -1086,7 +1093,70 @@ const app = createApp({
         else this.$toast(tt('没有认出稿件：请复制作者中心里列出稿件（含稿件编号）的页面'), 'warn');
       } catch {} finally { f.loading = false; }
     },
-    onSysPaste() { setTimeout(() => this.parseSysImport(), 0); },
+    onSysInput() {
+      this.sysImport.parsed = null;
+      if (!this.sysImport.text.trim()) { this.sysImport.via = ''; this.sysImport.ocr = null; }
+    },
+    onSysPaste(e) {
+      if (this.ocrFromEvent(e, 'sys')) return;            // 粘贴的是截图 → OCR
+      setTimeout(() => this.parseSysImport(), 0);
+    },
+
+    // ---------- 截图识别（可选 OCR 组件）：图片 → 文字 → 原来的解析预览 → 用户确认 ----------
+    _imageOf(e) {
+      const dt = e && (e.clipboardData || e.dataTransfer);
+      if (!dt) return null;
+      for (const f of Array.from(dt.files || [])) if (/^image\//.test(f.type)) return f;
+      for (const it of Array.from(dt.items || [])) {
+        if (it.kind === 'file' && /^image\//.test(it.type)) return it.getAsFile();
+      }
+      return null;
+    },
+    ocrFromEvent(e, target) {
+      const img = this._imageOf(e);
+      if (!img) return false;
+      e.preventDefault();
+      this.runOcr(img, target);
+      return true;
+    },
+    onOcrPick(e, target) {
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (f) this.runOcr(f, target);
+    },
+    async runOcr(file, target) {
+      if (!this.ocrInfo.available) {
+        this.$toast(tt('要识别截图，需要先安装 OCR 组件：在项目目录运行 {0}，然后重启', [this.ocrInfo.install || 'pip install -r requirements-ocr.txt']), 'warn');
+        return;
+      }
+      const form = target === 'sys' ? this.sysImport : this.pasteForm;
+      if (form.ocring) return;
+      form.ocring = true;
+      try {
+        const fd = new FormData();
+        fd.append('file', file, file.name || 'screenshot.png');
+        const r = await this.api('/api/ocr', { method: 'POST', body: fd });
+        if ((target === 'sys' ? this.sysImport : this.pasteForm) !== form) return;   // 期间关掉 / 换了稿件
+        form.text = r.text;
+        form.via = 'ocr';
+        form.ocr = r;
+        form.parsed = null;
+        if (target === 'sys') await this.parseSysImport();
+        else await this.parsePaste();
+      } catch {} finally { form.ocring = false; }
+    },
+    ocrNote(form) {
+      const o = form.ocr;
+      if (!o) return '';
+      const pct = o.min_score == null ? '—' : Math.round(o.min_score * 100) + '%';
+      return tt('文字由截图识别（{0} 行，最低置信度 {1}，用时 {2} 秒），数字请对照截图核对；识别错的可以直接在框里改',
+                [o.lines, pct, (o.ms / 1000).toFixed(1)]);
+    },
+    ocrLow(form) { return !!(form.ocr && form.ocr.min_score != null && form.ocr.min_score < 0.85); },
+    _viaBody(form) {
+      return form.via === 'ocr' ? { via: 'ocr', ocr_score: form.ocr ? form.ocr.min_score : null } : {};
+    },
+    evViaOcr(e) { return !!(e && e.payload && e.payload.via === 'ocr'); },
     sysPicks() {
       return (this.sysImport.parsed?.items || []).map((it, i) => ({ it, i })).filter(x => x.it._pick);
     },
@@ -1111,10 +1181,11 @@ const app = createApp({
       }
       this.sysImport.saving = true;
       try {
-        const r = await this.api('/api/import/system-paste/confirm', this.jsonOpts('POST', { text: p._text, picks }));
+        const r = await this.api('/api/import/system-paste/confirm',
+          this.jsonOpts('POST', { text: p._text, picks, ...this._viaBody(this.sysImport) }));
         this.$toast(tt('已记入 {0} 篇、新建 {1} 篇', [r.updated, r.created]) + (r.unchanged ? tt('，{0} 篇已是最新', [r.unchanged]) : '')
           + (r.backdated ? tt('；其中 {0} 篇时间线上有更晚的记录，当前状态没变', [r.backdated]) : '') + ' ✓', r.backdated ? 'warn' : '');
-        this.sysImport = { text: '', parsed: null, loading: false, saving: false };
+        this.sysImport = emptySysImport();
         this.refreshAll();
       } catch {} finally { this.sysImport.saving = false; }
     },
@@ -1587,7 +1658,11 @@ const app = createApp({
         if (this.wizard.draft) this.wizard = { ...newWizard(), step: 1 };
         this.wizard.draft = d;
         this._applyDraft(d);
-        this.$toast(tt('PDF 解析完成，请核对下一步补录缺失字段'));
+        if (d.ocr && d.ocr.used) {
+          this.$toast(tt('这是扫描版 PDF，首页文字由 OCR 识别：标题、作者请逐字核对'), 'warn');
+        } else if (d.ocr && d.ocr.reason === 'not_installed') {
+          this.$toast(tt('这是扫描版 PDF（没有文字层），读不出标题作者：可以手动填写，或安装 OCR 组件（{0}）后重新上传', [d.ocr.install]), 'warn');
+        } else this.$toast(tt('PDF 解析完成，请核对下一步补录缺失字段'));
       } catch (e) {
         this.$toast(tt('解析失败：{0}', [e.message]), 'bad');
       } finally { this.wizard.parsing = false; }

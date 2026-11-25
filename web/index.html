@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>论文投稿追踪系统</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
-<link rel="stylesheet" href="style.css?v=0.3.0">
+<link rel="stylesheet" href="style.css?v=0.4.0">
 </head>
 <body>
 <div id="app">
@@ -477,10 +477,16 @@
     <div class="panel" id="sys-import">
       <h3>{{ $t('从投稿系统导入') }} <span class="badge-src">{{ $t('ScholarOne · Editorial Manager · IEEE Author Portal · Snapp · MDPI · 中文期刊…') }}</span></h3>
       <p class="hint small">{{ $t('IEEE、Taylor & Francis、Springer、Wiley、Elsevier、MDPI 等都没有给作者用的接口，也不允许程序替你登录。 所以请你自己在浏览器里登录投稿系统，打开作者中心里列出稿件的那一页，') }}<b>{{ $t('Ctrl+A 全选、Ctrl+C 复制') }}</b>{{ $t('，粘贴到下面： 程序会认出每篇稿件的编号、标题、状态和日期，库里已有的记进时间线，没有的可以新建。本程序不会登录或访问这些网站。') }}</p>
-      <textarea v-model="sysImport.text" rows="6" class="sys-text" @input="sysImport.parsed = null" @paste="onSysPaste()"
+      <textarea v-model="sysImport.text" rows="6" class="sys-text" @input="onSysInput()" @paste="onSysPaste($event)"
+        @dragover.prevent @drop="ocrFromEvent($event, 'sys')"
         :placeholder="$t('把列出稿件的那一页整页粘贴到这里：ScholarOne 的 Author Dashboard、Editorial Manager 里的某个文件夹（如 Submissions Being Processed）、IEEE / Wiley 的 My Submissions、中文期刊的作者中心稿件列表…')"></textarea>
+      <p v-if="sysImport.ocr" class="ocr-note" :class="{ low: ocrLow(sysImport) }">{{ ocrNote(sysImport) }}</p>
       <div class="pf-actions">
         <button class="btn primary sm" :disabled="sysImport.loading" @click="parseSysImport()">{{ sysImport.loading ? $t('解析中…') : $t('🔍 解析预览') }}</button>
+        <label class="btn ghost sm ocr-btn" :class="{ off: !ocrInfo.available }"
+               :title="ocrInfo.available ? $t('选一张投稿系统页面的截图；也可以直接在框里 Ctrl+V 粘贴截图') : $t('需要先安装 OCR 组件：{0}', [ocrInfo.install])">
+          {{ sysImport.ocring ? $t('识别中…') : $t('📷 识别截图') }}
+          <input type="file" accept="image/*" hidden :disabled="sysImport.ocring" @change="onOcrPick($event, 'sys')"></label>
         <button class="btn ghost sm" v-if="sysImport.parsed && sysPicks().length" :disabled="sysImport.saving"
                 @click="confirmSysImport()">{{ sysImport.saving ? $t('导入中…') : $t('✓ 导入选中（') + sysPicks().length + '）' }}</button>
       </div>
@@ -726,11 +732,17 @@
       <!-- 粘贴官方结果（人工过码后 → 自适应解析 → 自动入档） -->
       <div class="paste-form" v-if="pasteForm.open">
         <h4>{{ $t('粘贴官方查询页结果') }} <span class="pf-hint">{{ $t('（官方页滑块过码后全选复制，粘到下面即可自动解析）') }}</span></h4>
-        <textarea v-model="pasteForm.text" rows="7" @input="onPasteInput"
+        <textarea v-model="pasteForm.text" rows="7" @input="onPasteInput" @paste="ocrFromEvent($event, 'official')"
+          @dragover.prevent @drop="ocrFromEvent($event, 'official')"
           :placeholder="$t('把官方页整段复制进来，例如：\n\nReview Status\n同行评审进行中\n更新时间：2025年1月20日\n当前进度：\nUnder Review\n评审完成：\n1\n接受评审邀请：\n2\n发出评审邀请*：\n3\nManuscript Number\nESWA-D-25-00000\n期刊\nExpert Systems with Applications\n提交日期\n2025年1月6日')"></textarea>
+        <p v-if="pasteForm.ocr" class="ocr-note" :class="{ low: ocrLow(pasteForm) }">{{ ocrNote(pasteForm) }}</p>
         <div class="pf-actions">
           <button class="btn primary sm" :disabled="pasteForm.loading" @click="parsePaste()">
             {{ pasteForm.loading ? $t('解析中…') : $t('🔍 解析预览') }}</button>
+          <label class="btn ghost sm ocr-btn" :class="{ off: !ocrInfo.available }"
+                 :title="ocrInfo.available ? $t('选一张官方查询页的截图；也可以直接在框里 Ctrl+V 粘贴截图') : $t('需要先安装 OCR 组件：{0}', [ocrInfo.install])">
+            {{ pasteForm.ocring ? $t('识别中…') : $t('📷 识别截图') }}
+            <input type="file" accept="image/*" hidden :disabled="pasteForm.ocring" @change="onOcrPick($event, 'official')"></label>
           <button class="btn ghost sm" v-if="pasteForm.parsed"
                   :disabled="pasteForm.saving || !!pasteForm.parsed.warning || !pasteForm.parsed.recognized"
                   @click="confirmPaste()">{{ pasteForm.saving ? $t('写入中…') : $t('✓ 记入时间线') }}</button>
@@ -861,6 +873,7 @@
           <span class="tl-src" :class="'src-'+e.source">{{ srcLabel(e.source) }}</span>
           <span class="tl-time" :title="$t('发生于 ') + fmtTs(e.observed_at) + $t(' · 记录于 ') + fmtTs(e.recorded_at)">{{ fmtTs(e.observed_at) }}</span>
           <span class="tl-rec" v-if="recordedLater(e)" :title="$t('这条是事后补录的：发生于 {0}，记录于 {1}', [fmtTs(e.observed_at), fmtTs(e.recorded_at)])">{{ $t('补录于 {0}', [fmtDate(e.recorded_at)]) }}</span>
+          <span class="tl-ocr" v-if="evViaOcr(e)" :title="$t('这条记录的文字来自截图 OCR（最低置信度 {0}）', [e.payload.ocr_min_score != null ? Math.round(e.payload.ocr_min_score * 100) + '%' : '—'])">OCR</span>
           <span class="tl-gap-inline" v-if="timelineDesc[i+1]">{{ $t('距上一条 {0} 天', [gapDays(timelineDesc[i+1].observed_at, e.observed_at)]) }}</span>
           <button v-if="detail.events.length > 1 && !detail.deleted" class="tl-del" :title="$t('删除这条记录（误记/重复；可撤销）')"
                   @click="deleteEvent(e)">✕</button>
@@ -978,7 +991,7 @@
     {{ $t('独立开源工具，与爱思唯尔（Elsevier）、OpenReview、Clarivate、中国科学院文献情报中心、新锐学术、CCF 均无关联；相关名称与商标归各自所有者。') }}</footer>
 </div>
 <script src="vendor/vue.global.prod.js"></script>
-<script src="i18n.en.js?v=0.3.0"></script>
-<script src="app.js?v=0.3.0"></script>
+<script src="i18n.en.js?v=0.4.0"></script>
+<script src="app.js?v=0.4.0"></script>
 </body>
 </html>
