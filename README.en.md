@@ -6,7 +6,7 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.2.1. **The user interface is in Chinese only.** UI labels are quoted in Chinese below so you can find them.
+This is v0.3.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
 
 ## Overview
 
@@ -78,12 +78,13 @@ PowerShell may block `.venv\Scripts\activate` because of its execution policy. Y
 
 On first start the app creates the data folder (default `./data`) and builds the local ranking database from the bundled CCF list, warning lists, CAS 2025 and XR 2026 tables, which takes a few seconds.
 
-**Try it with demo data**: fill a new, empty folder with made-up submissions, then point the app at it. This makes no network calls and leaves your real data alone.
+**Try it with demo data**: one command starts a separate instance on port 8766 with made-up submissions in `demo-data/` (created on first run). It makes no network calls and leaves your real data alone; a **Demo data** badge marks it. Delete `demo-data/` to start over.
 
 ```bash
-python tools/demo_seed.py --data-dir ./demo-data
-python run.py --data-dir ./demo-data --no-daily --open
+python run.py --demo --open
 ```
+
+[docs/DEMO.md](docs/DEMO.md) is a demo script (a five-minute storyboard and booth scenarios) with sample pages to paste in [docs/demo/](docs/demo/). To fill a folder of your choice instead, run `python tools/demo_seed.py --data-dir PATH` and then `python run.py --data-dir PATH --no-daily --open`.
 
 **Tests**:
 
@@ -110,6 +111,7 @@ python run.py --port 8765 --host 127.0.0.1 --data-dir PATH --no-daily --open
 | `--data-dir PATH` | `./data` | Data folder |
 | `--no-daily` | off | Disable the daily background tasks: automatic backup, recycle-bin purge and OpenReview daily sync |
 | `--open` | off | Open the browser once the server is accepting connections |
+| `--demo` | off | Demo mode: fictional data in `demo-data/` (created on first run), port 8766 unless `--port` is given, no daily tasks. Cannot be combined with `--data-dir` |
 
 Environment variables: `PAPER_TRACKER_DATA_DIR=PATH` (same as `--data-dir`), `PAPER_TRACKER_PORT=8765` (default port; `--port` wins) and `PAPER_TRACKER_NO_DAILY=1` (same as `--no-daily`).
 

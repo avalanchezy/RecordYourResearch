@@ -1,6 +1,41 @@
 /* 论文投稿追踪系统 · 前端（Vue 3 本地构建，无外部依赖） */
 const { createApp } = Vue;
 
+// ---------- 界面语言（中文 / English，一键切换） ----------
+// 中文原文就是翻译键：模板里用 $t(中文原文)，脚本里用 tt(中文原文)；英文在 i18n.en.js。
+// 服务端返回的提示（错误、提醒、阶段名等）也走 tt()：先查词典，再按 i18n.en.js 里的模式翻译。
+// 用户自己的数据（标题、作者、期刊名、备注……）从不经过 tt()，不会被翻译。
+const I18N_EN = (window.RYR_I18N_EN && window.RYR_I18N_EN.dict) || {};
+const I18N_PATTERNS = ((window.RYR_I18N_EN && window.RYR_I18N_EN.patterns) || [])
+  .map(([re, rep]) => [new RegExp(re), rep]);
+const HAN_RE = /[\u4e00-\u9fff]/;
+const i18nState = Vue.reactive({ lang: (() => {
+  try { const v = localStorage.getItem('ryr.lang'); if (v === 'zh' || v === 'en') return v; } catch {}
+  return /^zh/i.test(navigator.language || '') ? 'zh' : 'en';
+})() });
+function trEn(s) {
+  if (typeof s !== 'string' || !HAN_RE.test(s)) return s;
+  if (Object.prototype.hasOwnProperty.call(I18N_EN, s)) return I18N_EN[s];
+  const k = s.trim();
+  if (k !== s && Object.prototype.hasOwnProperty.call(I18N_EN, k)) return s.replace(k, I18N_EN[k]);
+  for (const [re, rep] of I18N_PATTERNS) {
+    const m = re.exec(s);
+    if (m) return rep.replace(/\$(\d)/g, (_, i) => trEn(m[+i] || ''));
+  }
+  // 组合文字逐段翻：「A · B」「A；B」「A、B」
+  if (s.includes(' · ')) return s.split(' · ').map(trEn).join(' · ');
+  if (s.includes('；')) return s.split('；').map(trEn).join('; ');
+  if (s.includes('、')) return s.split('、').map(trEn).join(', ');
+  return s;
+}
+function tt(s, args) {
+  let out = i18nState.lang === 'en' ? trEn(s) : s;
+  if (args && typeof out === 'string') {
+    out = out.replace(/\{(\d+)\}/g, (m, i) => (args[i] === undefined || args[i] === null) ? '' : String(args[i]));
+  }
+  return out;
+}
+
 // 本地日期 YYYY-MM-DD（toISOString 是 UTC，东八区早上 8 点前会得到昨天）
 function localDate(d = new Date()) {
   const p = n => String(n).padStart(2, '0');
@@ -48,7 +83,7 @@ const newWizard = () => ({
           corresponding_pinyin: '', openreview_forum: '', revise_due: '', notes: '' },
 });
 
-createApp({
+const app = createApp({
   data() {
     return {
       page: 'overview',
@@ -101,6 +136,7 @@ createApp({
       journals: [], journalsLoading: false,
       // 实验功能开关 / 分级数据集 / 版本信息（来自 /api/stages）
       features: { elsevier_query: false },
+      demoMode: false,          // python run.py --demo：虚构数据
       rankDatasets: {},
       rankEditions: {},
       rankOutdated: false,
@@ -137,6 +173,7 @@ createApp({
   },
 
   computed: {
+    lang() { return i18nState.lang; },
     stageOrder() {
       return Object.fromEntries(Object.entries(this.stages).sort((a, b) => a[1].order - b[1].order));
     },
@@ -159,8 +196,8 @@ createApp({
     // 自动同步出问题（解不开密码 / 上次同步失败）：总览顶部提示
     syncProblem() {
       const a = this.changes.account, s = this.changes.last_sync;
-      if (a && a.needs_rebind) return { kind: 'rebind', msg: '自动同步已停止：本机解不开保存的 OpenReview 密码（数据库可能是从别的电脑或别的 Windows 用户复制来的），需要重新绑定账号。' };
-      if (a && a.bound && s && !s.ok) return { kind: 'fail', msg: `上次账号同步失败（${this.relTime(s.created_at)}）：${this.short(s.error || '', 90)}` };
+      if (a && a.needs_rebind) return { kind: 'rebind', msg: tt('自动同步已停止：本机解不开保存的 OpenReview 密码（数据库可能是从别的电脑或别的 Windows 用户复制来的），需要重新绑定账号。') };
+      if (a && a.bound && s && !s.ok) return { kind: 'fail', msg: tt('上次账号同步失败（{0}）：{1}', [this.relTime(s.created_at), this.short(s.error || '', 90)]) };
       return null;
     },
     // 渠道查询页的同步结果：已忽略的不再列出
@@ -170,7 +207,7 @@ createApp({
 
   watch: {
     page(v) { this.loadPage(v); },
-    'changes.unread'(n) { document.title = (n > 0 ? `(${n > 99 ? '99+' : n}) ` : '') + '论文投稿追踪系统'; },
+    'changes.unread'(n) { document.title = (n > 0 ? `(${n > 99 ? '99+' : n}) ` : '') + tt('论文投稿追踪系统'); },
     infoOpen(v) { lsSet('pt.infoOpen', v); },
     // 抽屉打开时：焦点移进抽屉、背后的页面不可聚焦（inert）；关上后焦点回到打开它的地方
     showDetail(v) {
@@ -202,8 +239,10 @@ createApp({
       this.rankOutdated = !!r.rank_outdated;
       this.secretStorage = r.secret_storage || '';
       this.appVersion = r.version || '';
+      this.demoMode = !!r.demo;
       this.repoUrl = r.repo || '';
     } catch {}
+    this.applyLang();
     this.tick(); setInterval(this.tick, 1000 * 30);
     const lf = lsGet('pt.list', null);          // 上次的列表分类 / 排序（回收站不记）
     if (lf && typeof lf === 'object') {
@@ -244,13 +283,13 @@ createApp({
             const j = await r.json();
             if (typeof j.detail === 'string') msg = j.detail;
             else if (Array.isArray(j.detail))      // FastAPI 422：字段校验错误数组
-              msg = j.detail.map(x => `${(x.loc || []).slice(1).join('.') || '参数'}：${x.msg}`).join('；');
+              msg = j.detail.map(x => `${(x.loc || []).slice(1).join('.') || tt('参数')}：${x.msg}`).join('；');
           } catch {}
           throw new Error(msg);
         }
         return await r.json();
       } catch (e) {
-        if (!opts.silent) this.$toast(`请求失败：${e.message}`, 'bad');
+        if (!opts.silent) this.$toast(tt('请求失败：{0}', [e.message]), 'bad');
         throw e;
       }
     },
@@ -294,8 +333,8 @@ createApp({
       if (this.dialog) this.dialog.resolve(false);
       else this._dlgReturn = document.activeElement;
       return new Promise(resolve => {
-        this.dialog = { title: o.title || '', message: o.message || '', okText: o.okText || '确定',
-                        cancelText: o.cancelText === undefined ? '取消' : o.cancelText, danger: !!o.danger, resolve };
+        this.dialog = { title: o.title || '', message: o.message || '', okText: o.okText || tt('确定'),
+                        cancelText: o.cancelText === undefined ? tt('取消') : o.cancelText, danger: !!o.danger, resolve };
         this.$nextTick(() => {
           const el = (o.danger && this.$refs.dialogCancel) || this.$refs.dialogOk;
           try { el && el.focus(); } catch {}
@@ -350,7 +389,7 @@ createApp({
       else if (which === 'rel' && this.relForm.results.length) { this.relForm.results = []; e.preventDefault(); }
     },
     tick() {
-      this.clock = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit',
+      this.clock = new Date().toLocaleString(this.lang === 'en' ? 'en-GB' : 'zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit',
                                                         hour: '2-digit', minute: '2-digit', hour12: false });
     },
     nowLocal() { return localDateTime(); },
@@ -358,8 +397,8 @@ createApp({
     short(s, n) { return s && s.length > n ? s.slice(0, n) + '…' : (s || ''); },
     fmtTs(s) { return String(s || '').replace('T', ' ').slice(0, 16); },
     fieldLabel(k) {
-      return { title: '标题', authors: '作者', abstract: '摘要', keywords: '关键词',
-               number: '稿件编号', pinyin: '通讯作者拼音' }[k] || k;
+      return { title: tt('标题'), authors: tt('作者'), abstract: tt('摘要'), keywords: tt('关键词'),
+               number: tt('稿件编号'), pinyin: tt('通讯作者拼音') }[k] || k;
     },
     catCount(key) { return this.catCounts[key === '' ? 'all' : key] ?? 0; },
     fmtDate(s) { return String(s || '').slice(0, 10); },
@@ -368,43 +407,68 @@ createApp({
       const t = parseTs(s);
       if (!t) return '';
       const mins = (Date.now() - t.getTime()) / 60000;
-      if (mins < 1) return '刚刚';
-      if (mins < 60) return `${Math.floor(mins)} 分钟前`;
+      if (mins < 1) return tt('刚刚');
+      if (mins < 60) return tt('{0} 分钟前', [Math.floor(mins)]);
       const today = parseTs(localDate());
-      if (t >= today) return `${Math.floor(mins / 60)} 小时前`;
-      if (t >= new Date(today.getTime() - 86400000)) return `昨天 ${this.fmtTs(s).slice(11, 16)}`;
+      if (t >= today) return tt('{0} 小时前', [Math.floor(mins / 60)]);
+      if (t >= new Date(today.getTime() - 86400000)) return tt('昨天 {0}', [this.fmtTs(s).slice(11, 16)]);
       return this.fmtTs(s).slice(5, 16);
     },
     dueText(d) {
       const n = this.dueDays(d);
       if (isNaN(n)) return '';
-      return n < 0 ? `已逾期 ${-n} 天` : (n === 0 ? '今天截止' : `剩 ${n} 天`);
+      return n < 0 ? tt('已逾期 {0} 天', [-n]) : (n === 0 ? tt('今天截止') : tt('剩 {0} 天', [n]));
     },
     // DDL：已过的灰显（多为投稿截止，已经投了就不用急）；7 天内橙色
     ddlClass(d) { const n = this.dueDays(d); return isNaN(n) ? '' : (n < 0 ? 'past' : (n <= 7 ? 'warn' : '')); },
     ddlText(d) {
       const n = this.dueDays(d);
-      return isNaN(n) || n < 0 ? `DDL ${d}` : (n === 0 ? 'DDL 今天' : `DDL 剩 ${n} 天`);
+      return isNaN(n) || n < 0 ? `DDL ${d}` : (n === 0 ? tt('DDL 今天') : tt('DDL 剩 {0} 天', [n]));
     },
     trashLeft(s) {
       const t = parseTs(s && s.deleted_at);
       if (!t) return '';
       const left = 30 - Math.floor((Date.now() - t.getTime()) / 86400000);
-      return left > 0 ? `${left} 天后自动彻底删除` : '即将自动彻底删除';
+      return left > 0 ? tt('{0} 天后自动彻底删除', [left]) : tt('即将自动彻底删除');
     },
     safeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? String(u) : ''; },
     // 原始状态里真正变化的部分（OpenReview 形如「NeurIPS 2025 Conference Submission · 4 reviews released」）
     rawTail(s) { const t = String(s || ''); const i = t.lastIndexOf(' · '); return i >= 0 ? t.slice(i + 3) : t; },
     officialUrl(d) { return this.safeUrl(d.openreview_url) || this.safeUrl(d.venue_submit_url); },
-    officialLabel(d) { return this.safeUrl(d.openreview_url) ? 'OpenReview 稿件页' : '投稿系统'; },
+    officialLabel(d) { return this.safeUrl(d.openreview_url) ? tt('OpenReview 稿件页') : tt('投稿系统'); },
     fmtSize(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round((n || 0) / 1024)) + ' KB'; },
     catOfStage(k) { return Object.keys(this.categories).find(c => (this.categories[c] || []).includes(k)) ?? ''; },
 
-    stageLabel(k) { return (this.stages[k] || {}).label || k || '—'; },
+    // 一键切换界面语言，记住选择
+    toggleLang() {
+      i18nState.lang = i18nState.lang === 'en' ? 'zh' : 'en';
+      try { localStorage.setItem('ryr.lang', i18nState.lang); } catch {}
+      this.applyLang();
+      this.tick && this.tick();
+    },
+    applyLang() {
+      document.documentElement.lang = i18nState.lang === 'en' ? 'en' : 'zh-CN';
+      const n = this.changes ? this.changes.unread : 0;
+      document.title = (n > 0 ? `(${n > 99 ? '99+' : n}) ` : '') + tt('论文投稿追踪系统');
+    },
+    stageLabel(k) { return tt((this.stages[k] || {}).label || k || '—'); },
     stageColor(k) { return (this.stages[k] || {}).color || '#64748b'; },
     chipStyle(k) { return { background: this.stageColor(k) }; },
-    trackerLabel(t) { return { openreview: 'OpenReview', elsevier: '爱思唯尔', manual: '手动' }[t] || t; },
-    srcLabel(s) { return { manual: '手动', openreview: '自动·OR', elsevier: '半自动·爱思唯尔', paste: '粘贴·投稿系统' }[s] || s; },
+    trackerLabel(t) { return { openreview: 'OpenReview', elsevier: tt('爱思唯尔'), manual: tt('手动') }[t] || t; },
+    srcLabel(s) { return { manual: tt('手动'), openreview: tt('自动·OR'), elsevier: tt('半自动·爱思唯尔'), paste: tt('粘贴·投稿系统') }[s] || s; },
+    // 官方页显示的「旧值→新值」：发出邀请 4→5、接受 2→3……（来自 payload.reviewers_prev）
+    rvDelta(p) {
+      const prev = p && p.reviewers_prev, cur = p && p.reviewers;
+      if (!prev || !cur) return '';
+      const names = { invited: tt('发出邀请'), accepted: tt('接受'), completed: tt('完成') };
+      return ['invited', 'accepted', 'completed'].filter(k => prev[k] !== undefined && cur[k] !== undefined)
+        .map(k => `${names[k]} ${prev[k]}→${this.rvNum(p, k)}`).join(i18nState.lang === 'en' ? ', ' : '、');
+    },
+    // 事后补录：记录时间比发生时间晚一天以上（例如补登历史状态、粘贴较早的官方结果）
+    recordedLater(e) {
+      const o = parseTs(e.observed_at), r = parseTs(e.recorded_at);
+      return !!(o && r && r - o > 24 * 3600 * 1000);
+    },
     // 审稿人计数：src 是解析预览或事件 payload；「5+」这种官方隐藏了具体人数的项带上 +
     rvNum(src, k) {
       const v = src && src.reviewers ? src.reviewers[k] : undefined;
@@ -412,8 +476,8 @@ createApp({
       return (src.reviewers_at_least || []).includes(k) ? `${v}+` : `${v}`;
     },
     relLabel(r) {
-      const dir = { 转投: ['转投为 →', '← 转投自'], 扩写: ['扩写为 →', '← 扩写自'] }[r.relation];
-      return dir ? (r.direction === 'in' ? dir[1] : dir[0]) : r.relation;
+      const dir = { 转投: [tt('转投为 →'), tt('← 转投自')], 扩写: [tt('扩写为 →'), tt('← 扩写自')] }[r.relation];
+      return dir ? (r.direction === 'in' ? dir[1] : dir[0]) : tt(r.relation);
     },
 
     badgeClass(b) {
@@ -430,9 +494,9 @@ createApp({
     jcrLabel(j) {
       const q = String(j.quartile || '').trim(), f = String(j.if ?? '').trim();
       const qOk = q && !/^n\/?a$/i.test(q), fOk = f && !/^n\/?a$/i.test(f);
-      return [qOk ? 'JCR ' + q : (fOk ? 'JCR' : ''), fOk ? 'IF ' + f : ''].filter(Boolean).join(' · ') || 'JCR 收录';
+      return [qOk ? 'JCR ' + q : (fOk ? 'JCR' : ''), fOk ? 'IF ' + f : ''].filter(Boolean).join(' · ') || tt('JCR 收录');
     },
-    xrWarnLabel(w) { return /^under\s*review$/i.test(String(w).trim()) ? '⚠ 新锐预警·观察中' : `⚠ 新锐预警：${w}`; },
+    xrWarnLabel(w) { return /^under\s*review$/i.test(String(w).trim()) ? tt('⚠ 新锐预警·观察中') : tt('⚠ 新锐预警：{0}', [w]); },
     async lookupWizardRank(venueType) {
       const w = this.wizard;
       const name = this.stripYear(w.venue.name || '');
@@ -648,8 +712,8 @@ createApp({
       try {
         await this.api(`/api/submissions/${id}/archive`, this.jsonOpts('POST', { archived: to }));
       } catch { return; }
-      if (undo) this.$toast('已撤销');
-      else this.$toast(to ? '已归档（不再出现在状态分类，可到「归档」页查看）' : '已取消归档', 'ok',
+      if (undo) this.$toast(tt('已撤销'));
+      else this.$toast(to ? tt('已归档（不再出现在状态分类，可到「归档」页查看）') : tt('已取消归档'), 'ok',
         { undo: true, action: { label: '撤销', fn: () => this.toggleArchive({ id }, !to, true) } });
       this.refreshAll();
       if (this.detail && this.detail.id === id) await this.refreshDetail();
@@ -677,11 +741,11 @@ createApp({
     },
     async addRelated() {
       const f = this.relForm, sid = this.detail.id;
-      if (!f.target) { this.$toast('先搜索并选择要关联的稿件', 'warn'); return; }
+      if (!f.target) { this.$toast(tt('先搜索并选择要关联的稿件'), 'warn'); return; }
       try {
         const r = await this.api(`/api/submissions/${sid}/related`,
           this.jsonOpts('POST', { related_id: f.target.id, relation: f.relation, note: f.note }));
-        this.$toast(`${r.updated ? '已更新关联' : '已关联'}：${f.relation} → #${f.target.id} ✓`);
+        this.$toast(`${r.updated ? tt('已更新关联') : tt('已关联')}：${tt(f.relation)} → #${f.target.id} ✓`);
       } catch { return; }
       this.relForm = emptyRelForm();
       await this.refreshDetail();
@@ -693,12 +757,12 @@ createApp({
         res = await this.api(`/api/submissions/${this.detail.id}/related/${r.id}`, { method: 'DELETE' });
       } catch { return; }
       const link = res && res.link;
-      this.$toast(`已解除与 #${r.id} 的关联`, 'ok', link ? { undo: true, action: { label: '撤销', fn: async () => {
+      this.$toast(tt('已解除与 #{0} 的关联', [r.id]), 'ok', link ? { undo: true, action: { label: '撤销', fn: async () => {
         try {
           await this.api(`/api/submissions/${link.submission_id}/related`, this.jsonOpts('POST',
             { related_id: link.related_id, relation: link.relation, note: link.note || '' }));
         } catch { return; }
-        this.$toast('已恢复关联');
+        this.$toast(tt('已恢复关联'));
         await this.refreshDetail();
         this.refreshAll();
       } } } : {});
@@ -775,23 +839,23 @@ createApp({
     // 抽屉里还没保存的内容（编辑信息 / 粘贴的官方结果 / 转投表单），离开抽屉前要先问
     dirtyWhat() {
       if (!this.showDetail) return '';
-      if (this.editDirty()) return '「编辑信息」里的改动';
-      if ((this.pasteForm.text || '').trim() && !this.pasteForm.saving) return '粘贴的官方结果';
+      if (this.editDirty()) return tt('「编辑信息」里的改动');
+      if ((this.pasteForm.text || '').trim() && !this.pasteForm.saving) return tt('粘贴的官方结果');
       const r = this.resubForm;
       if (r.open && ((r.venue.name || '').trim() || (r.title || '').trim() || (r.manuscript_number || '').trim()))
-        return '「转投」表单里填的内容';
+        return tt('「转投」表单里填的内容');
       return '';
     },
     isEditDirty() { return !!this.dirtyWhat(); },
     async leaveEditOk() {
       const what = this.dirtyWhat();
       if (!what) return true;
-      return this.confirmDialog({ title: '放弃未保存的内容？', message: `${what}还没保存，离开后会丢失。`,
-                                  okText: '放弃', cancelText: '继续编辑', danger: true });
+      return this.confirmDialog({ title: tt('放弃未保存的内容？'), message: tt('{0}还没保存，离开后会丢失。', [what]),
+                                  okText: tt('放弃'), cancelText: tt('继续编辑'), danger: true });
     },
     async cancelEdit() {
-      if (this.editDirty() && !(await this.confirmDialog({ title: '放弃未保存的修改？',
-            message: '「编辑信息」里的改动还没保存，取消后会丢失。', okText: '放弃修改', cancelText: '继续编辑', danger: true })))
+      if (this.editDirty() && !(await this.confirmDialog({ title: tt('放弃未保存的修改？'),
+            message: tt('「编辑信息」里的改动还没保存，取消后会丢失。'), okText: tt('放弃修改'), cancelText: tt('继续编辑'), danger: true })))
         return;
       this.editMode = false;
     },
@@ -826,8 +890,8 @@ createApp({
         r = await this.api(`/api/submissions/${this.detail.id}/events`, this.jsonOpts('POST', body));
       } catch { return; }
       this.updateEvent = { open: false, stage: r.current_stage, raw: '', observed_at: '', revise_due: '' };
-      if (r.backdated) this.$toast(`已补录到时间线（当前状态仍为「${this.stageLabel(r.current_stage)}」，时间线上有更晚的记录）`, 'warn');
-      else this.$toast('状态变化已记入时间线 ✓');
+      if (r.backdated) this.$toast(tt('已补录到时间线（当前状态仍为「{0}」，时间线上有更晚的记录）', [this.stageLabel(r.current_stage)]), 'warn');
+      else this.$toast(tt('状态变化已记入时间线 ✓'));
       await this.refreshDetail();
       this.refreshAll();
     },
@@ -838,10 +902,10 @@ createApp({
         res = await this.api(`/api/submissions/${sid}/events/${e.id}`, { method: 'DELETE' });
       } catch { return; }
       const ev = res && res.event;
-      this.$toast(`已删除状态记录：${this.stageLabel(e.stage)} · ${this.fmtTs(e.observed_at)}`, 'ok',
+      this.$toast(tt('已删除状态记录：{0} · {1}', [this.stageLabel(e.stage), this.fmtTs(e.observed_at)]), 'ok',
         ev ? { undo: true, action: { label: '撤销', fn: async () => {
           try { await this.api(`/api/submissions/${sid}/events/restore`, this.jsonOpts('POST', ev)); } catch { return; }
-          this.$toast('已恢复这条状态记录');
+          this.$toast(tt('已恢复这条状态记录'));
           if (this.detail && this.detail.id === sid) await this.refreshDetail();
           this.refreshAll();
         } } } : {});
@@ -875,8 +939,8 @@ createApp({
     },
     async saveEdit() {
       const f = this.editForm, o = this.editOrig || {}, d = this.detail;
-      if (!f.title.trim()) { this.$toast('标题不能为空', 'warn'); return; }
-      if (!f.venue_name.trim()) { this.$toast('会议/期刊名称不能为空', 'warn'); return; }
+      if (!f.title.trim()) { this.$toast(tt('标题不能为空'), 'warn'); return; }
+      if (!f.venue_name.trim()) { this.$toast(tt('会议/期刊名称不能为空'), 'warn'); return; }
       const split = s => s.split(/[,，;；]/).map(x => x.trim()).filter(Boolean);
       const val = v => (typeof v === 'string' ? v.trim() : String(v ?? '').trim());
       // 只提交相对打开编辑时改动过的字段：编辑期间别的操作（粘贴入档、OpenReview 回填 forum）写入的值不会被旧快照覆盖
@@ -895,11 +959,11 @@ createApp({
                               ['submit_url', 'submit_url']]) {
         if (val(f[k]) !== val(o[k])) vp[key] = val(f[k]);
       }
-      if (vp.year && !/^\d{4}$/.test(vp.year)) { this.$toast('年份应为四位数字，如 2027', 'warn'); return; }
+      if (vp.year && !/^\d{4}$/.test(vp.year)) { this.$toast(tt('年份应为四位数字，如 2027'), 'warn'); return; }
       if (vp.submit_url && !/^https?:\/\//i.test(vp.submit_url)) {
-        this.$toast('投稿系统链接应以 http:// 或 https:// 开头', 'warn'); return;
+        this.$toast(tt('投稿系统链接应以 http:// 或 https:// 开头'), 'warn'); return;
       }
-      if (sp.submitted_at && sp.submitted_at > localDate()) { this.$toast('投稿日期不能晚于今天', 'warn'); return; }
+      if (sp.submitted_at && sp.submitted_at > localDate()) { this.$toast(tt('投稿日期不能晚于今天'), 'warn'); return; }
       try {
         // 先改会议信息（校验更严），再改稿件字段：避免一半保存成功、一半失败
         if (Object.keys(vp).length) await this.api(`/api/submissions/${d.id}/venue`, this.jsonOpts('PATCH', vp));
@@ -909,7 +973,7 @@ createApp({
         return;
       }
       this.editMode = false;
-      this.$toast('已保存 ✓');
+      this.$toast(tt('已保存 ✓'));
       await this.refreshDetail();
       this.refreshAll();
     },
@@ -942,32 +1006,32 @@ createApp({
       const id = s.id, title = s.title;
       try { await this.api(`/api/submissions/${id}`, { method: 'DELETE' }); } catch { return; }
       if (this.detail && this.detail.id === id && this.showDetail) await this.closeDetail(true);
-      this.$toast(`已移到回收站：《${this.short(title, 24)}》`, 'ok',
+      this.$toast(tt('已移到回收站：《{0}》', [this.short(title, 24)]), 'ok',
                   { undo: true, action: { label: '撤销', fn: () => this.restoreSub({ id, title }, true) } });
       this.refreshAll();
     },
     async restoreSub(s, undo = false) {
       try { await this.api(`/api/submissions/${s.id}/restore`, { method: 'POST' }); } catch { return; }
-      this.$toast(undo ? '已撤销，稿件已放回原处' : `已恢复：《${this.short(s.title, 24)}》`);
+      this.$toast(undo ? tt('已撤销，稿件已放回原处') : tt('已恢复：《{0}》', [this.short(s.title, 24)]));
       this.refreshAll();
       if (this.detail && this.detail.id === s.id) await this.refreshDetail();
     },
     async purgeSub(s) {
       const ok = await this.confirmDialog({
-        title: '彻底删除这篇投稿？',
-        message: `《${this.short(s.title, 60)}》\n\nPDF 原件、状态时间线与关联会一并删除，无法恢复。`,
-        okText: '彻底删除', danger: true });
+        title: tt('彻底删除这篇投稿？'),
+        message: tt('《{0}》\n\nPDF 原件、状态时间线与关联会一并删除，无法恢复。', [this.short(s.title, 60)]),
+        okText: tt('彻底删除'), danger: true });
       if (!ok) return;
       try { await this.api(`/api/submissions/${s.id}?purge=1`, { method: 'DELETE' }); } catch { return; }
       if (this.detail && this.detail.id === s.id && this.showDetail) await this.closeDetail(true);
-      this.$toast('已彻底删除');
+      this.$toast(tt('已彻底删除'));
       this.refreshAll();
     },
 
     // ---------- 粘贴官方结果（自适应解析 → 自动入档） ----------
     async parsePaste() {
       const form = this.pasteForm, text = form.text, sid = this.detail.id;
-      if (!text.trim()) { this.$toast('先粘贴官方页内容', 'warn'); return; }
+      if (!text.trim()) { this.$toast(tt('先粘贴官方页内容'), 'warn'); return; }
       form.loading = true;
       try {
         const p = await this.api(`/api/submissions/${sid}/elsevier-paste`, this.jsonOpts('POST', { text }));
@@ -978,9 +1042,9 @@ createApp({
         form.parsed = p;
         if (p.warning) this.$toast(p.warning, 'bad');
         else if (!p.recognized) {
-          this.$toast('解析不到状态信息，请确认粘贴的是官方查询页（过码后的结果页）内容', 'warn');
+          this.$toast(tt('解析不到状态信息，请确认粘贴的是官方查询页（过码后的结果页）内容'), 'warn');
         } else {
-          this.$toast('解析完成 ✓ 核对后点「记入时间线」');
+          this.$toast(tt('解析完成 ✓ 核对后点「记入时间线」'));
         }
       } catch {} finally { form.loading = false; }
     },
@@ -993,9 +1057,9 @@ createApp({
         const r = await this.api(`/api/submissions/${this.detail.id}/elsevier-paste/confirm`,
           this.jsonOpts('POST', { text: p._text }));
         if (r.written && r.backdated) {
-          this.$toast(`已记入时间线：${this.stageLabel(r.stage)}（当前状态仍为「${this.stageLabel(r.current_stage)}」，时间线上有更晚的记录）`, 'warn');
-        } else if (r.written) this.$toast(`已记入时间线：${this.stageLabel(r.stage)} ✓`);
-        else this.$toast(r.hint || '该状态已记录过，跳过重复写入', 'warn');
+          this.$toast(tt('已记入时间线：{0}（当前状态仍为「{1}」，时间线上有更晚的记录）', [this.stageLabel(r.stage), this.stageLabel(r.current_stage)]), 'warn');
+        } else if (r.written) this.$toast(tt('已记入时间线：{0} ✓', [this.stageLabel(r.stage)]));
+        else this.$toast(r.hint || tt('该状态已记录过，跳过重复写入'), 'warn');
         this.pasteForm = emptyPasteForm();
         await this.refreshDetail();
         this.refreshAll();
@@ -1006,7 +1070,7 @@ createApp({
     // ---------- 投稿系统页面导入（用户自己登录后整页复制粘贴）----------
     async parseSysImport() {
       const f = this.sysImport, text = f.text;
-      if (!text.trim()) { this.$toast('先粘贴投稿系统页面的内容', 'warn'); return; }
+      if (!text.trim()) { this.$toast(tt('先粘贴投稿系统页面的内容'), 'warn'); return; }
       f.loading = true;
       try {
         const p = await this.api('/api/import/system-paste', this.jsonOpts('POST', { text }));
@@ -1018,8 +1082,8 @@ createApp({
           it._venue = it.journal || p.journal || '';
         }
         f.parsed = p;
-        if (p.items.length) this.$toast(`认出 ${p.items.length} 篇稿件，核对后点「导入选中」`);
-        else this.$toast('没有认出稿件：请复制作者中心里列出稿件（含稿件编号）的页面', 'warn');
+        if (p.items.length) this.$toast(tt('认出 {0} 篇稿件，核对后点「导入选中」', [p.items.length]));
+        else this.$toast(tt('没有认出稿件：请复制作者中心里列出稿件（含稿件编号）的页面'), 'warn');
       } catch {} finally { f.loading = false; }
     },
     onSysPaste() { setTimeout(() => this.parseSysImport(), 0); },
@@ -1027,14 +1091,14 @@ createApp({
       return (this.sysImport.parsed?.items || []).map((it, i) => ({ it, i })).filter(x => x.it._pick);
     },
     sysActionText(it) {
-      return { update: '记入时间线', same: '已是最新', create: '新建', unknown: '状态未识别',
-               skip: '草稿 / 已被取代，不导入', no_title: '缺标题，不能新建',
-               ambiguous: '对上了多篇，请手动处理', trashed: '在回收站里（先恢复再导入）' }[it.action] || '';
+      return { update: tt('记入时间线'), same: tt('已是最新'), create: tt('新建'), unknown: tt('状态未识别'),
+               skip: tt('草稿 / 已被取代，不导入'), no_title: tt('缺标题，不能新建'),
+               ambiguous: tt('对上了多篇，请手动处理'), trashed: tt('在回收站里（先恢复再导入）') }[it.action] || '';
     },
     sysMatchText(it) {
       const m = it.match;
       if (!m) return '';
-      return `《${this.short(m.title, 40)}》` + (m.venue ? ` · ${m.venue}` : '') + (m.by === 'title' ? ' · 按标题对上，请核对' : '');
+      return `《${this.short(m.title, 40)}》` + (m.venue ? ` · ${m.venue}` : '') + (m.by === 'title' ? tt(' · 按标题对上，请核对') : '');
     },
     async confirmSysImport() {
       const p = this.sysImport.parsed;
@@ -1043,13 +1107,13 @@ createApp({
                                                         venue_name: it.action === 'create' ? (it._venue || '').trim() : '' }));
       if (!picks.length) return;
       if (picks.some(x => x.action === 'create' && !x.venue_name)) {
-        this.$toast('新建的稿件需要期刊名：请在表格里补上', 'warn'); return;
+        this.$toast(tt('新建的稿件需要期刊名：请在表格里补上'), 'warn'); return;
       }
       this.sysImport.saving = true;
       try {
         const r = await this.api('/api/import/system-paste/confirm', this.jsonOpts('POST', { text: p._text, picks }));
-        this.$toast(`已记入 ${r.updated} 篇、新建 ${r.created} 篇` + (r.unchanged ? `，${r.unchanged} 篇已是最新` : '')
-          + (r.backdated ? `；其中 ${r.backdated} 篇时间线上有更晚的记录，当前状态没变` : '') + ' ✓', r.backdated ? 'warn' : '');
+        this.$toast(tt('已记入 {0} 篇、新建 {1} 篇', [r.updated, r.created]) + (r.unchanged ? tt('，{0} 篇已是最新', [r.unchanged]) : '')
+          + (r.backdated ? tt('；其中 {0} 篇时间线上有更晚的记录，当前状态没变', [r.backdated]) : '') + ' ✓', r.backdated ? 'warn' : '');
         this.sysImport = { text: '', parsed: null, loading: false, saving: false };
         this.refreshAll();
       } catch {} finally { this.sysImport.saving = false; }
@@ -1064,8 +1128,8 @@ createApp({
     orResultToast(r) {
       if (r.ok) {
         const st = `${this.stageLabel(r.stage)}${r.raw ? '（' + r.raw + '）' : ''}`;
-        this.$toast(r.changed ? `OpenReview 状态更新：${st}` : `OpenReview：${st}，与上次相同，未新增记录`);
-      } else this.$toast(r.error || '查询失败', 'warn');
+        this.$toast(r.changed ? tt('OpenReview 状态更新：{0}', [st]) : tt('OpenReview：{0}，与上次相同，未新增记录', [st]));
+      } else this.$toast(r.error || tt('查询失败'), 'warn');
     },
     async queryOR(s) {
       if (s._querying) return;
@@ -1086,7 +1150,7 @@ createApp({
       try {
         const r = await this.api('/api/query/elsevier', this.jsonOpts('POST', { submission_id: s.id }));
         if (r.ok) {
-          this.$toast(`爱思唯尔：${this.stageLabel(r.stage)}（${r.raw_zh || r.raw}）${r.changed ? '' : '，与上次相同'}`);
+          this.$toast(tt('爱思唯尔：{0}（{1}）{2}', [this.stageLabel(r.stage), r.raw_zh || r.raw, r.changed ? '' : tt('，与上次相同')]));
         } else if (r.need_manual) {
           // 官方要滑块验证码（不能绕过）→ 只复制编号，其余用户自填
           const cr = r.credentials || {};
@@ -1096,12 +1160,12 @@ createApp({
             try { await navigator.clipboard.writeText(num); didCopy = true; } catch {}
           }
           const go = await this.confirmDialog({
-            title: '官方需要滑块验证码（按设计不绕过）',
-            message: `稿件编号：${num || '—'} ${didCopy ? '（已复制，Ctrl+V 直接粘贴）' : ''}\n姓名拼音：${cr.pinyin || '—'}\n期刊缩写：${cr.journal_acronym || '—'}\n\n打开官方查询页 → 粘贴编号 → 填姓名 → 滑块过码查询。\n查到后整页复制，回到详情页「📋 粘贴官方结果」自动解析入档。`,
-            okText: '打开官方查询页', cancelText: '稍后' });
+            title: tt('官方需要滑块验证码（按设计不绕过）'),
+            message: tt('稿件编号：{0} {1}\n姓名拼音：{2}\n期刊缩写：{3}\n\n打开官方查询页 → 粘贴编号 → 填姓名 → 滑块过码查询。\n查到后整页复制，回到详情页「📋 粘贴官方结果」自动解析入档。', [num || '—', didCopy ? tt('（已复制，Ctrl+V 直接粘贴）') : '', cr.pinyin || '—', cr.journal_acronym || '—']),
+            okText: tt('打开官方查询页'), cancelText: tt('稍后') });
           if (go) window.open(this.safeUrl(cr.official_web) || 'https://webapps.elsevier.cn/st-wechat/manuscript-query', '_blank', 'noopener');
         } else {
-          this.$toast(r.error || '查询失败', 'bad');
+          this.$toast(r.error || tt('查询失败'), 'bad');
         }
       } catch {} finally {
         s._querying = false;
@@ -1117,8 +1181,8 @@ createApp({
         const r = await this.api('/api/poll/openreview', { method: 'POST' });
         if (r.busy || r.need_account) { this.$toast(r.error, 'warn'); return; }
         this.pollResults = r.results || [];
-        this.$toast(r.polled ? `轮询完成：${r.ok}/${r.polled} 成功，${r.changed || 0} 篇状态有变化`
-                             : '没有需要轮询的 OpenReview 稿件（已归档/已拒/已撤的会跳过）');
+        this.$toast(r.polled ? tt('轮询完成：{0}/{1} 成功，{2} 篇状态有变化', [r.ok, r.polled, r.changed || 0])
+                             : tt('没有需要轮询的 OpenReview 稿件（已归档/已拒/已撤的会跳过）'));
         this.loadPollLogs();
         this.loadCatCounts();
         this.loadChanges({ quiet: true });
@@ -1128,40 +1192,40 @@ createApp({
     async toggleElsevierQuery() {
       const on = !this.features.elsevier_query;
       if (on && !(await this.confirmDialog({
-        title: '开启「爱思唯尔一键查稿」实验功能？',
-        message: '它会用你填的稿件编号 + 通讯作者拼音 + 期刊缩写，向爱思唯尔中国的稿件查询服务发请求。\n\n'
-               + '· 非官方功能，与爱思唯尔无关，接口可能随时失效；\n'
-               + '· 是否符合爱思唯尔网站使用条款请自行判断，风险自负；\n'
-               + '· 只在你点「查」时请求，每篇稿件 24 小时最多一次；遇到验证码就停下，请到官方页面人工查询后用「粘贴官方结果」。',
-        okText: '我了解，开启', cancelText: '先不开' }))) return;
+        title: tt('开启「爱思唯尔一键查稿」实验功能？'),
+        message: tt('它会用你填的稿件编号 + 通讯作者拼音 + 期刊缩写，向爱思唯尔中国的稿件查询服务发请求。\n\n')
+               + tt('· 非官方功能，与爱思唯尔无关，接口可能随时失效；\n')
+               + tt('· 是否符合爱思唯尔网站使用条款请自行判断，风险自负；\n')
+               + tt('· 只在你点「查」时请求，每篇稿件 24 小时最多一次；遇到验证码就停下，请到官方页面人工查询后用「粘贴官方结果」。'),
+        okText: tt('我了解，开启'), cancelText: tt('先不开') }))) return;
       try {
         this.features = await this.api('/api/settings', this.jsonOpts('POST', { elsevier_query: on }));
       } catch { return; }
-      this.$toast(on ? '已开启「爱思唯尔一键查稿」（实验）' : '已关闭「爱思唯尔一键查稿」');
+      this.$toast(on ? tt('已开启「爱思唯尔一键查稿」（实验）') : tt('已关闭「爱思唯尔一键查稿」'));
     },
     rankMissingHint() {
       const d = this.rankDatasets || {};
-      if (this.rankOutdated) return '随项目附带的分级数据有更新；你的分级库里有自己导入的数据，所以没有自动重建。'
-        + '运行 tools/build_rankings.py 并带上原来的 CSV（例如 --jcr 你的JCR.csv）即可合并，见 README「分级数据」。';
-      if (!d.ccf) return '分级库不可用：运行 tools/build_rankings.py 重建（见 README「分级数据」）。';
-      return (d.cas || d.xr) ? '' : '分级库里没有中科院分区 / 新锐分区：运行 tools/build_rankings.py 重建（见 README「分级数据」）。';
+      if (this.rankOutdated) return tt('随项目附带的分级数据有更新；你的分级库里有自己导入的数据，所以没有自动重建。')
+        + tt('运行 tools/build_rankings.py 并带上原来的 CSV（例如 --jcr 你的JCR.csv）即可合并，见 README「分级数据」。');
+      if (!d.ccf) return tt('分级库不可用：运行 tools/build_rankings.py 重建（见 README「分级数据」）。');
+      return (d.cas || d.xr) ? '' : tt('分级库里没有中科院分区 / 新锐分区：运行 tools/build_rankings.py 重建（见 README「分级数据」）。');
     },
     rankSourcesText() {
       const d = this.rankDatasets || {}, e = this.rankEditions || {};
       const ed = k => (e[k] ? ' ' + e[k] : '');
-      return ['CCF 推荐目录' + ed('ccf'), d.cas ? '中科院分区' + ed('cas') : '', d.xr ? '新锐分区' + ed('xr') : '',
-              d.jcr ? 'JCR' + ed('jcr') : '', '中科院预警名单'].filter(Boolean).join(' · ');
+      return [tt('CCF 推荐目录') + ed('ccf'), d.cas ? tt('中科院分区') + ed('cas') : '', d.xr ? tt('新锐分区') + ed('xr') : '',
+              d.jcr ? 'JCR' + ed('jcr') : '', tt('中科院预警名单')].filter(Boolean).join(' · ');
     },
     secretStorageText(s) {
-      return { dpapi: 'Windows 凭据保护：只有这台电脑上的当前 Windows 用户能解开',
-               keyring: '系统钥匙串：macOS 钥匙串 / Linux Secret Service' }[s] || '';
+      return { dpapi: tt('Windows 凭据保护：只有这台电脑上的当前 Windows 用户能解开'),
+               keyring: tt('系统钥匙串：macOS 钥匙串 / Linux Secret Service') }[s] || '';
     },
     async loadJournals() {
       this.journalsLoading = true;
       try {
         const r = await this.api('/api/query/elsevier/journals');
-        if (r.ok) { this.journals = r.journals || []; this.$toast(`取到 ${this.journals.length} 个期刊缩写`); }
-        else this.$toast(r.error || '字典拉取失败', 'warn');
+        if (r.ok) { this.journals = r.journals || []; this.$toast(tt('取到 {0} 个期刊缩写', [this.journals.length])); }
+        else this.$toast(r.error || tt('字典拉取失败'), 'warn');
       } catch {} finally { this.journalsLoading = false; }
     },
     async loadPollLogs() {
@@ -1176,24 +1240,24 @@ createApp({
       } catch {}
     },
     async bindORAccount() {
-      if (!this.orForm.email.trim() || !this.orForm.secret) { this.$toast('请填写邮箱与密码', 'warn'); return; }
+      if (!this.orForm.email.trim() || !this.orForm.secret) { this.$toast(tt('请填写邮箱与密码'), 'warn'); return; }
       this.binding = true;
       try {
         const r = await this.api('/api/accounts/openreview', this.jsonOpts('POST',
           { email: this.orForm.email.trim(), secret: this.orForm.secret }));
         this.orForm = { email: '', secret: '' };
-        this.$toast(`绑定成功：${r.profile.id}，名下 ${r.my_submissions} 篇投稿 ✓`);
+        this.$toast(tt('绑定成功：{0}，名下 {1} 篇投稿 ✓', [r.profile.id, r.my_submissions]));
         await this.loadORAccount();
         this.syncMySubmissions();
       } catch {} finally { this.binding = false; }
     },
     async removeORAccount() {
-      if (!(await this.confirmDialog({ title: '解除 OpenReview 绑定？',
-            message: '会删除本机保存的 OpenReview 凭据（不影响官网账号）。之后自动同步与查询会停止，可随时重新绑定。',
-            okText: '解除绑定', danger: true }))) return;
+      if (!(await this.confirmDialog({ title: tt('解除 OpenReview 绑定？'),
+            message: tt('会删除本机保存的 OpenReview 凭据（不影响官网账号）。之后自动同步与查询会停止，可随时重新绑定。'),
+            okText: tt('解除绑定'), danger: true }))) return;
       try { await this.api('/api/accounts/openreview', { method: 'DELETE' }); } catch { return; }
       this.orAccount = null; this.syncResult = null;
-      this.$toast('已解除绑定：本机数据库和备份里的凭据都已删除');
+      this.$toast(tt('已解除绑定：本机数据库和备份里的凭据都已删除'));
       this.loadChanges({ quiet: true });
     },
     async syncMySubmissions() {
@@ -1203,11 +1267,11 @@ createApp({
         this.syncResult = r;
         if (r.ok) {
           const d = (r.discovered || []).filter(x => !x._dismissed).length, u = (r.updated || []).length;
-          this.$toast(d ? `同步完成：${u} 篇状态有变化，新发现 ${d} 篇可一键建档`
-                        : `同步完成：${u} 篇状态有变化，其余无变化 ✓`);
+          this.$toast(d ? tt('同步完成：{0} 篇状态有变化，新发现 {1} 篇可一键建档', [u, d])
+                        : tt('同步完成：{0} 篇状态有变化，其余无变化 ✓', [u]));
           this.refreshAll(); this.loadPollLogs(); this.loadChanges({ quiet: true });
         } else {
-          this.$toast(r.error || '同步失败', r.busy ? 'warn' : 'bad');
+          this.$toast(r.error || tt('同步失败'), r.busy ? 'warn' : 'bad');
           if (r.need_rebind) this.loadORAccount();
         }
       } catch {} finally { this.syncing = false; }
@@ -1224,11 +1288,11 @@ createApp({
           this.$toast(r.hint);
           this.openDetail(r.id);
         } else if (r.existing) {
-          this.$toast(r.hint || '该会议下已有这篇，未重复建档', 'warn',
+          this.$toast(r.hint || tt('该会议下已有这篇，未重复建档'), 'warn',
             r.in_trash ? { action: { label: '去回收站', fn: () => this.goList('trash') } } : {});
         } else {
-          this.$toast(r.linked?.length ? `已建档并关联到 ${r.linked.map(x => '#' + x).join(' ')}（转投，可在详情里改关系）✓`
-                                       : '已建档 ✓');
+          this.$toast(r.linked?.length ? tt('已建档并关联到 {0}（转投，可在详情里改关系）✓', [r.linked.map(x => '#' + x).join(' ')])
+                                       : tt('已建档 ✓'));
           this.openDetail(r.id);
         }
         // 从「新发现」列表移除
@@ -1244,7 +1308,7 @@ createApp({
       catch { return; }
       d._dismissed = true;
       this.loadChanges({ quiet: true });
-      this.$toast(`已忽略：${this.short(d.title, 30)}（之后同步也不再提示）`, 'ok', { undo: true, action: { label: '撤销', fn: async () => {
+      this.$toast(tt('已忽略：{0}（之后同步也不再提示）', [this.short(d.title, 30)]), 'ok', { undo: true, action: { label: '撤销', fn: async () => {
         try { await this.api('/api/pending-imports/dismiss', this.jsonOpts('POST', { forum: d.forum, dismissed: false })); } catch { return; }
         d._dismissed = false;
         this.loadChanges({ quiet: true });
@@ -1271,20 +1335,20 @@ createApp({
     changeLine(c) {
       const st = c.prev_stage && c.prev_stage !== c.stage
         ? `${this.stageLabel(c.prev_stage)} → ${this.stageLabel(c.stage)}`
-        : `${this.stageLabel(c.stage)}（${this.short(this.rawTail(c.raw_status), 30) || '有更新'}）`;
+        : `${this.stageLabel(c.stage)}（${this.short(this.rawTail(c.raw_status), 30) || tt('有更新')}）`;
       return `${this.short(c.title, 26)}：${st}`;
     },
     notifyChanges(fresh, freshPend) {
       const nC = fresh.length, nP = freshPend.length;
-      const title = nC ? `投稿状态有 ${nC} 条新变化` : `账号同步发现 ${nP} 篇新投稿待建档`;
+      const title = nC ? tt('投稿状态有 {0} 条新变化', [nC]) : tt('账号同步发现 {0} 篇新投稿待建档', [nP]);
       const lines = nC ? fresh.slice(0, 3).map(c => this.changeLine(c))
                        : freshPend.slice(0, 3).map(p => this.short((p.item && p.item.title) || '', 40));
-      if (nC && nP) lines.push(`另有 ${nP} 篇新发现的投稿待建档`);
+      if (nC && nP) lines.push(tt('另有 {0} 篇新发现的投稿待建档', [nP]));
       const away = document.visibilityState !== 'visible' || (document.hasFocus && !document.hasFocus());
       const perm = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
       this.notifyPerm = perm;                            // 以浏览器当前权限为准（用户可能刚在设置里改过）
       const inApp = () => this.$toast(
-        nC ? `${title}：${lines[0]}${nC > 1 ? ' 等' : ''}` : `${title}，可在总览一键建档`, 'ok',
+        nC ? `${title}：${lines[0]}${nC > 1 ? tt(' 等') : ''}` : tt('{0}，可在总览一键建档', [title]), 'ok',
         { action: { label: '查看', fn: () => this.goInbox() } });
       if (perm === 'granted' && away) {
         try {
@@ -1298,13 +1362,13 @@ createApp({
       inApp();
     },
     async enableNotify() {
-      if (typeof Notification === 'undefined') { this.$toast('这个浏览器不支持桌面通知', 'warn'); return; }
+      if (typeof Notification === 'undefined') { this.$toast(tt('这个浏览器不支持桌面通知'), 'warn'); return; }
       try { this.notifyPerm = await Notification.requestPermission(); } catch { this.notifyPerm = Notification.permission; }
       if (this.notifyPerm === 'granted') {
-        this.$toast('桌面通知已开启：页面开着时（放在后台也行），有新变化会弹系统通知 ✓');
-        try { new Notification('桌面通知已开启', { body: '投稿状态有新变化时会这样提醒你', tag: 'paper-tracker-test' }); } catch {}
+        this.$toast(tt('桌面通知已开启：页面开着时（放在后台也行），有新变化会弹系统通知 ✓'));
+        try { new Notification(tt('桌面通知已开启'), { body: tt('投稿状态有新变化时会这样提醒你'), tag: 'paper-tracker-test' }); } catch {}
       } else if (this.notifyPerm === 'denied') {
-        this.$toast('浏览器没有允许通知：可点地址栏左侧的网站设置，把「通知」改为允许', 'warn');
+        this.$toast(tt('浏览器没有允许通知：可点地址栏左侧的网站设置，把「通知」改为允许'), 'warn');
       }
     },
     async markAllSeen() {
@@ -1312,7 +1376,7 @@ createApp({
       try { r = await this.api('/api/changes/seen', this.jsonOpts('POST', { until: this.changes.now || '' })); } catch { return; }
       const prev = (r && r.previous) || '';
       await this.loadChanges({ quiet: true });
-      this.$toast('已全部标为已读', 'ok', { undo: true, action: { label: '撤销', fn: async () => {
+      this.$toast(tt('已全部标为已读'), 'ok', { undo: true, action: { label: '撤销', fn: async () => {
         try { await this.api('/api/changes/seen', this.jsonOpts('POST', { until: prev, reset: true })); } catch { return; }
         await this.loadChanges();
       } } });
@@ -1322,7 +1386,7 @@ createApp({
       const forum = p.forum, title = p.item.title;
       try { await this.api('/api/pending-imports/dismiss', this.jsonOpts('POST', { forum, dismissed: true })); } catch { return; }
       await this.loadChanges({ quiet: true });
-      this.$toast(`已忽略：${this.short(title, 30)}（之后同步也不再提示）`, 'ok', { undo: true, action: { label: '撤销', fn: async () => {
+      this.$toast(tt('已忽略：{0}（之后同步也不再提示）', [this.short(title, 30)]), 'ok', { undo: true, action: { label: '撤销', fn: async () => {
         try { await this.api('/api/pending-imports/dismiss', this.jsonOpts('POST', { forum, dismissed: false })); } catch { return; }
         await this.loadChanges({ quiet: true });
       } } });
@@ -1332,7 +1396,7 @@ createApp({
       try { r = await this.api('/api/pending-imports/dismiss-all', { method: 'POST' }); } catch { return; }
       const forums = (r && r.forums) || [];
       await this.loadChanges({ quiet: true });
-      this.$toast(`已忽略 ${forums.length} 篇待建档（之后同步也不再提示）`, 'ok', { undo: true, action: { label: '撤销', fn: async () => {
+      this.$toast(tt('已忽略 {0} 篇待建档（之后同步也不再提示）', [forums.length]), 'ok', { undo: true, action: { label: '撤销', fn: async () => {
         try { await this.api('/api/pending-imports/undismiss-all', this.jsonOpts('POST', { forums })); } catch { return; }
         await this.loadChanges({ quiet: true });
       } } });
@@ -1350,7 +1414,7 @@ createApp({
       this.editMode = false;
       this.updateEvent.open = false; this.pasteForm.open = false; this.relForm.open = false;
       this.resubForm = { ...emptyResub(), open: true,
-                         relation: ['accepted', 'production'].includes(d.current_stage) ? '扩写' : '转投',
+                         relation: ['accepted', 'production'].includes(d.current_stage) ? '扩写' : '转投',   // 数据值，保持中文
                          copy_pdf: !!(d.documents && d.documents.length) };
       const f = this.resubForm;
       f.venue.type = d.venue_type || 'journal';
@@ -1399,16 +1463,16 @@ createApp({
       const f = this.resubForm, d = this.detail;
       if (!d || f.saving) return;
       const name = f.venue.name.trim();
-      if (!name) { this.$toast('请填写要转投的会议/期刊（可点上面的候选）', 'warn'); return; }
+      if (!name) { this.$toast(tt('请填写要转投的会议/期刊（可点上面的候选）'), 'warn'); return; }
       const showYear = f.venue.type === 'conference' || f.venue.tracker === 'openreview';
       const year = showYear ? String(f.venue.year || '').trim() : '';
-      if (year && !/^\d{4}$/.test(year)) { this.$toast('年份应为四位数字，如 2027', 'warn'); return; }
+      if (year && !/^\d{4}$/.test(year)) { this.$toast(tt('年份应为四位数字，如 2027'), 'warn'); return; }
       const conf = this.confOf(f.venue.acronym || name);
       const yearless = !!(conf && conf.template && !conf.template.includes('{year}'));
       if (f.venue.tracker === 'openreview' && !year && !yearless) {
-        this.$toast('OpenReview 渠道需要年份（用来组装 venue id）', 'warn'); return;
+        this.$toast(tt('OpenReview 渠道需要年份（用来组装 venue id）'), 'warn'); return;
       }
-      if (f.submitted_at && f.submitted_at > localDate()) { this.$toast('投稿日期不能晚于今天', 'warn'); return; }
+      if (f.submitted_at && f.submitted_at > localDate()) { this.$toast(tt('投稿日期不能晚于今天'), 'warn'); return; }
       f.saving = true;
       let r;
       try {
@@ -1420,7 +1484,7 @@ createApp({
       } catch { f.saving = false; return; }
       const label = `${name}${year ? ' ' + year : ''}`, rel = f.relation;
       this.resubForm = emptyResub();
-      this.$toast(`已建立新投稿 ${label}（${rel}），并与原稿 #${d.id} 关联 ✓`);
+      this.$toast(tt('已建立新投稿 {0}（{1}），并与原稿 #{2} 关联 ✓', [label, tt(rel), d.id]));
       this.refreshAll();
       await this.openDetail(r.id);
     },
@@ -1434,13 +1498,13 @@ createApp({
       this.backingUp = true;
       try {
         const r = await this.api('/api/backup', { method: 'POST' });
-        this.$toast(`已备份：${r.file} ✓`);
+        this.$toast(tt('已备份：{0} ✓', [r.file]));
         await this.loadBackups();
       } catch {} finally { this.backingUp = false; }
     },
     async copyText(t) {
-      try { await navigator.clipboard.writeText(t); this.$toast('已复制'); }
-      catch { this.$toast('复制失败：请手动选中文字复制', 'warn'); }
+      try { await navigator.clipboard.writeText(t); this.$toast(tt('已复制')); }
+      catch { this.$toast(tt('复制失败：请手动选中文字复制'), 'warn'); }
     },
 
     // ---------- 导出（全部 / 当前列表） ----------
@@ -1453,6 +1517,7 @@ createApp({
         if (f.q.trim()) p.set('q', f.q.trim());
         if (f.sort) p.set('sort', f.sort);
       }
+      if (i18nState.lang === 'en') p.set('lang', 'en');
       const a = document.createElement('a');
       a.href = '/api/export.csv' + (p.toString() ? '?' + p : '');
       a.download = '';
@@ -1512,7 +1577,7 @@ createApp({
       e.target.value = '';
     },
     async uploadPdf(file) {
-      if (!file.name.toLowerCase().endsWith('.pdf')) { this.$toast('请选择 PDF 文件', 'warn'); return; }
+      if (!file.name.toLowerCase().endsWith('.pdf')) { this.$toast(tt('请选择 PDF 文件'), 'warn'); return; }
       this.wizard.parsing = true;
       try {
         const fd = new FormData();
@@ -1522,9 +1587,9 @@ createApp({
         if (this.wizard.draft) this.wizard = { ...newWizard(), step: 1 };
         this.wizard.draft = d;
         this._applyDraft(d);
-        this.$toast('PDF 解析完成，请核对下一步补录缺失字段');
+        this.$toast(tt('PDF 解析完成，请核对下一步补录缺失字段'));
       } catch (e) {
-        this.$toast(`解析失败：${e.message}`, 'bad');
+        this.$toast(tt('解析失败：{0}', [e.message]), 'bad');
       } finally { this.wizard.parsing = false; }
     },
 
@@ -1567,9 +1632,9 @@ createApp({
         if (d.layout === 'editorial_manager' && !d.conf_name && w.tracker === 'elsevier') {
           if (pub && !/elsevier/i.test(pub)) {
             w.tracker = 'manual';
-            w.trackerHint = `（${pub} 期刊，爱思唯尔查稿通道不适用，已改为手动）`;
+            w.trackerHint = tt('（{0} 期刊，爱思唯尔查稿通道不适用，已改为手动）', [pub]);
           } else if (!pub) {
-            w.trackerHint = '（Editorial Manager 封面，未能确认出版社，默认爱思唯尔，可改）';
+            w.trackerHint = tt('（Editorial Manager 封面，未能确认出版社，默认爱思唯尔，可改）');
           }
         }
       }
@@ -1609,16 +1674,16 @@ createApp({
 
     async createSub() {
       const w = this.wizard, f = w.form;
-      if (!f.title.trim()) { this.$toast('标题不能为空', 'warn'); return; }
-      if (!w.venue.name.trim()) { this.$toast('请填写会议/期刊名称（可联想补全）', 'warn'); return; }
+      if (!f.title.trim()) { this.$toast(tt('标题不能为空'), 'warn'); return; }
+      if (!w.venue.name.trim()) { this.$toast(tt('请填写会议/期刊名称（可联想补全）'), 'warn'); return; }
       const showYear = w.venue.type === 'conference' || w.tracker === 'openreview';
       const year = showYear ? String(w.venue.year || '').trim() : '';
-      if (year && !/^\d{4}$/.test(year)) { this.$toast('年份应为四位数字，如 2027', 'warn'); return; }
-      if (f.submitted_at && f.submitted_at > localDate()) { this.$toast('投稿日期不能晚于今天', 'warn'); return; }
+      if (year && !/^\d{4}$/.test(year)) { this.$toast(tt('年份应为四位数字，如 2027'), 'warn'); return; }
+      if (f.submitted_at && f.submitted_at > localDate()) { this.$toast(tt('投稿日期不能晚于今天'), 'warn'); return; }
       const conf = this.confOfVenue();
       const yearless = !!(conf && conf.template && !conf.template.includes('{year}'));
       if (w.tracker === 'openreview' && !w.venue.venue_id.trim() && !year && !yearless) {
-        this.$toast('OpenReview 渠道需要年份（用来组装 venue id），或直接填写 OpenReview venue id', 'warn'); return;
+        this.$toast(tt('OpenReview 渠道需要年份（用来组装 venue id），或直接填写 OpenReview venue id'), 'warn'); return;
       }
       if (w.creating) return;
       // 只提交当前可见的字段：切换渠道/阶段后隐藏的旧值不再带上
@@ -1649,7 +1714,7 @@ createApp({
         r = await this.api('/api/submissions', this.jsonOpts('POST', body));
       } catch { w.creating = false; return; }
       w.creating = false;
-      this.$toast('建档成功 ✓ 时间线已留痕');
+      this.$toast(tt('建档成功 ✓ 时间线已留痕'));
       // 切到新稿件所在的分类，保证建完就能在列表里看到它
       const cat = Object.keys(this.categories).find(k => this.categories[k].includes(f.initial_stage));
       this.wizard = newWizard();            // 建完清空向导：后退回到这一页也不会重复建档
@@ -1659,4 +1724,6 @@ createApp({
       this.openDetail(r.id);
     },
   },
-}).mount('#app');
+});
+app.config.globalProperties.$t = tt;
+app.mount('#app');

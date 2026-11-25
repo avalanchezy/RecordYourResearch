@@ -381,7 +381,7 @@ def stages():
     return {"stages": STAGES, "common_venues": openreview.COMMON_VENUES,
             "categories": CATEGORY_STAGES, "features": _features(),
             "rank_datasets": rk.datasets(), "rank_editions": rk.editions(), "rank_outdated": rk.outdated(),
-            "version": config.VERSION,
+            "version": config.VERSION, "demo": config.DEMO,
             "repo": config.REPO_URL, "secret_storage": vault.backend()}
 
 
@@ -2177,6 +2177,32 @@ def system_paste_confirm(p: SysPasteConfirmIn):
 # ---------- 导出台账 ----------
 _TRACKER_LABEL = {"manual": "手动", "openreview": "OpenReview", "elsevier": "爱思唯尔"}
 _TYPE_LABEL = {"journal": "期刊", "conference": "会议"}
+# 英文界面导出（?lang=en）：表头、阶段、类型、渠道、关系、徽章翻成英文；用户数据（标题、备注……）原样
+_CSV_HEADER = ["ID", "标题", "作者", "会议/期刊", "类型", "年份", "CCF", "中科院分区", "新锐分区",
+               "JCR", "预警", "追踪通道", "稿件编号", "当前状态", "原始状态", "投稿日期", "结果日期",
+               "在审天数", "当前阶段停留天数", "返修截止", "会议截止", "相关投稿", "归档", "备注",
+               "最近更新"]
+_CSV_HEADER_EN = ["ID", "Title", "Authors", "Venue", "Type", "Year", "CCF", "CAS tier", "XR tier",
+                  "JCR", "Warning", "Channel", "Manuscript number", "Status", "Raw status", "Submitted", "Decided",
+                  "Days in review", "Days in current stage", "Revision due", "Venue deadline", "Related", "Archived",
+                  "Notes", "Last updated"]
+_TRACKER_LABEL_EN = {"manual": "Manual", "openreview": "OpenReview", "elsevier": "Elsevier"}
+_TYPE_LABEL_EN = {"journal": "Journal", "conference": "Conference"}
+_RELATION_EN = {"转投": "Resubmission", "扩写": "Extension", "会议版·期刊版": "Conference/journal version",
+                "同数据集": "Same dataset", "同方法": "Same method"}
+
+
+def _badge_en(label: str) -> str:
+    """中科院1区Top → CAS Q1 Top；新锐2区 → XR Q2；⚠ 预警2025 → Warning 2025；其余原样。"""
+    m = re.match(r"^(中科院|新锐)(\d)区(Top)?$", label)
+    if m:
+        return f"{'CAS' if m.group(1) == '中科院' else 'XR'} Q{m.group(2)}" + (" Top" if m.group(3) else "")
+    m = re.match(r"^预警(\d{4})$", label)
+    if m:
+        return f"Warning {m.group(1)}"
+    if label.startswith("新锐预警"):
+        return "XR warning" + label[len("新锐预警"):].replace("·观察中", " · watch list").replace("：", ": ")
+    return label
 
 
 def _csv_cell(v):
@@ -2189,34 +2215,35 @@ def _csv_cell(v):
 
 
 @app.get("/api/export.csv")
-def export_csv(stage: str = "", q: str = "", category: str = "", sort: str = "updated"):
-    """导出台账（Excel 直接打开）。带 category / stage / q / sort 时只导出当前列表里看到的那些。"""
+def export_csv(stage: str = "", q: str = "", category: str = "", sort: str = "updated", lang: str = ""):
+    """导出台账（Excel 直接打开）。带 category / stage / q / sort 时只导出当前列表里看到的那些；lang=en 用英文表头与标签。"""
+    en = lang == "en"
     with db.get_db() as c:
         rows = [_sub_row(c, i) for i in _filtered_ids(c, stage, q, category, sort)]
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(["ID", "标题", "作者", "会议/期刊", "类型", "年份", "CCF", "中科院分区", "新锐分区",
-                     "JCR", "预警", "追踪通道", "稿件编号", "当前状态", "原始状态", "投稿日期", "结果日期",
-                     "在审天数", "当前阶段停留天数", "返修截止", "会议截止", "相关投稿", "归档", "备注",
-                     "最近更新"])
+    writer.writerow(_CSV_HEADER_EN if en else _CSV_HEADER)
+    type_label, tracker_label = (_TYPE_LABEL_EN, _TRACKER_LABEL_EN) if en else (_TYPE_LABEL, _TRACKER_LABEL)
     for r in rows:
-        rel = "; ".join(f"{x['relation']} #{x['id']}" for x in r.get("related") or [])
+        rel = "; ".join(f"{_RELATION_EN.get(x['relation'], x['relation']) if en else x['relation']} #{x['id']}"
+                        for x in r.get("related") or [])
         by = {}
         for b in r.get("badges") or []:
-            by.setdefault(b.get("scope"), []).append(str(b.get("label") or ""))
+            lab = str(b.get("label") or "")
+            by.setdefault(b.get("scope"), []).append(_badge_en(lab.replace("⚠", "").strip()) if en else lab)
         badge = lambda k: " / ".join(by.get(k, []))
         writer.writerow([_csv_cell(x) for x in (
             r["id"], r["title"], "; ".join(r["authors"]), r.get("venue_name", ""),
-            _TYPE_LABEL.get(r.get("venue_type") or "", r.get("venue_type") or ""), r.get("venue_year", ""),
+            type_label.get(r.get("venue_type") or "", r.get("venue_type") or ""), r.get("venue_year", ""),
             badge("ccf"), badge("cas"), badge("xr"), badge("jcr"),
             " / ".join(x.replace("⚠", "").strip() for x in by.get("warn", [])),
-            _TRACKER_LABEL.get(r.get("venue_tracker") or "", r.get("venue_tracker") or ""),
+            tracker_label.get(r.get("venue_tracker") or "", r.get("venue_tracker") or ""),
             r["manuscript_number"],
-            STAGES.get(r["current_stage"], {}).get("label", r["current_stage"]),
+            STAGES.get(r["current_stage"], {}).get("label_en" if en else "label", r["current_stage"]),
             r["current_raw"], r["submitted_at"], (r.get("result_at") or "")[:10],
             "" if r.get("days_total") is None else r["days_total"],
             "" if r.get("days_in_stage") is None else r["days_in_stage"],
-            r["revise_due"], r.get("venue_ddl", ""), rel, "是" if r.get("archived") else "",
+            r["revise_due"], r.get("venue_ddl", ""), rel, ("yes" if en else "是") if r.get("archived") else "",
             r["notes"], r["updated_at"],
         )])
     data = "\ufeff" + buf.getvalue()  # UTF-8 BOM，Excel 直接打开不乱码

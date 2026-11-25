@@ -6,7 +6,7 @@
 
 RecordYourResearch 把你投出去的每一篇论文记在一个地方：投到了哪里、现在是什么状态、在审了多少天、返修什么时候截止、被拒后转投到了哪里。它只在你自己的电脑上运行（默认只监听 `127.0.0.1`），所有数据都在本机的一个数据文件夹里：没有账号体系、没有遥测、不从任何 CDN 加载资源。
 
-当前版本 v0.2.1，界面为中文。
+当前版本 v0.3.0，界面有**中文和英文**两种：点顶栏右上角的「EN / 中文」一键切换，会记住你的选择；浏览器语言不是中文时默认显示英文。
 
 ## 简介
 
@@ -133,12 +133,13 @@ Windows 的 PowerShell 可能因为执行策略（Execution Policy）拦截 `.ve
 
 第一次启动时会创建数据文件夹（默认 `./data`），并用随项目附带的 CCF 目录、预警名单、中科院分区表 2025 和新锐期刊分区表 2026 生成本地分级库，需要几秒钟。
 
-**先用演示数据试试**：往一个新的空目录里灌一批虚构的投稿，再指向它启动（不联网，不会碰你的真实数据）：
+**先用演示数据试试**：一条命令在 8766 端口另起一个实例，用 `demo-data/` 里的虚构投稿（第一次运行时自动生成）。不联网，不会碰你的真实数据，界面上标着「演示数据」；删掉 `demo-data/` 就能重来。
 
 ```bash
-python tools/demo_seed.py --data-dir ./demo-data
-python run.py --data-dir ./demo-data --no-daily --open
+python run.py --demo --open
 ```
+
+[docs/DEMO.md](docs/DEMO.md) 是英文的演示脚本（5 分钟视频分镜和现场演示场景），配套的可粘贴演示页面在 [docs/demo/](docs/demo/)。想灌到自己指定的目录，可以先 `python tools/demo_seed.py --data-dir 路径`，再 `python run.py --data-dir 路径 --no-daily --open`。
 
 ### 运行测试
 
@@ -165,6 +166,7 @@ python run.py --port 8765 --host 127.0.0.1 --data-dir PATH --no-daily --open
 | `--data-dir PATH` | `./data` | 数据文件夹位置 |
 | `--no-daily` | 关闭 | 不启动每日后台任务：自动备份、回收站 30 天清理、OpenReview 每日同步都不会运行 |
 | `--open` | 关闭 | 服务就绪（开始接受连接）后自动打开浏览器 |
+| `--demo` | 关闭 | 演示模式：用 `demo-data/` 里的虚构数据（第一次运行时生成），默认端口 8766（可用 `--port` 改），不跑每日任务；不能和 `--data-dir` 一起用 |
 
 | 环境变量 | 作用 |
 |---|---|

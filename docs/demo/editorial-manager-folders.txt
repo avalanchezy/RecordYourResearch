@@ -1,0 +1,79 @@
+Knowledge-Based Systems
+Alice Example | Logout
+Home
+Main Menu
+Submit a Manuscript
+About
+Help
+Submissions Being Processed
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+Action	Manuscript Number	Title	Initial Date Submitted	Status Date	Current Status
+View Submission
+Correspondence
+Send E-mail	KNOSYS-D-26-97754	Synthetic Study of Hypergraph Embeddings for Toy Citation Networks	May 06, 2026	Jun 01, 2026	Under Review
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+
+Knowledge-Based Systems
+Alice Example | Logout
+Home
+Main Menu
+Submit a Manuscript
+About
+Help
+Revisions Being Processed
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+Action	Manuscript Number	Title	Initial Date Submitted	Status Date	Current Status
+View Submission
+Correspondence
+Send E-mail	KNOSYS-D-26-96120R1	Synthetic Study of Few-Shot Fault Diagnosis on Simulated Bearings	Mar 02, 2026	Nov 09, 2026	Required Reviews Completed
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+
+Knowledge-Based Systems
+Alice Example | Logout
+Home
+Main Menu
+Submit a Manuscript
+About
+Help
+Submission Transfers Waiting for Author's Approval
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+Action	Manuscript Number	Title	Initial Date Submitted	Status Date	Current Status
+View Submission
+Agree to Transfer
+Decline to Transfer
+Correspondence	KNOSYS-D-26-94468	Synthetic Study of Fuzzy Rule Pruning on Invented Credit Data	Jan 15, 2026	Oct 20, 2026	Transfer Pending
+Page 1 of 1 (1 total submissions)
+Previous 1 Next
+Results per page
+
+Knowledge-Based Systems
+Alice Example | Logout
+Home
+Main Menu
+Submit a Manuscript
+About
+Help
+Submissions with a Decision
+Page 1 of 1 (2 total submissions)
+Previous 1 Next
+Results per page
+Action	Manuscript Number	Title	Initial Date Submitted	Status Date	Current Status
+View Submission
+View Decision Letter
+Correspondence	KNOSYS-D-25-93999R2	Synthetic Study of Temporal Knowledge Distillation on Mock Sensor Logs	Sep 08, 2025	Apr 27, 2026	Completed - Accept
+View Submission
+View Decision Letter
+Correspondence	KNOSYS-D-26-95036	Synthetic Study of Active Learning Budgets for Placeholder Medical Notes	Feb 03, 2026	Mar 30, 2026	Completed - Reject
+Page 1 of 1 (2 total submissions)
+Previous 1 Next
+Results per page

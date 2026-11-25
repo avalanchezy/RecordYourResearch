@@ -1,0 +1,45 @@
+ScholarOne Manuscripts™
+Alice Example
+Instructions & Forms
+Help
+Log Out
+Home
+Author
+Review
+Author Dashboard
+Author Dashboard
+1 Revised Manuscripts in Draft
+3 Submitted Manuscripts
+6 Manuscripts with Decisions
+2 Manuscripts I Have Co-Authored
+Start New Submission
+5 Most Recent E-mails
+English Language Editing Service
+Submitted Manuscripts
+STATUS	ID	TITLE	CREATED	SUBMITTED
+Contact Journal
+
+ADM: Not Assigned
+
+Awaiting Admin Processing	XMI-2026-1187	Synthetic Study of Placeholder Tissue Segmentation in Mock CT Volumes
+View Submission	17-Nov-2026	18-Nov-2026
+Contact Journal
+
+EIC: Example, Edwin
+AE: Sample, Sasha
+ADM: Placeholder, Pat
+
+Awaiting Reviewer Scores	XMI-2026-0412.R1	Synthetic Study of Imaginary Contrast Agents for Simulated MRI
+View Submission	20-Oct-2026	21-Oct-2026
+Contact Journal
+
+EIC: Example, Edwin
+AE: Demo, Dana
+ADM: Placeholder, Pat
+
+Awaiting Reviewer Scores
+Awaiting Final Decision	XMI-2026-0655	A Synthetic Benchmark for Fictional Ultrasound Denoising
+View Submission	03-Aug-2026	04-Aug-2026
+© ScholarOne, Inc., 2026. All Rights Reserved.
+ScholarOne Manuscripts and ScholarOne are registered trademarks of ScholarOne, Inc.
+Terms of Use | Privacy Policy | Cookie Policy | Get Help Now

@@ -8,7 +8,7 @@
 """
 import os
 
-VERSION = "0.2.1"
+VERSION = "0.3.0"
 REPO_URL = "https://github.com/avalanchezy/RecordYourResearch"
 USER_AGENT = f"RecordYourResearch/{VERSION} (+{REPO_URL})"
 
@@ -16,3 +16,5 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.abspath(os.environ.get("PAPER_TRACKER_DATA_DIR") or os.path.join(BASE_DIR, "data"))
 SOURCES_DIR = os.path.join(BASE_DIR, "data-sources")
 RANKINGS_DB = os.path.join(DATA_DIR, "rankings", "rankings.db")
+# 演示模式（python run.py --demo）：用 demo-data/ 里的虚构数据，界面上标出「演示数据」
+DEMO = os.environ.get("PAPER_TRACKER_DEMO") == "1"
