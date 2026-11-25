@@ -14,6 +14,12 @@ from datetime import datetime, timedelta
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+for _s in (sys.stdout, sys.stderr):      # 非中文 Windows 的控制台 / 管道（cp1252）不会因中文输出崩溃
+    try:
+        _s.reconfigure(errors="replace")
+    except Exception:
+        pass
+
 
 def main():
     ap = argparse.ArgumentParser(description="生成演示数据（虚构）")
