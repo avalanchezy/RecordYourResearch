@@ -101,6 +101,13 @@ CREATE TABLE IF NOT EXISTS pending_imports (
   last_seen_at TEXT,
   dismissed INTEGER DEFAULT 0        -- 用户点了「忽略」
 );
+CREATE TABLE IF NOT EXISTS status_rules (
+  key TEXT PRIMARY KEY,              -- stages.status_key() 归一后的原始状态
+  raw TEXT NOT NULL,                 -- 第一次见到时的原文
+  stage TEXT NOT NULL,
+  source TEXT DEFAULT 'user',        -- user = 手动指定；model = 采纳了本地模型的建议
+  created_at TEXT DEFAULT (datetime('now','localtime'))
+);
 CREATE INDEX IF NOT EXISTS idx_events_sub ON status_events(submission_id, observed_at);
 """
 

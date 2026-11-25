@@ -71,6 +71,7 @@ const emptyResub = () => ({
 const emptyRelForm = () => ({ open: false, q: '', results: [], target: null, relation: '转投', note: '' });
 const emptyPasteForm = () => ({ open: false, text: '', parsed: null, loading: false, saving: false,
                                  via: '', ocr: null, ocring: false });
+const emptyLetter = () => ({ open: false, text: '', res: null, loading: false, saving: false, decision: '', deadline: '' });
 const emptySysImport = () => ({ text: '', parsed: null, loading: false, saving: false, via: '', ocr: null, ocring: false });
 const newWizard = () => ({
   step: 1, tracker: 'manual', autoTracker: false, trackerHint: '', venueIdTouched: false,
@@ -140,6 +141,11 @@ const app = createApp({
       features: { elsevier_query: false },
       demoMode: false,          // python run.py --demo：虚构数据
       ocrInfo: { available: false, install: '' },   // 可选 OCR 组件（截图识别）
+      ai: { enabled: false, supported: false },     // 可选本地小模型（智能助手）
+      aiStatus: null, aiSource: 'huggingface', aiStarting: false,
+      statusRules: [], ruleForm: { raw: '', stage: '', note: '', busy: false },
+      letterForm: emptyLetter(),
+      askForm: { q: '', busy: false, res: null },
       rankDatasets: {},
       rankEditions: {},
       rankOutdated: false,
@@ -244,6 +250,7 @@ const app = createApp({
       this.appVersion = r.version || '';
       this.demoMode = !!r.demo;
       this.ocrInfo = r.ocr || { available: false, install: '' };
+      this.ai = r.ai || { enabled: false, supported: false };
       this.repoUrl = r.repo || '';
     } catch {}
     this.applyLang();
@@ -381,6 +388,7 @@ const app = createApp({
       if (!this.showDetail || e.defaultPrevented) return;
       if (this.resubForm.open) { this.resubForm.open = false; return; }
       if (this.pasteForm.open) { this.pasteForm.open = false; return; }
+      if (this.letterForm.open) { this.letterForm.open = false; return; }
       if (this.updateEvent.open) { this.updateEvent.open = false; return; }
       if (this.relForm.open) { this.relForm.open = false; return; }
       if (this.editMode) { this.cancelEdit(); return; }
@@ -459,7 +467,7 @@ const app = createApp({
     stageColor(k) { return (this.stages[k] || {}).color || '#64748b'; },
     chipStyle(k) { return { background: this.stageColor(k) }; },
     trackerLabel(t) { return { openreview: 'OpenReview', elsevier: tt('爱思唯尔'), manual: tt('手动') }[t] || t; },
-    srcLabel(s) { return { manual: tt('手动'), openreview: tt('自动·OR'), elsevier: tt('半自动·爱思唯尔'), paste: tt('粘贴·投稿系统') }[s] || s; },
+    srcLabel(s) { return { manual: tt('手动'), openreview: tt('自动·OR'), elsevier: tt('半自动·爱思唯尔'), paste: tt('粘贴·投稿系统'), letter: tt('来信') }[s] || s; },
     // 官方页显示的「旧值→新值」：发出邀请 4→5、接受 2→3……（来自 payload.reviewers_prev）
     rvDelta(p) {
       const prev = p && p.reviewers_prev, cur = p && p.reviewers;
@@ -556,7 +564,7 @@ const app = createApp({
     loadPage(v) {
       if (v === 'overview') { this.loadOverview(); this.loadChanges(); }
       if (v === 'list') this.loadSubs();
-      if (v === 'query') { this.loadPollLogs(); this.loadORAccount(); this.loadBackups(); }
+      if (v === 'query') { this.loadPollLogs(); this.loadORAccount(); this.loadBackups(); this.loadAiStatus(); this.loadStatusRules(); }
     },
 
     // ---------- 网址路由（前进/后退、刷新、收藏都回到同一视图） ----------
@@ -789,6 +797,7 @@ const app = createApp({
       // 切换稿件时清空所有与上一篇相关的临时表单，避免把粘贴结果/关联写到别的稿件上
       this.editMode = false;
       this.pasteForm = emptyPasteForm();
+      this.letterForm = emptyLetter();
       this.relForm = emptyRelForm();
       this.resubForm = emptyResub();
       this.moreOpen = false;
@@ -872,7 +881,7 @@ const app = createApp({
     },
     togglePaste() {
       this.pasteForm.open = !this.pasteForm.open;
-      if (this.pasteForm.open) { this.updateEvent.open = false; this.resubForm.open = false; }
+      if (this.pasteForm.open) { this.updateEvent.open = false; this.resubForm.open = false; this.letterForm.open = false; }
     },
     openPdf(s) { window.open(`/api/submissions/${s.id}/pdf`, '_blank'); },
 
@@ -881,7 +890,7 @@ const app = createApp({
       const d = this.detail;
       const open = !this.updateEvent.open;
       this.updateEvent = { open, stage: d.current_stage, raw: '', observed_at: '', revise_due: d.revise_due || '' };
-      if (open) { this.pasteForm.open = false; this.resubForm.open = false; }
+      if (open) { this.pasteForm.open = false; this.resubForm.open = false; this.letterForm.open = false; }
     },
     async addEvent() {
       const e = this.updateEvent;
@@ -938,7 +947,7 @@ const app = createApp({
       };
       this.editOrig = JSON.parse(JSON.stringify(this.editForm));   // 打开编辑时的快照：只提交改动过的字段
       this.editSuggests = []; this.editSuggestOpen = false;
-      this.pasteForm.open = false; this.updateEvent.open = false; this.resubForm.open = false;
+      this.pasteForm.open = false; this.updateEvent.open = false; this.resubForm.open = false; this.letterForm.open = false;
       this.editMode = true;
     },
     async saveEdit() {
@@ -1157,6 +1166,177 @@ const app = createApp({
       return form.via === 'ocr' ? { via: 'ocr', ocr_score: form.ocr ? form.ocr.min_score : null } : {};
     },
     evViaOcr(e) { return !!(e && e.payload && e.payload.via === 'ocr'); },
+    evViaModel(e) { const p = e && e.payload; return !!(p && p.model && ['model', 'rules+model'].includes(p.via)); },
+
+    // ---------- 智能助手（可选本地模型）：下载部署 / 启停 / 删除 ----------
+    async loadAiStatus() {
+      try {
+        this.aiStatus = await this.api('/api/ai/status', { silent: true });
+        this.ai = { ...this.ai, enabled: this.aiStatus.enabled, supported: this.aiStatus.supported };
+      } catch {}
+      clearTimeout(this._aiTimer);
+      const st = this.aiStatus;
+      if (st && (st.busy || st.starting) && this.page === 'query') this._aiTimer = setTimeout(() => this.loadAiStatus(), 1000);
+    },
+    async aiInstall() {
+      try { this.aiStatus = await this.api('/api/ai/install', this.jsonOpts('POST', { source: this.aiSource })); } catch {}
+      this.loadAiStatus();
+    },
+    async aiCancel() { try { await this.api('/api/ai/cancel', this.jsonOpts('POST', {})); } catch {} this.loadAiStatus(); },
+    async aiEnable(on) {
+      try {
+        this.aiStatus = await this.api('/api/ai/enable', this.jsonOpts('POST', { enabled: on }));
+        this.ai = { ...this.ai, enabled: this.aiStatus.enabled };
+        this.$toast(on ? tt('智能助手已启用') : tt('智能助手已停用'));
+      } catch {}
+    },
+    async aiStart() {
+      this.aiStarting = true;
+      try { this.aiStatus = await this.api('/api/ai/start', this.jsonOpts('POST', {})); this.$toast(tt('本地模型已启动')); }
+      catch {} finally { this.aiStarting = false; this.loadAiStatus(); }
+    },
+    async aiStop() { try { this.aiStatus = await this.api('/api/ai/stop', this.jsonOpts('POST', {})); } catch {} },
+    async aiRemove() {
+      const st = this.aiStatus || {};
+      const ok = await this.confirmDialog({
+        title: tt('删除本地模型？'), danger: true, okText: tt('删除'),
+        message: tt('会删除下载的推理引擎和模型文件（{0}），智能功能随之关闭；你的投稿数据和已学会的状态词规则不受影响。以后可以重新下载。', [this.fmtSize(st.disk_bytes || 0)]) });
+      if (!ok) return;
+      try { this.aiStatus = await this.api('/api/ai/remove', this.jsonOpts('POST', {})); this.ai = { ...this.ai, enabled: false }; this.$toast(tt('已删除本地模型文件')); } catch {}
+    },
+    aiPct() { const p = this.aiStatus && this.aiStatus.progress; return p && p.total ? Math.min(100, Math.round(p.done * 100 / p.total)) : 0; },
+    aiDownloadSize() {
+      const st = this.aiStatus || {};
+      const mb = ((st.model && st.model.size) || 870e6) + ((st.runtime && st.runtime.size) || 25e6);
+      return this.fmtSize(mb);
+    },
+    aiStateText() {
+      const st = this.aiStatus;
+      if (!st) return '';
+      if (st.busy) return tt('正在下载部署…');
+      if (st.starting || this.aiStarting) return tt('正在启动模型…');
+      if (!st.installed) return st.progress && st.progress.phase === 'error' ? tt('下载失败') : tt('未安装');
+      if (!st.enabled) return tt('已下载，未启用');
+      return st.running ? tt('已启用 · 运行中') : tt('已启用 · 空闲（用到时自动启动）');
+    },
+    aiStateClass() {
+      const st = this.aiStatus || {};
+      return st.busy || st.starting ? 'busy' : !st.installed ? 'off' : !st.enabled ? 'off' : st.running ? 'on' : 'idle';
+    },
+
+    // ---------- 状态词规则（认不出的状态文字 → 指定 / 模型建议阶段 → 记成规则） ----------
+    async loadStatusRules() { try { this.statusRules = await this.api('/api/status-rules', { silent: true }); } catch {} },
+    async ruleSuggest() {
+      const f = this.ruleForm;
+      if (!f.raw.trim()) return;
+      f.busy = true; f.note = '';
+      try {
+        const r = await this.api('/api/status-rules/suggest', this.jsonOpts('POST', { raw: f.raw }));
+        if (r.stage) f.stage = r.stage;
+        f.note = { rules: tt('内置规则已经认得：{0}', [this.stageLabel(r.stage)]),
+                   user_rule: tt('已有你的规则：{0}', [this.stageLabel(r.stage)]),
+                   model: r.stage ? tt('本地模型建议：{0}（确认后点保存）', [this.stageLabel(r.stage)]) : tt('本地模型也拿不准，请手动选择') }[r.source]
+                 || tt(r.hint || '请手动选择阶段');
+        f._source = r.source === 'model' ? 'model' : 'user';
+        f._suggested = r.stage || '';
+      } catch {} finally { f.busy = false; }
+    },
+    async ruleSave() {
+      const f = this.ruleForm;
+      try {
+        this.statusRules = await this.api('/api/status-rules', this.jsonOpts('POST', {
+          raw: f.raw, stage: f.stage, source: f._source === 'model' && f._suggested === f.stage ? 'model' : 'user' }));
+        this.$toast(tt('已记住：「{0}」→ {1}', [f.raw.trim(), this.stageLabel(f.stage)]));
+        this.ruleForm = { raw: '', stage: '', note: '', busy: false };
+      } catch {}
+    },
+    async ruleDelete(r) {
+      try { this.statusRules = await this.api('/api/status-rules/delete', this.jsonOpts('POST', { key: r.key })); } catch {}
+    },
+    async sysSuggest(it) {
+      it._sugBusy = true;
+      try {
+        const r = await this.api('/api/status-rules/suggest', this.jsonOpts('POST', { raw: it.raw_status }));
+        it._sug = r; it._sugStage = r.stage || '';
+      } catch {} finally { it._sugBusy = false; }
+    },
+    async sysSaveRule(it) {
+      if (!it._sugStage) return;
+      const src = it._sug && it._sug.source === 'model' && it._sug.stage === it._sugStage ? 'model' : 'user';
+      try {
+        await this.api('/api/status-rules', this.jsonOpts('POST', { raw: it.raw_status, stage: it._sugStage, source: src }));
+        this.$toast(tt('已记住：「{0}」→ {1}', [it.raw_status, this.stageLabel(it._sugStage)]));
+        await this.parseSysImport();                       // 用新规则重新解析整页
+      } catch {}
+    },
+
+    // ---------- 编辑来信：规则 + 本地模型（若启用）识别决定和返修截止日，校验后由你确认 ----------
+    toggleLetter() {
+      const open = !this.letterForm.open;
+      this.letterForm = { ...emptyLetter(), open };
+      if (open) { this.pasteForm.open = false; this.updateEvent.open = false; this.resubForm.open = false; }
+    },
+    async parseLetter() {
+      const f = this.letterForm, d = this.detail;
+      if (!f.text.trim() || !d) return;
+      f.loading = true;
+      try {
+        const r = await this.api(`/api/submissions/${d.id}/letter`, this.jsonOpts('POST', { text: f.text }));
+        if (this.letterForm !== f) return;
+        f.res = r; f.decision = r.decision; f.deadline = r.deadline || '';
+      } catch {} finally { f.loading = false; }
+    },
+    letterStage() {
+      const f = this.letterForm, o = f.res && f.res.options.find(x => x.key === f.decision);
+      return o ? o.stage : null;
+    },
+    letterAgreeText(r) {
+      return { agree: tt('规则和本地模型的判断一致'), disagree: tt('规则和本地模型的判断不一致：已按规则预选，请核对原文'),
+               rules_only: tt('按规则识别'), model_only: tt('规则没认出来，这是本地模型的判断，请核对原文'),
+               model_pick: tt('规则看到几种可能，本地模型选了这一项'), ambiguous: tt('规则看到几种可能，请手动选择'),
+               none: tt('没认出决定，请手动选择') }[r.agreement] || r.agreement;
+    },
+    deadlineHowText(h) {
+      return { stated: tt('来信里写明的日期'), relative: tt('按来信日期推算（「N 天内」）'),
+               model: tt('本地模型找到、已在原文中核实') }[h] || '';
+    },
+    async saveLetter() {
+      const f = this.letterForm, d = this.detail;
+      if (!f.res || !this.letterStage()) return;
+      f.saving = true;
+      try {
+        const r = await this.api(`/api/submissions/${d.id}/letter/confirm`, this.jsonOpts('POST', {
+          text: f.text, decision: f.decision, deadline: this.letterStage() === 'revise' ? f.deadline : '' }));
+        if (r.backdated) this.$toast(tt('已记入时间线：{0}（当前状态仍为「{1}」，时间线上有更晚的记录）', [this.stageLabel(this.letterStage()), this.stageLabel(r.current_stage)]), 'warn');
+        else this.$toast(tt('已记入时间线：{0} ✓', [this.stageLabel(this.letterStage())]));
+        this.letterForm = emptyLetter();
+        await this.refreshDetail();
+        this.refreshAll();
+      } catch {} finally { f.saving = false; }
+    },
+
+    // ---------- 用自然语言提问（总览页） ----------
+    askExamples() {
+      return i18nState.lang === 'en'
+        ? ['Which papers have been under review for more than 3 months?', 'Decisions in the last 30 days', 'How many papers per venue?', 'How long do reviews take?', 'Revision deadlines coming up']
+        : ['哪些稿子审了超过三个月？', '最近 30 天收到了哪些决定？', '按期刊统计投稿数', '平均审稿要多久？', '返修截止日快到了的'];
+    },
+    async askRun(q) {
+      const f = this.askForm;
+      if (q) f.q = q;
+      if (!f.q.trim() || f.busy) return;
+      f.busy = true;
+      try { f.res = await this.api('/api/ask', this.jsonOpts('POST', { q: f.q })); } catch {} finally { f.busy = false; }
+    },
+    askColLabel(c) {
+      return { id: '#', title: tt('标题'), venue: tt('期刊/会议'), stage: tt('阶段'), since: tt('进入当前阶段'), days: tt('天数'),
+               n: tt('篇数'), year: tt('年份'), outcome: tt('结果'), at: tt('时间'), avg_days: tt('平均天数'), min_days: tt('最短'),
+               max_days: tt('最长'), revise_due: tt('返修截止'), submitted_at: tt('投稿日期'), updated: tt('更新于'),
+               manuscript_number: tt('稿件编号') }[c] || c;
+    },
+    askOutcome(v) {
+      return { accepted: tt('已录用'), rejected: tt('已拒稿'), withdrawn: tt('已撤稿'), in_progress: tt('进行中') }[v] || v;
+    },
     sysPicks() {
       return (this.sysImport.parsed?.items || []).map((it, i) => ({ it, i })).filter(x => x.it._pick);
     },
@@ -1483,7 +1663,7 @@ const app = createApp({
       if (!d) return;
       if (this.editMode && !(await this.leaveEditOk())) return;
       this.editMode = false;
-      this.updateEvent.open = false; this.pasteForm.open = false; this.relForm.open = false;
+      this.updateEvent.open = false; this.pasteForm.open = false; this.relForm.open = false; this.letterForm.open = false;
       this.resubForm = { ...emptyResub(), open: true,
                          relation: ['accepted', 'production'].includes(d.current_stage) ? '扩写' : '转投',   // 数据值，保持中文
                          copy_pdf: !!(d.documents && d.documents.length) };
