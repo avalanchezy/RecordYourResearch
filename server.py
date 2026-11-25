@@ -26,6 +26,7 @@ from pydantic import BaseModel
 from app import config
 from app import db
 from app import elsevier
+from app import ocr
 from app.elsevier_counters import parse_reviewer_counters
 from app import openreview
 from app import rankings as rk
@@ -382,7 +383,7 @@ def stages():
             "categories": CATEGORY_STAGES, "features": _features(),
             "rank_datasets": rk.datasets(), "rank_editions": rk.editions(), "rank_outdated": rk.outdated(),
             "version": config.VERSION, "demo": config.DEMO,
-            "repo": config.REPO_URL, "secret_storage": vault.backend()}
+            "repo": config.REPO_URL, "secret_storage": vault.backend(), "ocr": ocr.status()}
 
 
 # ---------- 设置：实验功能开关（存在本机数据库 meta 表） ----------
@@ -615,6 +616,21 @@ async def parse_pdf_api(file: UploadFile = File(...)):
     draft["upload_id"] = upload_id
     draft["file_name"] = os.path.basename(file.filename or "")
     return draft
+
+
+# ---------- 截图 OCR（可选组件；只把图片变成文字，解析和写入仍走原来的预览 → 确认） ----------
+@app.post("/api/ocr")
+def ocr_api(file: UploadFile = File(...)):
+    if not ocr.available():
+        raise HTTPException(501, f"OCR 组件没有安装。在项目目录运行：{ocr.INSTALL_HINT}，然后重启")
+    data = file.file.read(ocr.MAX_IMAGE_BYTES + 1)
+    try:
+        res = ocr.image_to_text(data)
+    except ocr.OcrError as e:
+        raise HTTPException(413 if "太大" in str(e) else 422, str(e))
+    if not res["text"].strip():
+        raise HTTPException(422, "截图里没有认出文字：请截取投稿系统页面上有状态、编号的那一块")
+    return res
 
 
 # ---------- submissions ----------
@@ -1745,6 +1761,20 @@ def _import_discovered(s: dict) -> dict:
 # ---------- 爱思唯尔官方结果粘贴解析（人工过码后 → 自适应提取 → 自动入档） ----------
 class PasteIn(BaseModel):
     text: str
+    via: str = ""                   # "ocr"：文字由截图识别而来（可能经用户手改），记进事件的来源信息
+    ocr_score: float | None = None  # OCR 各行置信度的最小值
+
+
+def _via_payload(via: str, score: float | None) -> dict:
+    """粘贴文本的来历：空 = 复制网页；ocr = 截图识别。其他值一律拒绝。"""
+    if via not in ("", "ocr"):
+        raise HTTPException(400, "via 只能是空或 ocr")
+    if via != "ocr":
+        return {}
+    out = {"via": "ocr"}
+    if isinstance(score, (int, float)) and 0 <= score <= 1:
+        out["ocr_min_score"] = round(float(score), 3)
+    return out
 
 
 # 官方页中文状态通栏 → 归一阶段
@@ -1939,7 +1969,7 @@ def elsevier_paste_confirm(sid: int, p: PasteIn):
         raw = parsed["raw"] or (parsed["stage_zh"] or "官方查询结果")
         # observed_at 用官方更新时间（当天 = 现在，往日 = 当日 12:00；无则现在）
         observed = db.ts_from_date(parsed["observed_at"]) if parsed["observed_at"] else None
-        payload = {"official_paste": True}
+        payload = {"official_paste": True, **_via_payload(p.via, p.ocr_score)}
         if parsed["reviewers"]:
             payload["reviewers"] = parsed["reviewers"]
             if parsed["reviewers_prev"]:
@@ -1994,6 +2024,8 @@ class SysPastePick(BaseModel):
 class SysPasteConfirmIn(BaseModel):
     text: str
     picks: list[SysPastePick] = []
+    via: str = ""
+    ocr_score: float | None = None
 
 
 def _sys_parse(text: str) -> dict:
@@ -2095,7 +2127,7 @@ def system_paste_preview(p: SysPasteIn):
     return parsed
 
 
-def _sys_event(c, sid: int, it: dict, parsed: dict) -> int | None:
+def _sys_event(c, sid: int, it: dict, parsed: dict, via: dict | None = None) -> int | None:
     stage = it.get("stage")
     if not stage:
         return None
@@ -2107,7 +2139,7 @@ def _sys_event(c, sid: int, it: dict, parsed: dict) -> int | None:
                  (sid, stage, raw, observed[:10])).fetchone():
         return None
     payload = {"system_paste": True, "system": parsed.get("system") or "",
-               "system_label": parsed.get("system_label") or ""}
+               "system_label": parsed.get("system_label") or "", **(via or {})}
     if it.get("status_date"):
         payload["official_date"] = it["status_date"]
     if it.get("manuscript_id"):
@@ -2126,6 +2158,7 @@ def _sys_event(c, sid: int, it: dict, parsed: dict) -> int | None:
 def system_paste_confirm(p: SysPasteConfirmIn):
     """确认导入：选中的已有稿件记一条官方状态（同一天同状态不重复），对不上的新建投稿。"""
     parsed = _sys_parse(p.text)
+    via = _via_payload(p.via, p.ocr_score)
     res = {"updated": 0, "created": 0, "unchanged": 0, "backdated": 0, "ids": []}
     today = date.today().isoformat()
     with db.get_db() as c:
@@ -2139,7 +2172,7 @@ def system_paste_confirm(p: SysPasteConfirmIn):
             if pk.action == "update" and it["match"] and it["action"] in ("update", "same"):
                 sid = it["match"]["id"]
                 sub = _require_live_sub(c, sid)
-                eid = _sys_event(c, sid, it, parsed)
+                eid = _sys_event(c, sid, it, parsed, via)
                 if it.get("manuscript_id") and not sub["manuscript_number"]:
                     c.execute("UPDATE submissions SET manuscript_number=? WHERE id=?", (it["manuscript_id"], sid))
                 sd = it.get("submitted_date") or ""
@@ -2166,7 +2199,7 @@ def system_paste_confirm(p: SysPasteConfirmIn):
                     submitted_at=sd if sd and sd <= today else "",
                     notes=f"从 {parsed.get('system_label') or '投稿系统'} 页面导入",
                     venue=VenueIn(name=venue, type="journal", tracker="manual")))
-                _sys_event(c, sid, it, parsed)
+                _sys_event(c, sid, it, parsed, via)
                 res["created"] += 1
                 res["ids"].append(sid)
             else:

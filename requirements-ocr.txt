@@ -1,0 +1,5 @@
+# 可选：截图 / 扫描版 PDF 的 OCR（不装也能正常使用，只是不能识别截图）
+# Optional: OCR for screenshots and scanned PDFs (everything else works without it)
+# RapidOCR = PaddleOCR models on ONNX Runtime: CPU only, offline, Chinese + English models ship inside the wheel (~27 MB)
+rapidocr>=3.0,<4
+onnxruntime>=1.18

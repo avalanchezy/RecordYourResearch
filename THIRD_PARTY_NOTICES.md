@@ -59,6 +59,15 @@ Notes:
 - These packages pull in further small dependencies (for example `typing-extensions`, `sniffio`, `annotated-types` and `pydantic-core`, plus the platform back ends of `keyring`). Their licences ship with the installed packages. To see what is installed in your environment, run `pip list`, and `pip show <package>` for a package's licence.
 - Licences are listed for the versions current at the time of writing. If a package changes its licence, the licence shipped with the installed version applies.
 
+### Optional: OCR add-on (`requirements-ocr.txt`, installed only if you choose to)
+
+| Package | Licence | Used for |
+|---|---|---|
+| [RapidOCR](https://pypi.org/project/rapidocr/) | Apache-2.0 | Screenshot / scanned-PDF text recognition; ships PaddleOCR models (Apache-2.0) converted to ONNX |
+| [ONNX Runtime](https://pypi.org/project/onnxruntime/) | MIT | Runs the OCR models on the CPU |
+
+RapidOCR in turn installs OpenCV (`opencv-python-headless`, Apache-2.0), NumPy, Shapely, pyclipper, Pillow and a few small helpers; their licences ship with the installed packages.
+
 ## 3. Development and test dependencies
 
 Packages in `requirements-dev.txt` (for example pytest) are only used to develop and test the project. They are not part of the application.
