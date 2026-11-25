@@ -1,0 +1,13 @@
+ScholarOne Manuscripts™
+Alice Example
+Author Dashboard
+Submitted Manuscripts
+STATUS	ID	TITLE	CREATED	SUBMITTED
+Contact Journal
+
+EIC: Example, Edwin
+ADM: Placeholder, Pat
+
+Out for Refereeing	XMI-2026-0903	A Fictional Study of Synthetic Retina Scans
+View Submission	02-Sep-2026	03-Sep-2026
+© ScholarOne, Inc., 2026. All Rights Reserved.

@@ -80,6 +80,12 @@ def main():
     ev(r1, "rejected", "Reject", 35)
     c.post(f"/api/submissions/{r1}/resubmit", json={"venue": {"name": "ICASSP", "year": "2026", "type": "conference"},
                                                     "relation": "转投", "submitted_at": day(20)})
+    # 外审拖了五个月：演示「哪些稿子审了超过三个月？」
+    s1 = new("Slow Reviews of Hypothetical Graph Indexes",
+             {"name": "IEEE Transactions on Knowledge and Data Engineering", "type": "journal", "tracker": "manual"},
+             submitted_at=day(200), manuscript_number="TKDE-2026-00-0000")
+    ev(s1, "editor", "With Editor", 190)
+    ev(s1, "review", "Under Review", 150)
     m1 = new("Notes on Entirely Made-Up Datasets",
              {"name": "IEEE Transactions on Cybernetics", "type": "journal", "tracker": "manual"}, submitted_at=day(45))
     ev(m1, "editor", "With Editor", 33)

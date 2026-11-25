@@ -14,6 +14,11 @@ python run.py --demo --open
 - The **EN / 中文** button in the top right switches the whole interface, including messages from the server. The choice is remembered in the browser; a browser whose language is not Chinese starts in English.
 - Demo mode makes no network requests: the OpenReview sync results shown are pre-seeded.
 
+Two optional add-ons make the demo richer. Set them up once on the demo laptop, before the event:
+
+- **Screenshot OCR**: `python -m pip install -r requirements-ocr.txt` (about 100 MB of Python packages).
+- **Smart assistant**: in the normal or demo instance, open **Channels → 🤖 Smart assistant → Download and set up** (about 0.84 GB, checked against pinned SHA-256 hashes). Demo mode and normal mode share the same `data/ai/` folder, so the model is downloaded once. Click **Start now** a minute before you present so the first answer is quick.
+
 Pages to paste during the demo are in [`docs/demo/`](demo/):
 
 | File | What it shows |
@@ -21,19 +26,23 @@ Pages to paste during the demo are in [`docs/demo/`](demo/):
 | `scholarone-author-dashboard.txt` | A ScholarOne Author Dashboard with 3 manuscripts |
 | `editorial-manager-folders.txt` | Several Editorial Manager folders pasted at once, 5 manuscripts with different outcomes |
 | `elsevier-query-changed-counts.txt` | Elsevier China's status page right after reviewer counts changed (copied text reads `12`, `23`, `45`) |
+| `scholarone-unknown-status.txt` | A ScholarOne page whose status (*Out for Refereeing*) the built-in rules do not know |
+| `decision-letter.txt` | An editor's letter asking for a major revision of *PR-D-25-00000* by 15 January 2027 |
 
-All three are synthetic; the first two come from the test corpus in `tests/fixtures/syspaste_corpus.json`.
+All five are synthetic; the first two come from the test corpus in `tests/fixtures/syspaste_corpus.json`.
 
 ## Five-minute storyboard
 
 | Time | Scene | What the audience sees |
 |---|---|---|
-| 0:00–0:30 | The problem | A researcher with papers at OpenReview conferences, Elsevier journals and a ScholarOne journal: every system shows status differently, and none of them has an author API. |
-| 0:30–1:15 | Overview | Counts by lifecycle stage, alerts (a revision due in 2 days, a paper “with editor” for more than four weeks), and the *since your last visit* panel with an automatically detected change and an OpenReview submission waiting to be imported. |
-| 1:15–2:15 | Import by pasting | Paste `scholarone-author-dashboard.txt` into **Import from submission system**. The preview recognizes the system, splits the page into manuscripts, normalizes each raw status (e.g. *Awaiting Reviewer Scores* → Under review) and proposes *create* or *update* per manuscript. Import; the new records appear with their timelines. Repeat with `editorial-manager-folders.txt` to show several folders in one paste. |
-| 2:15–3:15 | Noisy extraction | Open *A Survey of Placeholder Methods for Pattern Recognition*, click **Paste official result** and paste `elsevier-query-changed-counts.txt`. The page shows `old → new` with an arrow icon, so the copied text reads `12`, `23`, `45`. The preview reads *completed 1→2, accepted 2→3, invited 4→5*, explains the reading, and would flag it if two readings stayed plausible. |
-| 3:15–4:15 | Provenance and lineage | The status timeline: each entry carries its source (manual, OpenReview sync, pasted page), when it happened vs. when it was recorded, and the raw official text. Then the rejected ICME paper and its ICASSP resubmission, linked both ways, with CCF / CAS ranking badges matched offline. |
-| 4:15–5:00 | Local-first | Switch to Chinese and back, export the ledger to CSV, and point out that the database, PDFs and credentials (in the OS keyring) never leave the machine. |
+| 0:00–0:25 | The problem | A researcher with papers at OpenReview conferences, Elsevier journals and a ScholarOne journal: every system shows status differently, and none of them has an author API. |
+| 0:25–0:55 | Overview | Counts by lifecycle stage, alerts (a revision due in 2 days, a paper “with editor” for more than four weeks), and the *since your last visit* panel with an automatically detected change and an OpenReview submission waiting to be imported. |
+| 0:55–1:45 | Import by pasting | Paste `scholarone-author-dashboard.txt` into **Import from submission system**. The preview recognizes the system, splits the page into manuscripts, normalizes each raw status (e.g. *Awaiting Reviewer Scores* → Under review) and proposes *create* or *update* per manuscript. Then paste `scholarone-unknown-status.txt`: *Out for Refereeing* is unknown, **🤖 Classify** suggests *Under review* (the prompt carries the most similar statuses from the rule dictionary), **Remember** turns it into a rule, and the re-parsed page now resolves it without the model. |
+| 1:45–2:30 | Noisy extraction | Open *A Survey of Placeholder Methods for Pattern Recognition*, click **Paste official result** and paste `elsevier-query-changed-counts.txt`. The page shows `old → new` with an arrow icon, so the copied text reads `12`, `23`, `45`. The preview reads *completed 1→2, accepted 2→3, invited 4→5*, explains the reading, and would flag it if two readings stayed plausible. |
+| 2:30–3:15 | Reading a letter | In the same paper, **✉️ Paste editor's letter** with `decision-letter.txt`. Rules and the local model agree on *major revision*; the deadline 2027-01-15 is shown as found in the letter; confirming writes a *Letter* event dated by the letter, marked **AI**, and sets the revision countdown. |
+| 3:15–4:00 | Asking the history | On the overview, ask “Which papers have been under review for more than 3 months?”. The answer names the TKDE paper (150 days), says how the question was understood, and shows the read-only SQL that ran. Ask “Any news lately?”: no rule cue, so the local model picks the template. |
+| 4:00–4:40 | Provenance and lineage | The status timeline: each entry carries its source (manual, OpenReview sync, pasted page, letter), when it happened vs. when it was recorded, and the raw official text. Then the rejected ICME paper and its ICASSP resubmission, linked both ways, with CCF / CAS ranking badges matched offline. |
+| 4:40–5:00 | Local-first | Switch to Chinese and back and point out that the database, PDFs, credentials (in the OS keyring) and the model (on 127.0.0.1) never leave the machine. |
 
 ## Live demo at the booth
 
@@ -43,8 +52,8 @@ Let visitors drive. Good prompts:
 2. *Try to confuse the counter parser.* Edit the numbers in `elsevier-query-changed-counts.txt` (for example `12` → `112`) and watch the preview's reading and its ambiguity warning.
 3. *Log a status change in the past.* Use **＋ Log a status change** with an earlier time: the entry is placed in the timeline, and the current status only changes if nothing later exists.
 4. *Look up a venue* under **Channels → Journal / conference ranking lookup**.
-6. *Ask your submission history* (needs the smart assistant). On the overview, ask "Which papers have been under review for more than 3 months?" The answer shows how the question was understood, the rows, and the exact read-only SQL that ran. Then paste the synthetic decision letter from `docs/demo/decision-letter.txt` into a submission's "✉️ Paste editor's letter": rules and model agree on *major revision* and the deadline is checked against the letter before you confirm.
-5. *Paste a screenshot instead of text* (needs `requirements-ocr.txt`). Take a screenshot of one of the sample pages opened in a browser and press `Ctrl+V` in the paste box: the image is recognised on the CPU, the text appears in the box for correction, and the same parser preview follows. The confirmed event carries an **OCR** tag with the lowest line confidence.
+5. *Ask in your own words* (needs the smart assistant), in English or Chinese. Every answer shows how the question was understood and the SQL that ran; try to make the model invent a number (“papers stuck for 45 days” when the question says three months) and watch the rule-extracted number win.
+6. *Paste a screenshot instead of text* (needs `requirements-ocr.txt`). Take a screenshot of one of the sample pages opened in a browser and press `Ctrl+V` in the paste box: the image is recognised on the CPU, the text appears in the box for correction, and the same parser preview follows. The confirmed event carries an **OCR** tag with the lowest line confidence.
 
 ## Technical points worth stressing
 
@@ -59,4 +68,4 @@ Let visitors drive. Good prompts:
 
 ## What is implemented
 
-Everything in this guide is implemented and covered by the test suite (`pytest`); no part of the demo is mocked except the pre-seeded sync results in demo mode.
+Everything in this guide is implemented and covered by the test suite (`pytest`); no part of the demo is mocked except the pre-seeded sync results in demo mode. The OCR add-on and the smart assistant are also tested end to end in CI with the real engines on Linux and Windows (`tests/test_ocr_real.py`, `tests/test_ai_real.py`).

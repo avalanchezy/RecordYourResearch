@@ -6,7 +6,7 @@
 
 RecordYourResearch (Chinese name: 论文投稿追踪 / 投稿记录本) keeps every paper you have submitted in one place: where it went, its current status, how long it has been under review, when the revision is due, and where it was resubmitted after a rejection. It runs only on your own computer (it listens on `127.0.0.1` by default) and keeps all data in a local folder. There are no accounts, no telemetry and no CDN.
 
-This is v0.5.0. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
+This is v0.5.1. The interface is in **English and Chinese**: switch with the **EN / 中文** button in the top bar. The choice is remembered, and a browser whose language is not Chinese starts in English. Labels below are quoted as they appear in the Chinese interface.
 
 ## Overview
 
