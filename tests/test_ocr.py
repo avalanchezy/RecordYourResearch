@@ -4,7 +4,8 @@
 这里用假的识别引擎，不需要装 RapidOCR；真实引擎的端到端测试在 tests/test_ocr_real.py
 （CI 的 OCR 任务里安装 requirements-ocr.txt 后运行）。只用合成数据。
 """
-import io
+import struct
+import zlib
 
 import pytest
 
@@ -92,10 +93,12 @@ def fake_ocr(monkeypatch):
 
 
 def _png(w=400, h=360):
-    from PIL import Image
-    buf = io.BytesIO()
-    Image.new("RGBA", (w, h), (255, 255, 255, 0)).save(buf, "PNG")   # 带透明通道的截图
-    return buf.getvalue()
+    """白底带透明通道的 PNG（手工编码，不依赖 Pillow：基础安装里没有它）。"""
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+    raw = b"".join(b"\x00" + b"\xff\xff\xff\x00" * w for _ in range(h))
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
 
 
 def test_image_to_text_with_fake_engine(fake_ocr):
